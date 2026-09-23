@@ -24,9 +24,15 @@ images:
     alt: Arrows from the centre of a grid showing how often each step direction occurs; the diagonals dominate.
     credit: © The Sound of Entanglement
 audio:
+  - src: /media/audio/8rooms-room1-alice-a2-minus.mp3
+    title: "Room 1, Alice alone: setting 2, outcome −1"
+    note: Alice's click with the echo pattern this outcome selects.
+  - src: /media/audio/8rooms-room1-bob-b2-plus.mp3
+    title: "Room 1, Bob alone: setting 2, outcome +1"
+    note: Bob's click with its echo pattern.
   - src: /media/audio/8rooms-clicks-correlation.mp3
-    title: Clicks with echoes
-    note: Alice's click on the left, Bob's on the right, each with the echo pattern its outcome selects.
+    title: Room 1, both together
+    note: Alice on the left, Bob on the right, as the correlated measurements combine them into one rhythm.
   - src: /media/audio/tuq-ball-2025-excerpt.mp3
     title: The Uncertain Question, live at the Vienna Ball of Sciences
     note: Last set of the night, 25 January 2025.
@@ -35,33 +41,44 @@ youtube: Smz7cGPBODw
 
 *8 Rooms* brought the project out of the cathedral and onto stages with a
 band: Clemens Wenger on synthesizer and electric piano, Manu Mayr on electric
-bass and, from 2025 on, Judith Schwarz on drums. It premiered at the Vienna
-Ball of Sciences in City Hall on 25 January 2025.
+bass and, from August 2025 on, Judith Schwarz on drums. It premiered at the
+Vienna Ball of Sciences in City Hall on 25 January 2025. Clemens Wenger
+describes the piece in three layers.
 
 ## The clicks
 
 Every time the experiment chooses a new measurement setting, a small motor
 turns a half-wave plate and clicks. Contact microphones pick up one click for
-Alice (left) and one for Bob (right). The measurements are timed about every
-half second, so the clicks become a metronome at around 114 beats per minute
-and a percussion instrument in their own right. Each of the four possible
-outcomes on each side gives the click its own echo pattern: "sometimes
-sounding like distorted electric guitars, sometimes like a knock on wood."
+Alice, on the left, and one for Bob, on the right. The measurements are timed
+about every half second, so the clicks become a metronome at around 114 beats
+per minute, and a percussion instrument in their own right.
 
-## The rooms
+Each of the four possible outcomes on each side gives the click its own echo
+pattern. "Sometimes this sounds like short needle transients triggering
+complementary delay responses, and at other times it sounds like bitcrushed
+synth guitars." In the first room the two patterns are built so that, played
+together, they complement each other: you can hear Alice's echoes, Bob's
+echoes and the rhythm they make together below.
 
-The form is a walk. Each room is a square with its own musical theme and tonal
-centre, and the walk starts in its middle. Setting 1 moves the walker left or
-right, setting 2 up or down, and the outcome decides which way. When it
-reaches a wall, that wall is a door into another room, and the walk starts
-again from the centre. After about nineteen minutes, every door leads to the
-ninth room, where the piece ends.
+## The walk
 
-On their own, Alice's and Bob's steps are random. Together they are
-correlated, so the walk prefers the diagonals: "a very strangely behaving
-quantum random walk that shows a strong will to reintroduce some order into
-chaos." The musicians improvise over each room's material, in dialogue with
-the clicks.
+The measurements also decide the form. Each room is a square with its own
+musical theme and tonal centre, and the succession, repeats and length of the
+parts are determined by the measurements. "A random walk is like a game of
+snake. The walk starts in the middle of the room and each measurement defines
+the path, until the snake comes to a border, which is a door to another room."
+Setting 1 moves the walker left or right, setting 2 up or down, and the
+outcome decides which way. After about nineteen minutes all doors are locked
+except one: the next exit leads to the ninth room, where the piece ends.
+
+Each side on its own produces a random walk. Put together, "some order is
+reintroduced and the axes of our walk are skewed": the correlations make the
+walk prefer the diagonals.
+
+## The band
+
+The musicians improvise over each room's material, in a musical dialogue with
+the clicks the experiment makes and the path it takes.
 
 ## The landscape
 

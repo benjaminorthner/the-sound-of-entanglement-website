@@ -9,6 +9,7 @@ import Rings from '../../components/visuals/rings/Rings.astro';
 import Terrain from '../../components/visuals/terrain/Terrain.astro';
 import Metronome from '../../components/visuals/metronome/Metronome.astro';
 import BruqnerStory from '../../components/pieces/bruqner/BruqnerStory.astro';
+import IAStory from '../../components/pieces/indeterminate-apparatus/IAStory.astro';
 import { formatDate } from '../../lib/format';
 
 export async function getStaticPaths() {
@@ -32,8 +33,8 @@ const shows = (await getCollection('shows', (s) => !s.data.draft && s.data.piece
   .sort((a, b) => +b.data.date - +a.data.date);
 const premiere = shows.filter((s) => s.data.premiere).sort((a, b) => +a.data.date - +b.data.date)[0];
 const hasVisual = d.visual !== 'none';
-// BruQner gets a photographic account of the premiere instead of the generic image layout.
-const isStory = piece.id === 'bruqner';
+// These pieces get a photographic story instead of the generic image layout.
+const isStory = piece.id === 'bruqner' || piece.id === 'indeterminate-apparatus';
 const [firstImage, ...moreImages] = d.images;
 const composers = d.composers.join(', ').replace(/, ([^,]*)$/, ' and $1');
 // Figures drawn on white are shown inverted so they sit on the dark page.
@@ -77,7 +78,8 @@ const isLight = (src: { src: string }) => LIGHT_FIGURES.some((f) => src.src.incl
       )}
     </div>
 
-    {isStory && <BruqnerStory />}
+    {piece.id === 'bruqner' && <BruqnerStory />}
+    {piece.id === 'indeterminate-apparatus' && <IAStory />}
 
     {d.cover && !isStory && (
       <div class="cover">

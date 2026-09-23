@@ -19,6 +19,16 @@ const premiereOf = (id: string) =>
       Every piece receives the same kind of data: a few times a second, one result for Alice and one for Bob.
       What changes from piece to piece is what those results are allowed to decide.
     </p>
+    <div class="idea">
+      <p>
+        Each measurement gives Alice one of four outcomes and Bob one of four: sixteen possible combinations.
+        Every mapping in these pieces is built on one fact about them.
+      </p>
+      <blockquote>
+        <p>“Entanglement enhances some combinations and suppresses others.”</p>
+        <footer class="ui dim">Clemens Wenger</footer>
+      </blockquote>
+    </div>
   </header>
 
   <div class="list">
@@ -48,6 +58,26 @@ const premiereOf = (id: string) =>
       );
     })}
   </div>
+
+  <section class="wrap grid statement" aria-labelledby="statement">
+    <h2 id="statement">Why compose for an experiment</h2>
+    <div class="statement-text">
+      <p>
+        We play with nature, not with data collections. The measurements happen in real time, and the
+        musicians answer them live, on stage, with the experiment in front of them.
+      </p>
+      <p>
+        The chance is objective. It has no moods and no favourite material, which leaves the musical form
+        and the sound genuinely open.
+      </p>
+      <p>
+        And entanglement brings something no dice can: chance and order at once. What that is, and what
+        music can do with it, is new ground for music theory. It asks for a new instrument, new
+        compositions and, in the end, a new aesthetic.
+      </p>
+      <p class="ui dim byline">Clemens Wenger, composer. Adapted from his notes for the premiere lecture.</p>
+    </div>
+  </section>
 
   <section class="wrap grid experiments" aria-labelledby="experiments">
     <div class="exp-head">
@@ -87,6 +117,36 @@ const premiereOf = (id: string) =>
     line-height: 1.45;
     max-width: 44ch;
   }
+
+  .idea {
+    margin-top: clamp(2.5rem, 5vw, 4rem);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+    gap: 1rem var(--gutter);
+    align-items: end;
+    max-width: 1100px;
+  }
+  .idea > p { font-size: 1rem; color: var(--ash); margin: 0; }
+  blockquote { margin: 0; }
+  blockquote p {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: var(--step-3);
+    line-height: 1.15;
+    margin: 0;
+    max-width: 22ch;
+  }
+  blockquote footer { margin-top: 0.75rem; }
+
+  .statement {
+    padding-block: clamp(4rem, 9vw, 7rem);
+    border-top: 1px solid var(--graphite);
+    row-gap: 2rem;
+  }
+  .statement h2 { grid-column: 1 / span 4; font-size: var(--step-3); }
+  .statement-text { grid-column: 6 / span 7; }
+  .statement-text p:not(.byline) { font-size: var(--step-1); font-weight: 300; line-height: 1.45; }
+  .byline { margin-top: 1.5rem; }
 
   .piece { padding-block: clamp(3rem, 7vw, 6rem); border-top: 1px solid var(--graphite); }
   .piece .grid { align-items: center; row-gap: 2rem; }
@@ -128,6 +188,7 @@ const premiereOf = (id: string) =>
   .album h2 em { font-style: normal; }
 
   @media (max-width: 900px) {
-    .image, .text, .flip .image, .flip .text, .exp-head, .exp-list, .album-text { grid-column: 1 / -1; grid-row: auto; }
+    .image, .text, .flip .image, .flip .text, .exp-head, .exp-list, .album-text, .statement h2, .statement-text { grid-column: 1 / -1; grid-row: auto; }
+    .idea { grid-template-columns: 1fr; }
   }
 </style>

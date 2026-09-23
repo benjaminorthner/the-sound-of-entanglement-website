@@ -61,10 +61,17 @@ export const photos = {
   caseAndCrowd: { src: caseAndCrowd, credit: V, alt: 'The lit case in the crowded nave after the performance, people gathering around it.' },
 } satisfies Record<string, StoryPhoto>;
 
-/** The form of the piece, from the premiere lecture script. */
-export const sections = [
-  { n: '1–3', text: 'Conducted by entangled photons.' },
-  { n: '4', text: 'The experiment switches between entangled photons and a classical setting. The correlations weaken and the Bell value falls below 2.' },
-  { n: '5', text: 'The organists improvise freely, without instructions: “a bow to human free will and to Anton Bruckner, who was known as one of the greatest improvisers on the organ.”' },
-  { n: '6–7', text: 'Back to the quantum world, ending with the Perger Präludium in an extended version by Franz Neuhofer.' },
+/**
+ * The seven parts, with the titles from the title cards shown during the
+ * premiere (2024 premiere deck, slides 24–30) and what happened in each
+ * (premiere lecture script; docs/pieces.md).
+ */
+export const sections: { n: number; title: string; text?: string }[] = [
+  { n: 1, title: 'Adagio Misterioso', text: 'Conducted by entangled photons, like the two parts that follow.' },
+  { n: 2, title: 'Andante Correlations' },
+  { n: 3, title: 'Complementary Melodies' },
+  { n: 4, title: 'Distinction – Quantum meets Classical', text: 'The experiment switches between entangled photons and a classical setting. The correlations weaken and the Bell value falls below 2.' },
+  { n: 5, title: 'Free Improvisation – Subjective Chance', text: 'The organists improvise freely, without instructions: “a bow to human free will and to Anton Bruckner, who was known as one of the greatest improvisers on the organ.”' },
+  { n: 6, title: 'Back To Entanglement', text: 'The photons take over again.' },
+  { n: 7, title: 'Finale Vivace / Reflection', text: 'Ending with the Perger Präludium in an extended version by Franz Neuhofer.' },
 ];

@@ -23,6 +23,10 @@ const narrow = '(min-width: 1000px) 34vw, 100vw';
         On Anton Bruckner’s 200th birthday, <em>BruQner</em> opened the Ars Electronica Festival in the
         Mariendom in Linz, as part of the Upper Austrian KulturEXPO antonbruckner2024. Admission was free.
       </p>
+      <p class="aside">
+        Bruckner and physics have met in Linz before: Ludwig Boltzmann, who founded statistical physics,
+        grew up in the city in the 1850s and took piano lessons from Anton Bruckner.
+      </p>
     </div>
     <div class="img-wide"><Photo {...p.exterior} sizes={wide} /></div>
     <div class="img-small"><Photo {...p.candles} sizes={narrow} /></div>
@@ -104,7 +108,10 @@ const narrow = '(min-width: 1000px) 34vw, 100vw';
       <h3>The form</h3>
       <ol class="form">
         {sections.map((s) => (
-          <li><span class="n num">{s.n}</span><span>{s.text}</span></li>
+          <li>
+            <span class="n num">{s.n}</span>
+            <span class="part"><span class="part-title">{s.title}</span>{s.text && <span class="part-text">{s.text}</span>}</span>
+          </li>
         ))}
       </ol>
       <p class="dim small">The piece opened with Bruckner’s original, played in the dark, and lasted about eighteen minutes.</p>
@@ -233,13 +240,22 @@ const narrow = '(min-width: 1000px) 34vw, 100vw';
   .form { list-style: none; margin: 0 0 2rem; padding: 0; border-top: 1px solid var(--graphite); max-width: var(--measure); }
   .form li {
     display: grid;
-    grid-template-columns: 4.5rem 1fr;
+    grid-template-columns: 2.5rem 1fr;
     gap: 1rem;
     padding-block: 0.9rem;
     border-bottom: 1px solid var(--graphite);
     font-size: 1.0625rem;
   }
-  .form .n { font-family: var(--font-display); color: var(--ash); padding-top: 0.1rem; }
+  .form .n { font-family: var(--font-display); color: var(--ash); padding-top: 0.15rem; }
+  .part-title { display: block; font-family: var(--font-display); font-size: 1.125rem; }
+  .part-text { display: block; margin-top: 0.3rem; color: var(--ash); font-size: 1rem; }
+  .aside {
+    margin-top: 2rem;
+    padding-left: 1rem;
+    border-left: 1px solid var(--graphite);
+    color: var(--ash);
+    font-size: 1rem;
+  }
 
   /* Experiment */
   .exp-body { margin-top: 2.5rem; row-gap: 3rem; align-items: start; margin-bottom: clamp(3rem, 7vw, 6rem); }
