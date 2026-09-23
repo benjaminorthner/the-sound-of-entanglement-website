@@ -1,0 +1,90 @@
+---
+/**
+ * Spontaneous parametric down-conversion, drawn in site colours.
+ * Two thin BBO crystals, rotated 90° to each other: the first emits
+ * horizontally polarised pairs on a cone, the second vertically polarised
+ * pairs on an almost identical cone. Where the cones overlap you cannot tell
+ * which crystal a pair came from, and the pair is entangled. The two photons
+ * of a pair always leave on opposite sides of the cone.
+ */
+---
+<figure class="cones">
+  <svg viewBox="0 0 900 440" role="img" aria-labelledby="cones-title cones-desc">
+    <title id="cones-title">How entangled photon pairs are made</title>
+    <desc id="cones-desc">
+      A violet 405 nanometre laser enters two thin crystals. Rarely, a pump photon splits into two
+      infrared 810 nanometre photons, which leave on opposite sides of a cone of light. Two crystals
+      make two overlapping cones; pairs from the overlap are entangled. One photon goes to Alice, the
+      other to Bob.
+    </desc>
+    <defs>
+      <linearGradient id="cone-fill" x1="0" x2="1">
+        <stop offset="0" stop-color="#ebe7df" stop-opacity="0.16" />
+        <stop offset="1" stop-color="#ebe7df" stop-opacity="0.02" />
+      </linearGradient>
+      <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="4" result="b" />
+        <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+      </filter>
+    </defs>
+
+    <!-- pump beam -->
+    <line x1="30" y1="220" x2="262" y2="220" class="pump" filter="url(#glow)" />
+    <line x1="274" y1="220" x2="560" y2="220" class="pump-rest" />
+
+    <!-- cones (crystal 1: H, crystal 2: V), nearly overlapping -->
+    <path d="M268 220 L700 78 A 44 142 0 0 1 700 362 Z" fill="url(#cone-fill)" />
+    <path d="M272 220 L716 84 A 44 136 0 0 1 716 356 Z" fill="url(#cone-fill)" />
+    <line x1="268" y1="220" x2="700" y2="78" class="edge" />
+    <line x1="268" y1="220" x2="700" y2="362" class="edge" />
+    <line x1="272" y1="220" x2="716" y2="84" class="edge2" />
+    <line x1="272" y1="220" x2="716" y2="356" class="edge2" />
+    <ellipse cx="700" cy="220" rx="44" ry="142" class="ring" />
+    <ellipse cx="716" cy="220" rx="44" ry="136" class="ring2" />
+
+    <!-- crystals -->
+    <rect x="256" y="176" width="7" height="88" class="crystal" />
+    <rect x="266" y="176" width="7" height="88" class="crystal" />
+
+    <!-- one entangled pair, on opposite sides of the overlap -->
+    <circle cx="707" cy="82" r="6" class="photon" filter="url(#glow)" />
+    <circle cx="709" cy="358" r="6" class="photon" filter="url(#glow)" />
+    <path d="M716 78 C 760 60, 790 56, 815 56" class="to-alice" />
+    <path d="M718 362 C 760 380, 790 384, 815 384" class="to-bob" />
+
+    <!-- labels -->
+    <text x="30" y="200" class="t">405 nm laser</text>
+    <text x="30" y="250" class="t dim">violet, about 12 mW</text>
+    <text x="212" y="300" class="t" text-anchor="middle">two thin crystals,</text>
+    <text x="212" y="320" class="t" text-anchor="middle">rotated 90° to each other</text>
+    <text x="440" y="120" class="t dim" text-anchor="middle">about one photon in 10¹¹</text>
+    <text x="440" y="140" class="t dim" text-anchor="middle">splits into two 810 nm photons</text>
+    <text x="822" y="61" class="t alice-t">to Alice</text>
+    <text x="822" y="389" class="t bob-t">to Bob</text>
+    <text x="774" y="226" class="t dim">overlapping cones:</text>
+    <text x="774" y="246" class="t dim">pairs from here</text>
+    <text x="774" y="266" class="t dim">are entangled</text>
+  </svg>
+  <figcaption class="ui dim">
+    The infrared photons are invisible. The cones of light projected into haze at the premiere were
+    this picture, made large.
+  </figcaption>
+</figure>
+
+<style>
+  .cones { margin: 0; }
+  svg { width: 100%; height: auto; overflow: visible; }
+  .pump { stroke: var(--pump); stroke-width: 3; }
+  .pump-rest { stroke: var(--pump); stroke-width: 1; stroke-dasharray: 2 6; opacity: 0.5; }
+  .edge, .ring { stroke: var(--paper); stroke-opacity: 0.55; stroke-width: 1; fill: none; }
+  .edge2, .ring2 { stroke: var(--ash); stroke-opacity: 0.6; stroke-width: 1; fill: none; stroke-dasharray: 4 4; }
+  .crystal { fill: none; stroke: var(--paper); stroke-width: 1; }
+  .photon { fill: var(--photon); }
+  .to-alice { stroke: var(--alice); fill: none; stroke-width: 1.5; }
+  .to-bob { stroke: var(--bob); fill: none; stroke-width: 1.5; }
+  .t { fill: var(--paper); font-family: var(--font-display); font-size: 15px; }
+  .t.dim { fill: var(--ash); }
+  .alice-t { fill: var(--alice); }
+  .bob-t { fill: var(--bob); }
+  figcaption { margin-top: 0.75rem; font-size: 0.8125rem; }
+</style>

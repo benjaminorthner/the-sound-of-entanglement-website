@@ -1,0 +1,102 @@
+---
+/**
+ * One performance in the shows timeline: date, what and where, the piece,
+ * the Bell value measured that night, and the cover photo. Premieres get a
+ * larger photo.
+ */
+import { Image } from 'astro:assets';
+import BellScale from '../BellScale.astro';
+import { formatRange } from '../../lib/format';
+import { pieceOf, place, type Show } from './data';
+
+interface Props { show: Show }
+const { show } = Astro.props;
+const d = show.data;
+const piece = await pieceOf(show);
+const href = `/shows/${show.id}/`;
+---
+<article class:list={['entry', { premiere: d.premiere, 'no-cover': !d.cover }]}>
+  <p class="date ui num">{formatRange(d.date, d.endDate)}</p>
+  <div class="text">
+    <h4><a href={href}>{d.title}</a></h4>
+    <p class="where">{d.venue}, {place(show)}</p>
+    <p class="piece">
+      {piece ? (
+        <>
+          <a href={`/pieces/${piece.id}/`}><em>{piece.data.title}</em></a>
+          {d.premiere && <span class="premiere-mark">premiere</span>}
+        </>
+      ) : d.kind === 'exhibition' ? 'Film in an exhibition' : null}
+    </p>
+    {d.bell !== undefined && (
+      <div class="bell">
+        <BellScale value={d.bell} compact label="measured that night" />
+      </div>
+    )}
+  </div>
+  {d.cover && (
+    <a class="cover" href={href} tabindex="-1" aria-hidden="true">
+      <Image
+        src={d.cover.src}
+        alt=""
+        widths={[480, 800, 1200, 1600]}
+        sizes={d.premiere ? '(min-width: 900px) 45vw, 100vw' : '(min-width: 900px) 33vw, 100vw'}
+        format="webp"
+        quality={80}
+      />
+    </a>
+  )}
+</article>
+
+<style>
+  .entry {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    row-gap: 1rem;
+    padding-block: clamp(2rem, 4vw, 3.5rem);
+    border-top: 1px solid var(--graphite);
+    align-items: start;
+  }
+  .date {
+    grid-column: 1 / span 2;
+    margin: 0.35rem 0 0;
+    color: var(--ash);
+    font-size: 0.9375rem;
+  }
+  .text { grid-column: 3 / span 5; }
+  .cover { grid-column: 8 / span 5; display: block; }
+  .premiere .text { grid-column: 3 / span 4; }
+  .premiere .date { color: var(--paper); }
+  .premiere .cover { grid-column: 7 / span 6; }
+  .cover :global(img) {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    background: var(--soot);
+    filter: brightness(0.92);
+    transition: filter 0.3s ease;
+  }
+  .cover:hover :global(img) { filter: brightness(1.05); }
+  h4 { font-size: var(--step-2); font-weight: 300; }
+
+  h4 a { text-decoration: none; }
+  h4 a:hover { text-decoration: underline; text-decoration-color: var(--graphite); }
+  .where { margin: 0.6rem 0 0; color: var(--ash); font-size: 1.0625rem; }
+  .piece { margin: 0.35rem 0 0; font-size: 1.0625rem; }
+  .piece a { text-decoration-color: var(--graphite); }
+  .premiere-mark {
+    font-family: var(--font-display);
+    font-size: 0.8125rem;
+    color: var(--photon);
+    margin-left: 0.6rem;
+    letter-spacing: 0.02em;
+  }
+  .bell { max-width: 17rem; margin-top: 0.4rem; }
+  @media (max-width: 860px) {
+    .date, .text, .cover, .premiere .text, .premiere .cover { grid-column: 1 / -1; }
+    .cover { order: -1; }
+    .date { margin-top: 0.5rem; }
+  }
+</style>

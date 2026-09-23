@@ -53,6 +53,18 @@ const isCurrent = (href: string) => path === href || path.startsWith(href);
     height: var(--header-h);
     transition: background-color 0.3s ease;
   }
+  /* Keeps the nav legible over bright full-bleed photos before scrolling. */
+  .site-header::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 -32px 0;
+    z-index: -1;
+    background: linear-gradient(rgb(0 0 0 / 0.7), rgb(0 0 0 / 0));
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .site-header.scrolled::before,
+  .site-header.open::before { opacity: 0; }
   .site-header.scrolled,
   .site-header.open {
     background: rgb(0 0 0 / 0.86);

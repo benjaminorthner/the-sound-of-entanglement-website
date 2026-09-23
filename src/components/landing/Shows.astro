@@ -1,0 +1,125 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import { formatDate, formatRange } from '../../lib/format';
+
+const now = new Date();
+const performances = await getCollection('shows', (s) => !s.data.draft && s.data.kind === 'performance');
+const next = performances.filter((s) => s.data.date >= now).sort((a, b) => +a.data.date - +b.data.date)[0];
+const recent = performances
+  .filter((s) => s.data.date < now && s.data.cover)
+  .sort((a, b) => +b.data.date - +a.data.date)
+  .slice(0, 4);
+const pieceTitles = new Map(
+  await Promise.all(
+    [...new Set(recent.map((s) => s.data.piece?.id).filter(Boolean))].map(async (id) => [
+      id!,
+      (await getEntry('pieces', id!))?.data.title ?? '',
+    ] as const),
+  ),
+);
+---
+<section class="shows section" aria-labelledby="shows-title">
+  <div class="wrap">
+    <h2 id="shows-title" class="visually-hidden">Shows</h2>
+
+    {next && (
+      <div class="next grid">
+        <p class="label ui dim">Next performance</p>
+        <div class="when">
+          <p class="date"><a href={`/shows/${next.id}/`}>{formatDate(next.data.date)}</a></p>
+          <p class="where">{next.data.venue.includes(next.data.city) ? next.data.venue : `${next.data.venue}, ${next.data.city}`}</p>
+          <p class="dim">{next.data.title}.{!next.data.time && ' Programme and time to follow.'}</p>
+        </div>
+      </div>
+    )}
+
+    <div class="recent">
+      <h3 class="ui recent-title">Recent performances</h3>
+      <ul>
+        {recent.map((s) => (
+          <li>
+            <a href={`/shows/${s.id}/`}>
+              {s.data.cover && (
+                <Image
+                  src={s.data.cover.src}
+                  alt=""
+                  widths={[480, 800]}
+                  sizes="(min-width: 900px) 24vw, 70vw"
+                  format="webp"
+                />
+              )}
+              <span class="d ui dim num">{formatRange(s.data.date, s.data.endDate)}</span>
+              <span class="t">{s.data.city}</span>
+              <span class="p">{s.data.piece ? pieceTitles.get(s.data.piece.id) : s.data.title}{s.data.premiere ? ', premiere' : ''}</span>
+            </a>
+            {s.data.cover && <span class="credit ui">Photo: {s.data.cover.credit.replace(/^©\s*/, '© ')}</span>}
+          </li>
+        ))}
+      </ul>
+      <p class="all ui"><a href="/shows/">All shows and talks since 2024</a></p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .next { align-items: baseline; padding-bottom: clamp(3rem, 7vw, 6rem); border-bottom: 1px solid var(--graphite); }
+  .label { grid-column: 1 / span 3; margin: 0; }
+  .when { grid-column: 4 / -1; }
+  .date {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(2.75rem, 1.2rem + 6vw, 6.5rem);
+    line-height: 1;
+    margin: 0 0 1.25rem;
+    max-width: none;
+  }
+  .date a { text-decoration: none; }
+  .date a:hover { text-decoration: underline; text-decoration-thickness: 1px; }
+  .where { font-size: var(--step-1); margin-bottom: 0.5rem; }
+
+  .recent { padding-top: clamp(3rem, 7vw, 5rem); }
+  .recent-title { font-weight: 400; margin-bottom: 1.5rem; color: var(--ash); font-size: var(--step--1); }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--gutter);
+  }
+  li a { display: block; text-decoration: none; }
+  li :global(img) {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    margin-bottom: 1rem;
+    background: var(--soot);
+    filter: brightness(0.9);
+    transition: filter 0.2s;
+  }
+  li a:hover :global(img) { filter: brightness(1.05); }
+  li a:hover .t { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+  .d, .t, .p { display: block; }
+  .t { font-size: var(--step-1); font-family: var(--font-display); font-weight: 300; margin: 0.15rem 0 0.1rem; }
+  .p { font-style: italic; color: var(--ash); font-size: 1rem; }
+  .credit { display: block; margin-top: 0.5rem; color: var(--smoke); font-size: 0.75rem; }
+  .all { margin-top: 3rem; }
+
+  @media (max-width: 900px) {
+    .label, .when { grid-column: 1 / -1; }
+    .label { margin-bottom: 1rem; }
+    ul {
+      grid-template-columns: none;
+      grid-auto-flow: column;
+      grid-auto-columns: 70%;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      margin-inline: calc(-1 * var(--gutter));
+      padding-inline: var(--gutter);
+      scroll-padding-inline: var(--gutter);
+    }
+    li { scroll-snap-align: start; }
+  }
+</style>

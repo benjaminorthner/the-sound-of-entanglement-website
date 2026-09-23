@@ -1,0 +1,179 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import YouTube from '../components/YouTube.astro';
+import { formatDate, formatDateShort, year } from '../lib/format';
+
+import docPoster from '../assets/photos/2024-bruqner-linz/haze-over-case.jpg';
+
+const all = (await getCollection('publications')).sort((a, b) => +b.data.date - +a.data.date);
+const of = (kind: string) => all.filter((p) => p.data.kind === kind);
+const paper = of('paper')[0];
+const talks = of('talk');
+const films = of('video').filter((v) => v.id !== 'doc-2025');
+const doc = all.find((p) => p.id === 'doc-2025');
+const press = of('press');
+const pressByYear = [...new Set(press.map((p) => year(p.data.date)))].map((y) => ({
+  y,
+  items: press.filter((p) => year(p.data.date) === y),
+}));
+---
+<Base title="Papers and press" description="The paper, talks, films and press coverage of The Sound of Entanglement.">
+  <header class="wrap intro">
+    <h1>Papers and press</h1>
+  </header>
+
+  {paper && (
+    <section class="wrap paper" aria-labelledby="paper-h">
+      <p class="kind ui dim">Paper, {formatDate(paper.data.date)}</p>
+      <h2 id="paper-h"><a href={paper.data.url}>{paper.data.title}</a></h2>
+      <p class="authors">{paper.data.by}</p>
+      <p class="ref ui dim">{paper.data.note}. Preprint.</p>
+      <blockquote class="abstract">
+        <p>
+          We present <em>The Sound of Entanglement</em>, a live musical performance driven by
+          real-time measurements of entangled photons in a Bell test. By integrating the measured
+          quantum correlations as a central compositional element and synchronizing live visuals with
+          experimental data, the performance offers a unique and unrepeatable audiovisual experience
+          that relies on quantum correlations which cannot be produced by any classical device.
+        </p>
+        <footer class="ui dim">From the abstract</footer>
+      </blockquote>
+      <p class="actions ui">
+        <a href={paper.data.url}>Read on arXiv</a>
+        <a href="https://arxiv.org/pdf/2509.08892">PDF</a>
+      </p>
+    </section>
+  )}
+
+  {doc && (
+    <section class="wrap film" aria-labelledby="film-h">
+      <div class="film-text">
+        <h2 id="film-h" class="section-title">Film</h2>
+        <h3>{doc.data.title.replace(' (documentary)', '')}</h3>
+        <p class="dim">
+          A documentary following the team through the days before the premiere in the Mariendom Linz.{' '}
+          {doc.data.by}, {year(doc.data.date)}.
+        </p>
+      </div>
+      <div class="film-video">
+        <YouTube id="_mIf_OFN1YI" title="BruQner – The Sound of Entanglement" poster={docPoster} posterAlt="Clouds of projected light above the glowing experiment in the Mariendom." duration="18 min" />
+      </div>
+      <ul class="list more-films">
+        {films.map((f) => (
+          <li>
+            <span class="date num">{formatDateShort(f.data.date)}</span>
+            <span class="what"><a href={f.data.url}>{f.data.title}</a><span class="by dim">{f.data.by}{f.data.note && `, ${f.data.note}`}</span></span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  <section class="wrap block" aria-labelledby="talks-h">
+    <h2 id="talks-h" class="section-title">Talks</h2>
+    <ul class="list">
+      {talks.map((t) => (
+        <li>
+          <span class="date num">{formatDateShort(t.data.date)}</span>
+          <span class="what">
+            {t.data.url ? <a href={t.data.url}>{t.data.title}</a> : t.data.title}
+            <span class="by dim">{t.data.by}</span>
+          </span>
+        </li>
+      ))}
+    </ul>
+    <p class="note dim">Talks and lectures at festivals and conferences are also listed with the <a href="/shows/">shows</a>.</p>
+  </section>
+
+  <section class="wrap block" aria-labelledby="press-h">
+    <h2 id="press-h" class="section-title">Press</h2>
+    {pressByYear.map(({ y, items }) => (
+      <div class="year-group">
+        <h3 class="year num">{y}</h3>
+        <ul class="list">
+          {items.map((p) => (
+            <li>
+              <span class="date num">{p.data.date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })}</span>
+              <span class="what">
+                <a href={p.data.url} lang={p.data.language}>{p.data.title}</a>
+                <span class="by dim">{p.data.by}{p.data.language === 'de' && ', in German'}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </section>
+</Base>
+
+<style>
+  .intro { padding-block: clamp(4rem, 12vw, 9rem) 0; }
+
+  .paper {
+    padding-top: clamp(3rem, 7vw, 5rem);
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+  }
+  .paper > * { grid-column: 1 / span 9; }
+  .kind { font-size: 0.875rem; margin: 0 0 1rem; }
+  .paper h2 { font-size: var(--step-4); }
+  .paper h2 a { text-decoration: none; }
+  .paper h2 a:hover { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.12em; }
+  .authors { margin-top: 1.5rem; font-size: var(--step-1); line-height: 1.45; max-width: 44ch; }
+  .ref { font-size: 0.875rem; }
+  .abstract {
+    grid-column: 1 / span 8;
+    margin: 2rem 0 0;
+    padding-left: 1.5rem;
+    border-left: 1px solid var(--graphite);
+  }
+  .abstract p { font-size: 1.0625rem; color: var(--ash); }
+  .abstract footer { font-size: 0.8125rem; }
+  .actions { display: flex; gap: 1.5rem; margin-top: 1.5rem; font-size: 1rem; }
+
+  .section-title { font-size: var(--step-2); color: var(--ash); margin-bottom: 2rem; }
+  .block { padding-top: clamp(4rem, 9vw, 7rem); }
+
+  .film {
+    padding-top: clamp(4rem, 9vw, 7rem);
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    row-gap: 2.5rem;
+    align-items: start;
+  }
+  .film-text { grid-column: 1 / span 4; }
+  .film-text h3 { font-size: var(--step-2); margin-bottom: 1rem; }
+  .film-text p { font-size: 1.0625rem; }
+  .film-video { grid-column: 5 / -1; }
+  .more-films { grid-column: 5 / -1; }
+
+  .list { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--graphite); }
+  .list li {
+    display: grid;
+    grid-template-columns: 8rem 1fr;
+    gap: 1.5rem;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid var(--graphite);
+  }
+  .date { font-family: var(--font-display); font-size: 0.9375rem; color: var(--ash); padding-top: 0.2rem; }
+  .what { display: flex; flex-direction: column; gap: 0.15rem; font-size: 1.0625rem; line-height: 1.45; }
+  .what a { text-decoration-color: var(--graphite); }
+  .what a:hover { text-decoration-color: var(--paper); }
+  .by { font-family: var(--font-display); font-size: 0.875rem; }
+  .note { margin-top: 1rem; font-size: 0.9375rem; }
+
+  .year-group { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gutter); margin-bottom: 3rem; }
+  .year { grid-column: 1 / span 2; font-size: var(--step-2); font-weight: 300; }
+  .year-group .list { grid-column: 3 / -1; }
+
+  @media (max-width: 900px) {
+    .paper > *, .abstract { grid-column: 1 / -1; }
+    .film-text, .film-video, .more-films { grid-column: 1 / -1; }
+    .year, .year-group .list { grid-column: 1 / -1; }
+    .year { margin-bottom: 1rem; }
+    .list li { grid-template-columns: 1fr; gap: 0.25rem; }
+  }
+</style>

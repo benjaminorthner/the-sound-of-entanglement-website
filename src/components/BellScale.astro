@@ -16,8 +16,8 @@ const pos = (v: number) => `${(Math.min(v, MAX) / MAX) * 100}%`;
 ---
 <div class:list={['bell', { compact }]} style={value !== undefined ? `--x: ${pos(value)}` : undefined} data-bell>
   <div class="track" aria-hidden="true">
-    <span class="mark classical" style={`left: ${pos(2)}`}><span class="ui">{!compact && 'classical limit '}2</span></span>
-    <span class="mark quantum" style={`left: ${pos(2 * Math.SQRT2)}`}><span class="ui">{!compact && 'quantum limit '}2√2</span></span>
+    <span class="mark classical" style={`left: ${pos(2)}`}><span class="ui">{!compact && <span class="long">classical limit </span>}2</span></span>
+    <span class="mark quantum" style={`left: ${pos(2 * Math.SQRT2)}`}><span class="ui">{!compact && <span class="long">quantum limit </span>}2√2</span></span>
     {value !== undefined && <span class="dot"></span>}
   </div>
   {value !== undefined && (
@@ -29,7 +29,11 @@ const pos = (v: number) => `${(Math.min(v, MAX) / MAX) * 100}%`;
 </div>
 
 <style>
-  .bell { --x: 0%; }
+  .bell { --x: 0%; container-type: inline-size; }
+  /* Full labels collide below ~460px of scale width: drop the words, keep the numbers. */
+  @container (max-width: 460px) {
+    .long { display: none; }
+  }
   .track {
     position: relative;
     height: 1px;

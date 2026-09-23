@@ -1,0 +1,260 @@
+---
+/**
+ * BruQner: the ring replay. Every photon pair measured at the premiere
+ * (Mariendom Linz, 4 September 2024) spawns one ring for Alice and one for
+ * Bob, coloured by the rule of the 2024 visuals: red/blue when both stations
+ * chose the same setting, yellow/violet when they chose different ones; the
+ * same colour on both sides means the same outcome.
+ * Data: src/data/bruqner_premiere_2024-09-04.json (see docs/data.md).
+ */
+import LiveBell from '../../pieces/LiveBell.astro';
+---
+<section class="rings-visual" data-rings aria-label="Live replay of photon pairs measured at the BruQner premiere">
+  <canvas aria-hidden="true"></canvas>
+  <div class="overlay wrap">
+    <div class="caption">
+      <p class="ui source">
+        Photon pairs measured at the premiere in the Mariendom Linz, 4 September 2024, replayed at the pace they arrived.
+      </p>
+      <p class="ui count num" data-count>&nbsp;</p>
+      <p class="ui legend">
+        <span class="item"><span class="sw" style="--c: var(--alice)"></span><span class="sw" style="--c: var(--bob)"></span>both stations chose the same setting.</span>
+        <span class="item"><span class="sw" style="--c: var(--photon)"></span><span class="sw" style="--c: var(--violet)"></span>different settings.</span>
+        <span class="item">The same colour on both sides means the same outcome.</span>
+      </p>
+      <button class="ui pause" type="button" aria-pressed="false" data-pause>Pause</button>
+    </div>
+    <div class="bell"><LiveBell /></div>
+  </div>
+</section>
+
+<script>
+  import premiere from '../../../data/bruqner_premiere_2024-09-04.json';
+  import { decodeExcerpt, RunningS, type Excerpt, type ReplayEvent } from '../../../lib/replay';
+  import { setLiveBell, clockAt, whileVisible, REDUCED } from '../../pieces/liveBell';
+
+  type RGB = [number, number, number];
+  const RED: RGB = [255, 125, 125], BLUE: RGB = [143, 143, 255], YELLOW: RGB = [255, 255, 179], VIOLET: RGB = [255, 179, 255];
+  const LIFE = 5.3; // seconds a ring lives, as in the cathedral
+
+  document.querySelectorAll<HTMLElement>('[data-rings]').forEach((root) => {
+    const data = premiere as Excerpt;
+    const events = decodeExcerpt(data);
+    const canvas = root.querySelector('canvas')!;
+    const ctx = canvas.getContext('2d')!;
+    const $count = root.querySelector<HTMLElement>('[data-count]')!;
+    const $bell = root.querySelector<HTMLElement>('[data-live-bell]')!;
+    const $pause = root.querySelector<HTMLButtonElement>('[data-pause]')!;
+
+    interface Ring { side: -1 | 1; color: RGB; born: number; drift: number; j: number }
+    const rings: Ring[] = [];
+    let W = 0, H = 0, pump = 0, clock = 0, paused = false;
+    let idx = 0, nextDue = 1.2, elapsedMs = 0;
+    let stats = new RunningS();
+    let firstClear: number | null = null;
+
+    function resize() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const r = root.getBoundingClientRect();
+      W = r.width; H = r.height;
+      canvas.width = Math.round(W * dpr);
+      canvas.height = Math.round(H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (REDUCED || paused) draw(clock);
+    }
+
+    function geometry() {
+      const overlay = root.querySelector<HTMLElement>('.overlay')!;
+      const top = 88;
+      const bottom = H - overlay.offsetHeight - 24;
+      const cy = (top + bottom) / 2;
+      const narrow = W < 700;
+      const off = Math.min(W * (narrow ? 0.24 : 0.19), H * 0.45);
+      const R = Math.max(30, Math.min(off * (narrow ? 0.85 : 0.95), ((bottom - top) / 2) * 0.9));
+      return { cx: W / 2, cy, off, R };
+    }
+
+    function spawn(e: ReplayEvent, now: number) {
+      const same = e.a === e.b;
+      const group = same ? [RED, BLUE] : [YELLOW, VIOLET];
+      const cA = e.A > 0 ? group[0] : group[1];
+      const cB = e.A === e.B ? cA : cA === group[0] ? group[1] : group[0];
+      const drift = same ? 1 : -1; // apart when the settings match, together when they differ
+      rings.push({ side: -1, color: cA, born: now, drift, j: Math.random() * 0.06 - 0.03 });
+      rings.push({ side: 1, color: cB, born: now, drift, j: Math.random() * 0.06 - 0.03 });
+      pump = 1;
+    }
+
+    function draw(now: number) {
+      ctx.clearRect(0, 0, W, H);
+      const { cx, cy, off, R } = geometry();
+      ctx.globalCompositeOperation = 'lighter';
+      // the source: a violet point between the two stations (405 nm pump)
+      const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, 24 + pump * 30);
+      g.addColorStop(0, `rgba(138, 92, 255, ${0.35 + pump * 0.4})`);
+      g.addColorStop(1, 'rgba(138, 92, 255, 0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(cx - 60, cy - 60, 120, 120);
+      ctx.fillStyle = `rgba(205, 190, 255, ${0.7 + pump * 0.3})`;
+      ctx.beginPath(); ctx.arc(cx, cy, 2 + pump * 3, 0, Math.PI * 2); ctx.fill();
+
+      for (let i = rings.length - 1; i >= 0; i--) {
+        const r = rings[i];
+        const age = now - r.born;
+        if (age > LIFE) { rings.splice(i, 1); continue; }
+        if (age < 0) continue;
+        const k = age / LIFE;
+        const fadeIn = Math.min(age / 0.3, 1);
+        const fadeOut = Math.max(Math.min((LIFE - age) / 1.8, 1), 0);
+        const alpha = 0.85 * fadeIn * Math.pow(fadeOut, 1.4);
+        const rad = R * (0.3 + 0.7 * Math.pow(k, 0.65));
+        const x = cx + r.side * off + r.side * r.drift * age * W * 0.014;
+        const y = cy + r.j * rad * age * 0.12;
+        const fresh = Math.max(0, 1 - age / 0.5);
+        ctx.strokeStyle = `rgba(${r.color}, ${alpha})`;
+        ctx.lineWidth = 1.1 + fresh * 1.4;
+        ctx.shadowColor = `rgba(${r.color}, ${alpha * 0.9})`;
+        ctx.shadowBlur = 10;
+        ctx.beginPath(); ctx.arc(x, y, rad, 0, Math.PI * 2); ctx.stroke();
+      }
+      ctx.shadowBlur = 0;
+      ctx.globalCompositeOperation = 'source-over';
+    }
+
+    function readout(e: ReplayEvent | null) {
+      if (e) $count.textContent = `Pair ${(e.n + 1).toLocaleString('en')} of ${data.count.toLocaleString('en')}, measured at ${clockAt(data.start, elapsedMs)}`;
+      const n = stats.n;
+      if (!n) return;
+      const S = stats.S, sg = stats.sigma, z = (S - 2) / sg;
+      if (z >= 2 && firstClear === null) firstClear = n;
+      let note: string;
+      if (n < 30) note = 'too few pairs to tell anything yet.';
+      else if (z >= 2) note = `more than two standard deviations above the classical limit${firstClear ? `, first reached at pair ${firstClear}` : ''}.`;
+      else if (S > 2) note = 'above 2, but not yet by more than the uncertainty.';
+      else note = 'within the classical limit so far.';
+      setLiveBell($bell, S, sg, `S = ${S.toFixed(2)} ± ${sg.toFixed(2)} from ${n.toLocaleString('en')} pairs: ${note}`);
+    }
+
+    function consume(e: ReplayEvent, at: number) {
+      stats.add(e);
+      spawn(e, at);
+      readout(e);
+    }
+
+    function step(now: number) {
+      let guard = 0;
+      while (now >= nextDue && guard++ < 20) {
+        const e = events[idx];
+        consume(e, nextDue);
+        idx++;
+        if (idx >= events.length) {
+          // loop the excerpt and start counting again
+          idx = 0; elapsedMs = 0; stats = new RunningS(); firstClear = null;
+        }
+        const dt = events[idx].dt || 300;
+        elapsedMs += dt;
+        nextDue += Math.max(dt, 40) / 1000;
+      }
+    }
+
+    let last: number | null = null;
+    function frame(ts: number) {
+      const dt = last === null ? 0 : Math.min((ts - last) / 1000, 0.1);
+      last = ts;
+      if (paused) return;
+      clock += dt;
+      pump = Math.max(0, pump - dt * 3.2);
+      step(clock);
+      draw(clock);
+    }
+
+    $pause.addEventListener('click', () => {
+      paused = !paused;
+      $pause.textContent = paused ? 'Resume' : 'Pause';
+      $pause.setAttribute('aria-pressed', String(paused));
+    });
+
+    new ResizeObserver(resize).observe(root);
+    resize();
+
+    if (REDUCED) {
+      // one still frame: rings from pairs 1–24, Bell value from all 2 000 pairs
+      $pause.hidden = true;
+      let t = 0;
+      events.forEach((e, i) => {
+        stats.add(e);
+        if (i > 0) t += e.dt / 1000;
+        if (i < 24) spawn(e, t);
+        if (i === 23) clock = t + 0.4;
+      });
+      pump = 0;
+      $count.textContent = 'A still frame. The Bell value uses all 2 000 pairs of the excerpt, measured from 23:00:10.';
+      const z = (stats.S - 2) / stats.sigma;
+      setLiveBell($bell, stats.S, stats.sigma, `S = ${stats.S.toFixed(2)} ± ${stats.sigma.toFixed(2)} from 2 000 pairs, ${z.toFixed(1)} standard deviations above the classical limit.`);
+      draw(clock);
+    } else {
+      whileVisible(root, (ts) => frame(ts));
+      document.addEventListener('visibilitychange', () => { last = null; });
+    }
+  });
+</script>
+
+<style>
+  .rings-visual {
+    position: relative;
+    height: clamp(560px, 92svh, 940px);
+    overflow: hidden;
+    background: var(--black);
+  }
+  canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding-bottom: 2rem;
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: 1.5rem var(--gutter);
+    align-items: end;
+  }
+  .caption p {
+    margin: 0 0 0.35rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--ash);
+    max-width: 52ch;
+  }
+  .caption .source { color: var(--paper); }
+  .legend { margin-top: 0.6rem !important; }
+  .sw {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    border: 1.5px solid var(--c);
+    margin-right: 3px;
+    vertical-align: -1px;
+  }
+  .sw + .sw { margin-right: 6px; }
+  .legend .item { display: inline-block; margin-right: 0.9rem; }
+  .pause {
+    margin-top: 0.6rem;
+    background: none;
+    border: 0;
+    padding: 0.25rem 0;
+    color: var(--paper);
+    text-decoration: underline;
+    text-decoration-color: var(--smoke);
+    text-underline-offset: 0.25em;
+    cursor: pointer;
+  }
+  @media (max-width: 760px) {
+    .overlay { grid-template-columns: 1fr; }
+  }
+</style>

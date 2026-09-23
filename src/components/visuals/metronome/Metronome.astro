@@ -1,0 +1,428 @@
+---
+/**
+ * Indeterminate Apparatus: the Bell metronome.
+ *
+ * The Bell value S over the last WINDOW pairs sets the tempo, using the
+ * mapping logged at the CIVA and JKU performances (S 0 → ~42 bpm … S 4 →
+ * ~269 bpm, interpolated). With few pairs S is noisy and so is the tempo;
+ * as pairs accumulate both settle. The points follow the same logic as the
+ * piece's visuals: scattered while S is uncertain, an image once it settles.
+ * With entangled photons (measured pairs, Vienna Ball of Sciences 2025) the
+ * image is an abstract motif, two interlocking rings; with a classical
+ * source (simulated) it is the most concrete object in the room, the 3D
+ * scan of the experiment (public/media/setup-pointcloud.bin).
+ */
+import LiveBell from '../../pieces/LiveBell.astro';
+---
+<section class="metronome-visual" data-metronome aria-label="The Bell metronome: tempo from the measured Bell value">
+  <canvas aria-hidden="true"></canvas>
+  <div class="overlay wrap">
+    <div class="caption">
+      <div class="source-switch" role="group" aria-label="Photon source">
+        <button type="button" class="ui" aria-pressed="true" data-mode="quantum">Entangled (measured)</button>
+        <button type="button" class="ui" aria-pressed="false" data-mode="classical">Classical (simulated)</button>
+      </div>
+      <p class="ui source" data-source-text>
+        Pairs measured at the Vienna Ball of Sciences, 25 January 2025, replayed at the pace they arrived.
+      </p>
+      <p class="ui tempo num" data-tempo aria-live="off">&nbsp;</p>
+      <div class="buttons">
+        <button type="button" class="ui link" aria-pressed="false" data-sound>Sound on</button>
+        <button type="button" class="ui link" aria-pressed="false" data-pause>Pause</button>
+      </div>
+    </div>
+    <div class="bell"><LiveBell /></div>
+  </div>
+</section>
+
+<script>
+  import ball from '../../../data/8rooms_wissenschaftsball_2025-01-25.json';
+  import { decodeExcerpt, type Excerpt } from '../../../lib/replay';
+  import { BellTest, type Event } from '../../../lib/bell';
+  import { setLiveBell, whileVisible, REDUCED } from '../../pieces/liveBell';
+
+  const WINDOW = 240; // pairs in the running Bell value
+  const NPTS = 7000;
+  // Tempo against the short-window S, from the performance logs (docs/data.md)
+  const TEMPO: [number, number][] = [[0, 42], [0.5, 47], [1, 56], [1.5, 67], [2, 86], [2.5, 101], [3, 146], [3.5, 219], [4, 269]];
+  function bpmFor(S: number) {
+    const s = Math.max(0, Math.min(4, S));
+    for (let i = 1; i < TEMPO.length; i++) {
+      const [s1, b1] = TEMPO[i];
+      if (s <= s1) {
+        const [s0, b0] = TEMPO[i - 1];
+        return b0 + ((b1 - b0) * (s - s0)) / (s1 - s0);
+      }
+    }
+    return 269;
+  }
+
+  /** Bell value over a sliding window of pairs. */
+  class Window {
+    private q: Event[] = [];
+    private c = [0, 0, 0, 0];
+    private s = [0, 0, 0, 0];
+    add(e: Event) {
+      this.q.push(e);
+      const k = e.a * 2 + e.b;
+      this.c[k]++; this.s[k] += e.A * e.B;
+      if (this.q.length > WINDOW) {
+        const o = this.q.shift()!;
+        const j = o.a * 2 + o.b;
+        this.c[j]--; this.s[j] -= o.A * o.B;
+      }
+    }
+    clear() { this.q = []; this.c = [0, 0, 0, 0]; this.s = [0, 0, 0, 0]; }
+    get n() { return this.q.length; }
+    private E(k: number) { return this.c[k] ? this.s[k] / this.c[k] : 0; }
+    get S() { return Math.abs(this.E(0) + this.E(1) + this.E(2) - this.E(3)); }
+    get sigma() {
+      let v = 0;
+      for (let k = 0; k < 4; k++) v += this.c[k] ? (1 - this.E(k) ** 2) / this.c[k] : 1;
+      return Math.sqrt(v);
+    }
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-metronome]').forEach((root) => {
+    const canvas = root.querySelector('canvas')!;
+    const ctx = canvas.getContext('2d')!;
+    const overlay = root.querySelector<HTMLElement>('.overlay')!;
+    const $bell = root.querySelector<HTMLElement>('[data-live-bell]')!;
+    const $tempo = root.querySelector<HTMLElement>('[data-tempo]')!;
+    const $source = root.querySelector<HTMLElement>('[data-source-text]')!;
+    const $pause = root.querySelector<HTMLButtonElement>('[data-pause]')!;
+    const $sound = root.querySelector<HTMLButtonElement>('[data-sound]')!;
+    const modeBtns = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-mode]'));
+
+    const data = ball as Excerpt;
+    const measured = decodeExcerpt(data);
+    const classical = new BellTest({ mode: 'classical' });
+    let mode: 'quantum' | 'classical' = 'quantum';
+    let cursor = 0;
+    const win = new Window();
+
+    // ---- point targets ----
+    // x, y in [-1, 1]; colour as [r, g, b] 0..255
+    const px = new Float32Array(NPTS), py = new Float32Array(NPTS); // displayed
+    const ringX = new Float32Array(NPTS), ringY = new Float32Array(NPTS);
+    const scanX = new Float32Array(NPTS), scanY = new Float32Array(NPTS);
+    const ringC = new Uint8Array(NPTS * 3), scanC = new Uint8Array(NPTS * 3);
+    const dirX = new Float32Array(NPTS), dirY = new Float32Array(NPTS), mag = new Float32Array(NPTS);
+    let scanReady = false;
+
+    for (let i = 0; i < NPTS; i++) {
+      // two interlocking rings, Alice left, Bob right; a few yellow points where they cross
+      const side = i % 2 === 0 ? -1 : 1;
+      const t = Math.random() * Math.PI * 2;
+      const r = 0.46 + (Math.random() - 0.5) * 0.035 * (1 + Math.random());
+      ringX[i] = side * 0.3 + Math.cos(t) * r;
+      ringY[i] = Math.sin(t) * r;
+      const c = side < 0 ? [255, 125, 125] : [143, 143, 255];
+      const white = Math.random() < 0.35;
+      ringC.set(white ? [235, 231, 223] : c, i * 3);
+      const ang = Math.random() * Math.PI * 2;
+      dirX[i] = Math.cos(ang); dirY[i] = Math.sin(ang);
+      mag[i] = 0.25 + Math.random() * 0.95;
+      px[i] = ringX[i] + dirX[i] * mag[i];
+      py[i] = ringY[i] + dirY[i] * mag[i];
+    }
+    // the crossings of the two rings: x = 0, y = ±sqrt(r² − 0.3²)
+    const yc = Math.sqrt(0.46 ** 2 - 0.3 ** 2);
+    for (let i = 0; i < 90; i++) {
+      const k = i * 7;
+      ringX[k] = (Math.random() - 0.5) * 0.03;
+      ringY[k] = (i % 2 ? yc : -yc) + (Math.random() - 0.5) * 0.03;
+      ringC.set([255, 255, 179], k * 3);
+    }
+    scanX.set(ringX); scanY.set(ringY); scanC.set(ringC);
+
+    fetch('/media/setup-pointcloud.bin')
+      .then((r) => r.arrayBuffer())
+      .then((buf) => {
+        const n = new Uint32Array(buf, 0, 1)[0];
+        const xyz = new Float32Array(buf, 4, n * 3);
+        const rgb = new Uint8Array(buf, 4 + n * 12, n * 3);
+        // pick points weighted by brightness so edges and components show
+        const w = new Float32Array(n);
+        let total = 0;
+        for (let i = 0; i < n; i++) {
+          const l = (0.3 * rgb[i * 3] + 0.59 * rgb[i * 3 + 1] + 0.11 * rgb[i * 3 + 2]) / 255;
+          const sat = (Math.max(rgb[i * 3], rgb[i * 3 + 1], rgb[i * 3 + 2]) - Math.min(rgb[i * 3], rgb[i * 3 + 1], rgb[i * 3 + 2])) / 255;
+          total += w[i] = l * l + sat * 0.6 + 0.01;
+        }
+        const cum = new Float32Array(n);
+        let acc = 0;
+        for (let i = 0; i < n; i++) cum[i] = acc += w[i];
+        for (let k = 0; k < NPTS; k++) {
+          const u = Math.random() * total;
+          let lo = 0, hi = n - 1;
+          while (lo < hi) { const mid = (lo + hi) >> 1; if (cum[mid] < u) lo = mid + 1; else hi = mid; }
+          scanX[k] = xyz[lo * 3] * 0.95;
+          scanY[k] = -xyz[lo * 3 + 1] * 0.95;
+          const boost = 1.9;
+          scanC[k * 3] = Math.min(255, rgb[lo * 3] * boost + 40);
+          scanC[k * 3 + 1] = Math.min(255, rgb[lo * 3 + 1] * boost + 40);
+          scanC[k * 3 + 2] = Math.min(255, rgb[lo * 3 + 2] * boost + 40);
+        }
+        scanReady = true;
+        if (REDUCED) drawStatic();
+      })
+      .catch(() => { /* keep the rings as the only image */ });
+
+    // ---- sound (only after the visitor turns it on) ----
+    let audio: AudioContext | null = null;
+    let soundOn = false;
+    function tick(accent: boolean) {
+      if (!soundOn || !audio) return;
+      const t = audio.currentTime;
+      const o = audio.createOscillator();
+      const g = audio.createGain();
+      o.frequency.value = accent ? 1760 : 1320;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.25, t + 0.002);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+      o.connect(g).connect(audio.destination);
+      o.start(t); o.stop(t + 0.06);
+    }
+
+    // ---- state ----
+    let W = 0, H = 0, DPR = 1;
+    let paused = false;
+    let untilNext = 600;
+    let bpm = 60, bpmShown = 60;
+    let phase = 0, beats = 0, pulse = 0;
+    let chaos = 1;
+    let morph = 1; // 0 → 1 transition to the current target
+    let prevIsScan = false;
+
+    function resize() {
+      DPR = Math.min(window.devicePixelRatio || 1, 2);
+      const r = root.getBoundingClientRect();
+      W = r.width; H = r.height;
+      canvas.width = Math.round(W * DPR); canvas.height = Math.round(H * DPR);
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      if (REDUCED || paused) draw();
+    }
+
+    function nextEvent(): { e: Event; dt: number } {
+      if (mode === 'quantum') {
+        const e = measured[cursor];
+        cursor = (cursor + 1) % measured.length;
+        return { e, dt: measured[cursor].dt || 528 };
+      }
+      const e = classical.next();
+      return { e, dt: measured[Math.floor(Math.random() * (measured.length - 1)) + 1].dt || 528 };
+    }
+
+    function readout() {
+      const n = win.n;
+      const S = win.S, sg = win.sigma;
+      $tempo.textContent = n < 4
+        ? 'Tempo: waiting for pairs.'
+        : `Tempo ${Math.round(bpmShown)} bpm, set by S = ${S.toFixed(2)} over the last ${n} ${n === 1 ? 'pair' : 'pairs'}.`;
+      const note = n < 40 ? 'still noisy.' : S - 2 * sg > 2 ? 'above the classical limit.' : S <= 2 ? 'within the classical limit.' : 'close to the limit.';
+      setLiveBell($bell, S, Math.min(sg, 1.5), n ? `S = ${S.toFixed(2)} ± ${Math.min(sg, 9).toFixed(2)} from the last ${n} pairs: ${note}` : 'Waiting for the first pairs.');
+    }
+
+    /** How scattered the image is: high while S is uncertain or based on few pairs. */
+    function chaosNow() {
+      const fromSigma = (Math.min(win.sigma, 2) - 0.45) / 0.9;
+      const fromCount = 1 - win.n / 30;
+      return Math.max(0, Math.min(1, Math.max(fromSigma, fromCount)));
+    }
+
+    function consume(e: Event) {
+      win.add(e);
+      const n = win.n;
+      // with very few pairs S is meaningless noise, and so is the tempo
+      bpm = bpmFor(win.S);
+      chaos = chaosNow();
+      readout();
+    }
+
+    function setMode(m: 'quantum' | 'classical') {
+      if (m === mode) return;
+      prevIsScan = mode === 'classical';
+      mode = m;
+      win.clear();
+      chaos = 1;
+      morph = 0;
+      modeBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === m)));
+      $source.textContent = m === 'quantum'
+        ? 'Pairs measured at the Vienna Ball of Sciences, 25 January 2025, replayed at the pace they arrived.'
+        : 'Simulated: a classical source that sends hidden instructions with every pair. Its Bell value settles at 2 or below; small excursions above 2 are statistical noise.';
+      readout();
+      if (REDUCED) drawStatic();
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      const top = 88;
+      const bottom = H - overlay.offsetHeight - 30;
+      const size = Math.max(120, Math.min(W * (W < 700 ? 0.46 : 0.3), (bottom - top) / 2 - 10));
+      const cx = W / 2, cy = (top + bottom) / 2;
+      const isScan = mode === 'classical' && scanReady;
+      const tx = isScan ? scanX : ringX, ty = isScan ? scanY : ringY, tc = isScan ? scanC : ringC;
+      const fx = prevIsScan && scanReady ? scanX : ringX, fy = prevIsScan && scanReady ? scanY : ringY;
+      const m = morph * morph * (3 - 2 * morph);
+      const spread = chaos * chaos;
+      ctx.globalCompositeOperation = 'lighter';
+      const dot = 1.8;
+      const alphaBase = 0.7 + pulse * 0.3;
+      for (let i = 0; i < NPTS; i++) {
+        const bx = fx[i] + (tx[i] - fx[i]) * m;
+        const by = fy[i] + (ty[i] - fy[i]) * m;
+        const jx = (Math.random() - 0.5) * 0.04 * chaos;
+        const jy = (Math.random() - 0.5) * 0.04 * chaos;
+        const kick = 1 + pulse * 0.08 * chaos;
+        const X = bx + (dirX[i] * mag[i] * spread + jx) * kick;
+        const Y = by + (dirY[i] * mag[i] * spread + jy) * kick;
+        px[i] = X; py[i] = Y;
+        const a = alphaBase * (1 - 0.35 * spread);
+        ctx.fillStyle = `rgba(${tc[i * 3]},${tc[i * 3 + 1]},${tc[i * 3 + 2]},${a.toFixed(3)})`;
+        ctx.fillRect(cx + X * size - dot / 2, cy + Y * size - dot / 2, dot, dot);
+      }
+      ctx.globalCompositeOperation = 'source-over';
+      // the pendulum: passes the centre on every beat
+      const pivotY = Math.min(bottom + 6, cy + size + 110);
+      const len = 72;
+      ctx.strokeStyle = 'rgba(235,231,223,0.25)';
+      ctx.beginPath(); ctx.moveTo(cx - 22, pivotY); ctx.lineTo(cx + 22, pivotY); ctx.stroke();
+      const ang = 0.42 * Math.sin(Math.PI * phase) * (beats % 2 ? 1 : -1);
+      const bxp = cx + Math.sin(ang) * len, byp = pivotY - Math.cos(ang) * len;
+      ctx.strokeStyle = 'rgba(235,231,223,0.7)';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(cx, pivotY); ctx.lineTo(bxp, byp); ctx.stroke();
+      ctx.fillStyle = `rgba(235,231,223,${0.6 + pulse * 0.4})`;
+      ctx.beginPath(); ctx.arc(bxp, byp, 3 + pulse * 2, 0, Math.PI * 2); ctx.fill();
+    }
+
+    let last = 0;
+    function frame(ts: number) {
+      const dt = last ? Math.min(0.1, (ts - last) / 1000) : 0;
+      last = ts;
+      if (paused) return;
+      untilNext -= dt * 1000;
+      let guard = 0;
+      while (untilNext <= 0 && guard++ < 10) {
+        const { e, dt: next } = nextEvent();
+        consume(e);
+        untilNext += next;
+      }
+      // the tempo follows S with a little inertia, as in the performance
+      bpmShown += (bpm - bpmShown) * Math.min(1, dt * 1.6);
+      phase += (dt * bpmShown) / 60;
+      while (phase >= 1) { phase -= 1; beats++; pulse = 1; tick(beats % 4 === 0); }
+      pulse = Math.max(0, pulse - dt * 4);
+      morph = Math.min(1, morph + dt / 2.2);
+      draw();
+    }
+
+    function drawStatic() {
+      // reduced motion: run a full window of pairs and show the settled frame
+      win.clear();
+      for (let k = 0; k < WINDOW; k++) consume(nextEvent().e);
+      bpmShown = bpm;
+      chaos = chaosNow();
+      morph = 1; prevIsScan = mode === 'classical';
+      phase = 0; pulse = 0;
+      readout();
+      draw();
+    }
+
+    modeBtns.forEach((b) => b.addEventListener('click', () => setMode(b.dataset.mode as 'quantum' | 'classical')));
+    $pause.addEventListener('click', () => {
+      paused = !paused;
+      $pause.textContent = paused ? 'Resume' : 'Pause';
+      $pause.setAttribute('aria-pressed', String(paused));
+    });
+    $sound.addEventListener('click', () => {
+      soundOn = !soundOn;
+      if (soundOn && !audio) audio = new AudioContext();
+      if (soundOn) audio?.resume();
+      $sound.textContent = soundOn ? 'Sound off' : 'Sound on';
+      $sound.setAttribute('aria-pressed', String(soundOn));
+    });
+
+    new ResizeObserver(resize).observe(root);
+    resize();
+    readout();
+    if (REDUCED) {
+      $pause.hidden = true;
+      $sound.hidden = true;
+      drawStatic();
+    } else {
+      whileVisible(root, frame);
+      document.addEventListener('visibilitychange', () => { last = 0; });
+    }
+  });
+</script>
+
+<style>
+  .metronome-visual {
+    position: relative;
+    height: clamp(620px, 94svh, 980px);
+    overflow: hidden;
+    background: var(--black);
+  }
+  canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding-bottom: 2rem;
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: 1.5rem var(--gutter);
+    align-items: end;
+  }
+  .caption p {
+    margin: 0 0 0.35rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--ash);
+    max-width: 52ch;
+  }
+  .caption .source { color: var(--paper); margin-top: 0.9rem; }
+  .source-switch {
+    display: inline-flex;
+    border: 1px solid var(--graphite);
+    border-radius: 999px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .source-switch button {
+    background: none;
+    border: 0;
+    border-radius: 999px;
+    padding: 0.4rem 0.9rem;
+    color: var(--ash);
+    cursor: pointer;
+    font-size: 0.8125rem;
+  }
+  .source-switch button[aria-pressed='true'] {
+    background: var(--paper);
+    color: var(--black);
+  }
+  .buttons { display: flex; gap: 1.25rem; margin-top: 0.4rem; }
+  .link {
+    background: none;
+    border: 0;
+    padding: 0.25rem 0;
+    color: var(--paper);
+    text-decoration: underline;
+    text-decoration-color: var(--smoke);
+    text-underline-offset: 0.25em;
+    cursor: pointer;
+  }
+  @media (max-width: 760px) {
+    .overlay { grid-template-columns: 1fr; }
+    .source-switch button { padding: 0.4rem 0.7rem; }
+  }
+</style>

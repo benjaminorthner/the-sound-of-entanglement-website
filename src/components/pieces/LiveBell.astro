@@ -1,0 +1,73 @@
+---
+/**
+ * Live Bell-value scale for the piece visuals: a hairline from 0 to 3 with
+ * the classical limit (2) and the quantum limit (2√2) marked, a dot for the
+ * running estimate and a band for its uncertainty. Driven from script via
+ * setLiveBell() in ./liveBell.ts.
+ */
+interface Props { id?: string }
+const { id } = Astro.props;
+const pos = (v: number) => `${(v / 3) * 100}%`;
+---
+<div class="live-bell" data-live-bell id={id}>
+  <div class="track" aria-hidden="true">
+    <span class="band" data-lb-band></span>
+    <span class="mark" style={`left: ${pos(2)}`}><span class="ui">classical limit 2</span></span>
+    <span class="mark q" style={`left: ${pos(2 * Math.SQRT2)}`}><span class="ui">2√2</span></span>
+    <span class="dot" data-lb-dot></span>
+  </div>
+  <p class="text ui num" data-lb-text aria-live="off">Waiting for the first pairs.</p>
+</div>
+
+<style>
+  .live-bell { width: 100%; }
+  .track {
+    position: relative;
+    height: 1px;
+    margin-top: 1.9rem;
+    background: rgb(235 231 223 / 0.22);
+  }
+  .mark {
+    position: absolute;
+    top: -6px;
+    width: 1px;
+    height: 13px;
+    background: var(--ash);
+  }
+  .mark span {
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    color: var(--ash);
+    font-size: 0.75rem;
+  }
+  .mark.q span { transform: translateX(-50%); }
+  .band {
+    position: absolute;
+    top: -2px;
+    height: 5px;
+    left: 0;
+    width: 0;
+    background: rgb(235 231 223 / 0.18);
+  }
+  .dot {
+    position: absolute;
+    top: -4px;
+    left: 0;
+    width: 9px;
+    height: 9px;
+    margin-left: -4.5px;
+    border-radius: 50%;
+    background: var(--paper);
+    box-shadow: 0 0 12px rgb(235 231 223 / 0.55);
+    opacity: 0;
+  }
+  .text {
+    margin: 0.8rem 0 0;
+    font-size: 0.8125rem;
+    color: var(--ash);
+    max-width: none;
+  }
+</style>

@@ -1,0 +1,40 @@
+---
+import YouTube from '../YouTube.astro';
+import poster from '../../assets/photos/2024-bruqner-making-of/pump-laser-crystal.jpg';
+---
+<section class="film section" aria-labelledby="film-title">
+  <div class="wrap grid">
+    <div class="player">
+      <YouTube
+        id="_mIf_OFN1YI"
+        title="BruQner – The Sound of Entanglement"
+        poster={poster}
+        posterAlt="A violet laser beam leaves the source module of the experiment, in a dark close-up."
+        duration="18 min"
+      />
+    </div>
+    <div class="text">
+      <h2 id="film-title">The film</h2>
+      <p>
+        A documentary that follows the team of artists and scientists through the days before the premiere in
+        the Mariendom Linz. The piece was inspired by Bruckner's <em>Perger Präludium</em>, but nobody could know
+        what it was going to sound like.
+      </p>
+      <p class="credits ui dim">
+        Directed by Deniz Lindenberg, camera Florian Lindenberg, produced by Alexander Ploier. weitblickfilm, 2025.
+        Poster image: film still, weitblickfilm.
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .grid { align-items: end; row-gap: 2rem; }
+  .player { grid-column: 1 / span 8; }
+  .text { grid-column: 9 / -1; }
+  h2 { font-size: var(--step-3); margin-bottom: 1.25rem; }
+  .credits { font-size: 0.875rem; line-height: 1.5; }
+  @media (max-width: 900px) {
+    .player, .text { grid-column: 1 / -1; }
+  }
+</style>

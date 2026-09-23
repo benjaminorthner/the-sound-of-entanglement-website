@@ -1,0 +1,230 @@
+---
+/**
+ * Photo gallery: the first photo spans the full width, the rest flow in an
+ * asymmetric two-column masonry. Every photo opens a lightbox (<dialog>) with
+ * a large optimised version, its caption and its credit. Keyboard: arrow keys
+ * to move, Esc to close; focus stays inside the dialog while it is open.
+ */
+import { Image, getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Item { src: ImageMetadata; alt: string; credit: string; caption?: string }
+interface Props { items: Item[]; label?: string }
+const { items, label = 'Photographs' } = Astro.props;
+
+const large = await Promise.all(
+  items.map((it) => getImage({ src: it.src, width: Math.min(2400, it.src.width), format: 'webp', quality: 84 })),
+);
+const credits = [...new Set(items.map((i) => i.credit))];
+const creditLine = (c: string) => (c.startsWith('©') ? c : `Photo: ${c}`);
+---
+<section class="gallery" aria-label={label} data-gallery>
+  <ul class="grid-list">
+    {items.map((it, i) => (
+      <li class:list={['item', { lead: i === 0, portrait: it.src.height > it.src.width }]}>
+        <button
+          class="open"
+          data-index={i}
+          data-large={large[i].src}
+          data-alt={it.alt}
+          data-caption={it.caption ?? it.alt}
+          data-credit={creditLine(it.credit)}
+          aria-label={`Open photo ${i + 1} of ${items.length}: ${it.alt}`}
+        >
+          <Image
+            src={it.src}
+            alt={it.alt}
+            widths={[480, 800, 1200, 1600, 2000].filter((w) => w <= it.src.width)}
+            sizes={i === 0 ? '100vw' : '(min-width: 860px) 50vw, 100vw'}
+            format="webp"
+            quality={80}
+          />
+        </button>
+      </li>
+    ))}
+  </ul>
+  <p class="credits ui">{credits.map(creditLine).join('; ')}.</p>
+
+  <dialog class="lightbox" aria-label="Photo viewer" data-lightbox>
+    <div class="lb-inner">
+      <figure class="lb-figure">
+        <img class="lb-img" alt="" />
+        <figcaption class="lb-caption">
+          <span class="lb-text"></span>
+          <span class="lb-credit ui"></span>
+        </figcaption>
+      </figure>
+      <div class="lb-controls">
+        <button class="lb-btn ui" data-prev aria-label="Previous photo">Previous</button>
+        <span class="lb-count ui num" aria-live="polite"></span>
+        <button class="lb-btn ui" data-next aria-label="Next photo">Next</button>
+        <button class="lb-btn lb-close ui" data-close>Close</button>
+      </div>
+    </div>
+  </dialog>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-gallery]').forEach((root) => {
+    const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>('button.open'));
+    const dialog = root.querySelector<HTMLDialogElement>('[data-lightbox]')!;
+    const img = dialog.querySelector<HTMLImageElement>('.lb-img')!;
+    const text = dialog.querySelector<HTMLElement>('.lb-text')!;
+    const credit = dialog.querySelector<HTMLElement>('.lb-credit')!;
+    const count = dialog.querySelector<HTMLElement>('.lb-count')!;
+    const focusables = () =>
+      Array.from(dialog.querySelectorAll<HTMLButtonElement>('button')).filter((b) => !b.disabled);
+    let index = 0;
+    let opener: HTMLButtonElement | null = null;
+
+    const show = (i: number) => {
+      index = (i + buttons.length) % buttons.length;
+      const b = buttons[index];
+      img.src = b.dataset.large!;
+      img.alt = b.dataset.alt!;
+      text.textContent = b.dataset.caption!;
+      credit.textContent = b.dataset.credit!;
+      count.textContent = `${index + 1} of ${buttons.length}`;
+      // preload neighbours
+      [index + 1, index - 1].forEach((j) => {
+        const n = buttons[(j + buttons.length) % buttons.length];
+        new Image().src = n.dataset.large!;
+      });
+    };
+
+    buttons.forEach((b, i) =>
+      b.addEventListener('click', () => {
+        opener = b;
+        show(i);
+        dialog.showModal();
+        dialog.querySelector<HTMLButtonElement>('[data-next]')!.focus();
+      }),
+    );
+    dialog.querySelector('[data-prev]')!.addEventListener('click', () => show(index - 1));
+    dialog.querySelector('[data-next]')!.addEventListener('click', () => show(index + 1));
+    dialog.querySelector('[data-close]')!.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('close', () => opener?.focus());
+    // click on the backdrop (outside the figure and controls) closes
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog || (e.target as HTMLElement).classList.contains('lb-inner')) dialog.close();
+    });
+    dialog.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') { e.preventDefault(); show(index + 1); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); show(index - 1); }
+      else if (e.key === 'Tab') {
+        const f = focusables();
+        const first = f[0], last = f[f.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    });
+    // swipe on touch screens
+    let x0: number | null = null;
+    dialog.addEventListener('touchstart', (e) => { x0 = e.touches[0].clientX; }, { passive: true });
+    dialog.addEventListener('touchend', (e) => {
+      if (x0 === null) return;
+      const dx = e.changedTouches[0].clientX - x0;
+      if (Math.abs(dx) > 50) show(index + (dx < 0 ? 1 : -1));
+      x0 = null;
+    });
+  });
+</script>
+
+<style>
+  .grid-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    columns: 2;
+    column-gap: var(--gutter);
+  }
+  .item { break-inside: avoid; margin-bottom: var(--gutter); }
+  .item.lead { column-span: all; }
+  .open {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: var(--soot);
+    cursor: zoom-in;
+  }
+  .open :global(img) {
+    width: 100%;
+    height: auto;
+    filter: brightness(0.94);
+    transition: filter 0.25s ease;
+  }
+  .open:hover :global(img) { filter: brightness(1.05); }
+  .open:focus-visible { outline-offset: 4px; }
+  .credits {
+    color: var(--smoke);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    max-width: none;
+    margin-top: 0.25rem;
+  }
+  @media (max-width: 860px) {
+    .grid-list { columns: 1; }
+  }
+
+  .lightbox {
+    width: 100vw;
+    height: 100dvh;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: rgb(0 0 0 / 0.96);
+    color: var(--paper);
+  }
+  .lightbox::backdrop { background: rgb(0 0 0 / 0.85); }
+  .lb-inner {
+    height: 100%;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    padding: clamp(12px, 3vw, 40px) var(--gutter) 16px;
+    gap: 1rem;
+  }
+  .lb-figure {
+    margin: 0;
+    min-height: 0;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 0.75rem;
+  }
+  .lb-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    min-height: 0;
+  }
+  .lb-caption {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.25rem;
+    align-items: baseline;
+    font-size: 1rem;
+    max-width: var(--measure);
+  }
+  .lb-credit { color: var(--ash); font-size: 0.8125rem; }
+  .lb-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-top: 1px solid var(--graphite);
+    padding-top: 0.75rem;
+  }
+  .lb-btn {
+    background: none;
+    border: 1px solid var(--graphite);
+    color: var(--paper);
+    border-radius: 999px;
+    padding: 0.45rem 1rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+  }
+  .lb-btn:hover { border-color: var(--ash); }
+  .lb-count { color: var(--ash); min-width: 5.5rem; text-align: center; }
+  .lb-close { margin-left: auto; }
+</style>

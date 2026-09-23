@@ -22,7 +22,7 @@ images:
     credit: © Land OÖ / Andreas Krenn
   - src: ../../assets/photos/figures/bruqner-motifs.jpg
     alt: One set of eight motifs, four for Alice's organ and four for Bob's, labelled A1+ to B2−.
-    credit: Clemens Wenger
+    credit: © Clemens Wenger
 audio:
   - src: /media/audio/wave-plate-clicks.mp3
     title: The sound of a measurement

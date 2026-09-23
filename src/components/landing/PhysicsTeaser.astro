@@ -1,0 +1,70 @@
+---
+/** The half-wave-plate mount turning, as a muted loop; paused under reduced motion. */
+---
+<section class="physics section" aria-labelledby="physics-title">
+  <div class="wrap grid">
+    <div class="text">
+      <h2 id="physics-title">Every click is a measurement being chosen</h2>
+      <p>
+        Before each measurement, a small motor turns a half-wave plate on each side of the experiment to one of two
+        angles, picked at random. You can hear it on stage: a click for Alice and a click for Bob, about twice a
+        second. In <a href="/pieces/8-rooms/">8 Rooms</a> those clicks are the metronome.
+      </p>
+      <p>
+        Whether the photon behind the plate is then transmitted or reflected has no cause at all. That's the
+        randomness the music is built on, and the correlations between the two sides are what make it quantum.
+      </p>
+      <p class="ui more"><a href="/physics/">How the experiment works</a></p>
+    </div>
+    <figure class="loop">
+      <video
+        src="/media/loops/setting-choice-mount.mp4"
+        muted
+        loop
+        playsinline
+        autoplay
+        preload="metadata"
+        aria-label="Close-up of the motorised rotation mount turning the half-wave plate."
+        data-loop
+      ></video>
+      <figcaption class="ui">A rotation mount choosing a measurement setting. Video: The Sound of Entanglement</figcaption>
+    </figure>
+  </div>
+</section>
+
+<script>
+  const v = document.querySelector<HTMLVideoElement>('[data-loop]');
+  if (v) {
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+    const apply = () => {
+      if (reduced.matches) {
+        v.removeAttribute('autoplay');
+        v.pause();
+        v.controls = true;
+      }
+    };
+    apply();
+    reduced.addEventListener('change', apply);
+    // only play while on screen
+    new IntersectionObserver(([e]) => {
+      if (reduced.matches) return;
+      if (e.isIntersecting) v.play().catch(() => {});
+      else v.pause();
+    }).observe(v);
+  }
+</script>
+
+<style>
+  .grid { align-items: center; row-gap: 2.5rem; }
+  .text { grid-column: 1 / span 5; }
+  h2 { font-size: var(--step-3); margin-bottom: 1.5rem; max-width: 16ch; }
+  .more { margin-top: 1.5rem; }
+  .loop { grid-column: 7 / -1; margin: 0 calc(-1 * var(--gutter)) 0 0; }
+  video { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: var(--soot); }
+  figcaption { margin-top: 0.6rem; color: var(--smoke); font-size: 0.8125rem; padding-right: var(--gutter); }
+  @media (max-width: 900px) {
+    .text, .loop { grid-column: 1 / -1; }
+    .loop { margin-left: calc(-1 * var(--gutter)); }
+    figcaption { padding-inline: var(--gutter); }
+  }
+</style>

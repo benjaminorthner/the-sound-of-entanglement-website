@@ -22,7 +22,11 @@ export interface Excerpt {
 export interface ReplayEvent extends Event {
   /** Milliseconds since the previous event, as measured. */
   dt: number;
-  /** Wall-clock time of the measurement, local to the venue. */
+  /**
+   * Wall-clock time of the measurement at the venue, encoded as a UTC Date so
+   * it doesn't depend on the visitor's timezone. Format with `clock(e)` or
+   * with `timeZone: 'UTC'`.
+   */
   at: Date;
 }
 
@@ -34,7 +38,9 @@ const OUTCOMES: [Outcome, Outcome][] = [
 ];
 
 export function decodeExcerpt(x: Excerpt): ReplayEvent[] {
-  const t0 = new Date(x.start).getTime();
+  // The logged start is venue-local wall-clock time without an offset; read it
+  // as UTC so formatting with timeZone 'UTC' reproduces the venue clock.
+  const t0 = Date.parse(x.start.endsWith('Z') ? x.start : x.start + 'Z');
   let t = t0;
   return Array.from(x.events, (ch, n) => {
     const v = parseInt(ch, 16);
@@ -50,6 +56,11 @@ export function decodeExcerpt(x: Excerpt): ReplayEvent[] {
       at: new Date(t),
     };
   });
+}
+
+/** Venue wall-clock time of an event, e.g. "23:00:17". */
+export function clock(e: ReplayEvent): string {
+  return e.at.toISOString().slice(11, 19);
 }
 
 /** Running CHSH estimate, same convention as BellTest: S = |E11 + E12 + E21 − E22|. */

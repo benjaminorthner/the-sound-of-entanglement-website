@@ -1,0 +1,133 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Photo from '../../components/Photo.astro';
+import AudioPlayer from '../../components/AudioPlayer.astro';
+import { formatDate } from '../../lib/format';
+
+const pieces = (await getCollection('pieces')).sort((a, b) => a.data.order - b.data.order);
+const repertoire = pieces.filter((p) => p.data.status === 'repertoire');
+const experimental = pieces.filter((p) => p.data.status === 'experimental');
+const shows = await getCollection('shows', (s) => !s.data.draft && s.data.kind === 'performance');
+const premiereOf = (id: string) =>
+  shows.filter((s) => s.data.piece?.id === id && s.data.premiere).sort((a, b) => +a.data.date - +b.data.date)[0];
+---
+<Base title="Pieces" description="Three pieces for entangled photons and live musicians: BruQner, 8 Rooms and Indeterminate Apparatus.">
+  <header class="wrap intro">
+    <h1>Pieces</h1>
+    <p class="lede">
+      Every piece receives the same kind of data: a few times a second, one result for Alice and one for Bob.
+      What changes from piece to piece is what those results are allowed to decide.
+    </p>
+  </header>
+
+  <div class="list">
+    {repertoire.map((p, i) => {
+      const premiere = premiereOf(p.id);
+      return (
+        <section class:list={['piece', i % 2 ? 'flip' : '']} aria-labelledby={`p-${p.id}`}>
+          <div class="wrap grid">
+            {p.data.cover && (
+              <a class="image" href={`/pieces/${p.id}/`} tabindex="-1" aria-hidden="true">
+                <Photo {...p.data.cover} sizes="(min-width: 1000px) 62vw, 100vw" ratio="3 / 2" />
+              </a>
+            )}
+            <div class="text">
+              <p class="year ui num">{p.data.year}</p>
+              <h2 id={`p-${p.id}`}><a href={`/pieces/${p.id}/`}>{p.data.title}</a></h2>
+              <p class="forces">{p.data.forces}</p>
+              <p class="summary">{p.data.summary}</p>
+              <p class="mapping dim">{p.data.mapping}</p>
+              <p class="meta ui dim">
+                {premiere && <>Premiered {formatDate(premiere.data.date)}, {premiere.data.venue.replace(/ \(.*\)$/, '')}, {premiere.data.city}.</>}
+              </p>
+              <p class="more ui"><a href={`/pieces/${p.id}/`}>About {p.data.title}</a></p>
+            </div>
+          </div>
+        </section>
+      );
+    })}
+  </div>
+
+  <section class="wrap grid experiments" aria-labelledby="experiments">
+    <div class="exp-head">
+      <h2 id="experiments">Studies</h2>
+      <p class="dim">Two experimental pieces from the rehearsal events in Vienna in 2024, while the setup was being prepared for the premiere.</p>
+    </div>
+    <ul class="exp-list">
+      {experimental.map((p) => (
+        <li>
+          <h3><a href={`/pieces/${p.id}/`}>{p.data.title}</a></h3>
+          <p class="dim">{p.data.summary}</p>
+          {p.data.audio[0] && <AudioPlayer src={p.data.audio[0].src} title={p.data.audio[0].title} note={p.data.audio[0].note} />}
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="wrap grid album" aria-labelledby="album">
+    <div class="album-text">
+      <h2 id="album"><em>Sounds of Entanglement</em></h2>
+      <p>
+        The band has recorded its first album: music conducted by pairs of entangled photons, captured as a live performance with the experiment.
+        It is not released yet. There will be a vinyl edition.
+      </p>
+      <p class="dim ui">The Uncertain Question: Clemens Wenger, Manu Mayr and Judith Schwarz.</p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .intro { padding-block: clamp(4rem, 9vw, 8rem) clamp(3rem, 6vw, 5rem); }
+  .intro h1 { font-size: var(--step-5); }
+  .lede {
+    margin-top: 1.75rem;
+    font-size: var(--step-1);
+    font-weight: 300;
+    line-height: 1.45;
+    max-width: 44ch;
+  }
+
+  .piece { padding-block: clamp(3rem, 7vw, 6rem); border-top: 1px solid var(--graphite); }
+  .piece .grid { align-items: center; row-gap: 2rem; }
+  .image { grid-column: 1 / span 7; display: block; text-decoration: none; }
+  .text { grid-column: 9 / span 4; }
+  .flip .image { grid-column: 6 / span 7; grid-row: 1; }
+  .flip .text { grid-column: 1 / span 4; grid-row: 1; }
+  .year { color: var(--ash); margin: 0 0 0.5rem; }
+  h2 { font-size: var(--step-4); }
+  h2 a { text-decoration: none; }
+  h2 a:hover { text-decoration: underline; text-decoration-thickness: 1px; }
+  .forces { margin: 0.9rem 0 1.4rem; font-style: italic; color: var(--ash); line-height: 1.4; }
+  .summary { font-size: var(--step-0); }
+  .mapping { font-size: 1rem; }
+  .meta { margin-top: 1.25rem; font-size: 0.875rem; }
+  .more { margin-top: 1.25rem; }
+  .more a { text-decoration-color: var(--smoke); }
+
+  .experiments {
+    padding-block: clamp(4rem, 9vw, 7rem);
+    border-top: 1px solid var(--graphite);
+    row-gap: 2rem;
+  }
+  .exp-head { grid-column: 1 / span 4; }
+  .exp-head h2 { font-size: var(--step-3); margin-bottom: 1rem; }
+  .exp-head p { font-size: 1rem; }
+  .exp-list { grid-column: 6 / span 7; list-style: none; margin: 0; padding: 0; }
+  .exp-list li { padding-bottom: 2.5rem; }
+  .exp-list h3 { font-size: var(--step-2); margin-bottom: 0.5rem; }
+  .exp-list h3 a { text-decoration: none; }
+  .exp-list p { font-size: 1rem; }
+
+  .album {
+    padding-block: clamp(4rem, 9vw, 7rem);
+    border-top: 1px solid var(--graphite);
+  }
+  .album-text { grid-column: 6 / span 7; }
+  .album h2 { font-size: var(--step-3); margin-bottom: 1.25rem; }
+  .album h2 em { font-style: normal; }
+
+  @media (max-width: 900px) {
+    .image, .text, .flip .image, .flip .text, .exp-head, .exp-list, .album-text { grid-column: 1 / -1; grid-row: auto; }
+  }
+</style>

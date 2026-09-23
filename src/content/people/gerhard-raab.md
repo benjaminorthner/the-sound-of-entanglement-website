@@ -5,5 +5,5 @@ group: organists
 order: 1
 ---
 
-Organist. Played Alice's organ, the Rudigier organ at the back of the
+Played Alice's organ, the Rudigier organ at the back of the
 Mariendom, in *BruQner*.

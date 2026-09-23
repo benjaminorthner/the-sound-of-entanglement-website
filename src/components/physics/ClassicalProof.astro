@@ -1,0 +1,47 @@
+---
+/**
+ * The CHSH argument for local hidden variables, made checkable: every one of
+ * the 16 possible instruction sets (A1, A2, B1, B2 each ±1) gives
+ * A1(B1+B2) + A2(B1−B2) = +2 or −2. Averages of ±2 can never exceed 2.
+ */
+const pm = [1, -1] as const;
+const aSets = pm.flatMap((A1) => pm.map((A2) => [A1, A2] as const));
+const bSets = pm.flatMap((B1) => pm.map((B2) => [B1, B2] as const));
+const s = (x: number) => (x > 0 ? '+' : '−');
+---
+<div class="proof">
+  <table>
+    <caption>
+      A<sub>1</sub>(B<sub>1</sub> + B<sub>2</sub>) + A<sub>2</sub>(B<sub>1</sub> − B<sub>2</sub>)
+      for every possible set of hidden instructions
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col"><span class="alice">Alice</span> A<sub>1</sub> A<sub>2</sub> ↓ &nbsp; <span class="bob">Bob</span> B<sub>1</sub> B<sub>2</sub> →</th>
+        {bSets.map(([B1, B2]) => <th scope="col" class="num bob">{s(B1)}{s(B2)}</th>)}
+      </tr>
+    </thead>
+    <tbody>
+      {aSets.map(([A1, A2]) => (
+        <tr>
+          <th scope="row" class="num alice">{s(A1)}{s(A2)}</th>
+          {bSets.map(([B1, B2]) => {
+            const v = A1 * (B1 + B2) + A2 * (B1 - B2);
+            return <td class:list={['num', v > 0 ? 'pos' : 'neg']}>{v > 0 ? '+2' : '−2'}</td>;
+          })}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .proof { overflow-x: auto; }
+  table { border-collapse: collapse; font-size: 1rem; }
+  caption { text-align: left; color: var(--ash); font-size: 0.9375rem; margin-bottom: 0.75rem; }
+  th, td { padding: 0.45rem 0.9rem; text-align: center; border: 1px solid var(--graphite); font-weight: 400; }
+  thead th:first-child { text-align: left; font-family: var(--font-display); font-size: 0.8125rem; color: var(--ash); }
+  .pos { color: var(--paper); }
+  .neg { color: var(--ash); }
+  sub { font-size: 0.7em; }
+</style>

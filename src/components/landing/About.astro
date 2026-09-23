@@ -1,0 +1,78 @@
+---
+import Photo from '../Photo.astro';
+import hazeOverCase from '../../assets/photos/2024-bruqner-linz/haze-over-case.jpg';
+import washington from '../../assets/photos/2025-washington/landscape-above-stage.jpg';
+---
+<section class="about section" aria-labelledby="about-title">
+  <div class="wrap grid">
+    <div class="intro">
+      <h2 id="about-title">A physics experiment as the conductor</h2>
+      <p>
+        <em>The Sound of Entanglement</em> is a live performance conducted by a Bell test. On stage stands the
+        experiment: a laser, a crystal, mirrors and four single-photon detectors in a lit glass case. About twice a
+        second it measures a pair of entangled photons, and the results tell the musicians what to play and the
+        visuals what to show.
+      </p>
+      <p>
+        Each result on its own is pure chance. Compared with its partner, it is correlated more strongly than any
+        classical process allows, so the music follows an order that no human conductor or computer could give it.
+        Every performance is different, and none can be repeated.
+      </p>
+    </div>
+
+    <Photo
+      class="first"
+      src={hazeOverCase}
+      alt="Clouds of projected light hang in the dark nave above the glowing glass case of the experiment; the audience sits on the floor around it."
+      credit="Florian Voggeneder / Ars Electronica"
+      caption="BruQner, Mariendom Linz, 4 September 2024"
+      sizes="(min-width: 900px) 58vw, 100vw"
+    />
+
+    <Photo
+      class="second"
+      src={washington}
+      alt="A white-line landscape fills the screen above the band and the lit experiment on a dark stage."
+      credit="Kaveh Sardari"
+      caption="8 Rooms, Johns Hopkins University, Washington DC, 14 April 2025"
+      sizes="(min-width: 900px) 66vw, 100vw"
+    />
+
+    <div class="history">
+      <p>
+        The project brings together musicians, a visual artist and quantum physicists from Vienna, Linz and
+        Innsbruck. The experiment was built at TU Wien as a master thesis. It premiered in 2024 in the Mariendom
+        Linz, at the opening of Ars Electronica, in front of more than 3 000 people.
+      </p>
+      <p>
+        Since then it has played in Vienna City Hall, at Johns Hopkins University in Washington, at the European
+        Forum Alpbach and at the CIVA festival, each time with a short physics lecture first and about twenty
+        minutes of music after.
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .grid { row-gap: clamp(3rem, 7vw, 6rem); align-items: start; }
+  .intro { grid-column: 1 / span 5; grid-row: 1; padding-top: clamp(0rem, 6vw, 5rem); }
+  .intro h2 { font-size: var(--step-3); margin-bottom: 2rem; max-width: 14ch; }
+  .about :global(.first) { grid-column: 7 / -1; grid-row: 1; margin-right: calc(-1 * var(--gutter)); }
+  .about :global(.first figcaption) { padding-right: var(--gutter); }
+  .about :global(.second) { grid-column: 1 / span 8; grid-row: 2; margin-left: calc(-1 * var(--gutter)); }
+  .about :global(.second figcaption) { padding-left: var(--gutter); }
+  .history { grid-column: 9 / -1; grid-row: 2; align-self: end; padding-bottom: 2.5rem; }
+  .history p { font-size: 1.0625rem; color: var(--ash); }
+
+  @media (max-width: 900px) {
+    .intro, .history, .about :global(.first), .about :global(.second) {
+      grid-column: 1 / -1;
+      grid-row: auto;
+    }
+    .about :global(.first) { margin-right: calc(-1 * var(--gutter)); margin-left: calc(-1 * var(--gutter)); }
+    .about :global(.first figcaption) { padding-inline: var(--gutter); }
+    .about :global(.second) { margin-right: calc(-1 * var(--gutter)); }
+    .about :global(.second figcaption) { padding-right: var(--gutter); }
+    .history { padding-bottom: 0; }
+  }
+</style>

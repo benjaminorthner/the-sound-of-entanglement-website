@@ -1,0 +1,192 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Photo from '../../components/Photo.astro';
+import BellScale from '../../components/BellScale.astro';
+import YouTube from '../../components/YouTube.astro';
+import Gallery from '../../components/shows/Gallery.astro';
+import { publicShows, pieceOf, place, isUpcoming, type Show } from '../../components/shows/data';
+import { formatRange, formatDateShort } from '../../lib/format';
+
+export async function getStaticPaths() {
+  const shows = await publicShows();
+  return shows.map((show, i) => ({
+    params: { id: show.id },
+    props: { show, prev: shows[i - 1], next: shows[i + 1] },
+  }));
+}
+
+interface Props { show: Show; prev?: Show; next?: Show }
+const { show, prev, next } = Astro.props;
+const d = show.data;
+const { Content } = await render(show);
+const piece = await pieceOf(show);
+const upcoming = isUpcoming(show);
+const hasCover = !!d.cover;
+const kindLabel = d.kind === 'talk' ? 'Talk' : d.kind === 'exhibition' ? 'Exhibition' : upcoming ? 'Upcoming performance' : 'Performance';
+const videoPoster = d.gallery[1]?.src ?? d.cover?.src;
+---
+<Base title={d.title} description={d.summary} underHeader={hasCover}>
+  {hasCover && (
+    <div class="cover">
+      <Photo {...d.cover!} bleed loading="eager" sizes="100vw" />
+    </div>
+  )}
+
+  <article class:list={['wrap', 'show', { textled: !hasCover }]}>
+    <header class="head">
+      <p class="kind ui">
+        <a href="/shows/">Shows</a>
+        <span aria-hidden="true">/</span>
+        {kindLabel}{d.premiere && ', premiere'}
+      </p>
+      <h1>{d.title}</h1>
+      <p class="when num">{formatRange(d.date, d.endDate)}{d.time && !d.endDate && <span class="dim">, {d.time}</span>}</p>
+      <p class="where">{d.venue}, {place(show)}</p>
+    </header>
+
+    <div class="body">
+      <p class="summary">{d.summary}</p>
+      <div class="prose"><Content /></div>
+
+      {d.youtube && videoPoster && (
+        <div class="video">
+          <YouTube id={d.youtube} title={piece ? `${piece.data.title}, film` : 'Film'} poster={videoPoster} />
+        </div>
+      )}
+    </div>
+
+    <aside class="facts" aria-label="Details">
+      <dl>
+        {piece && (
+          <div>
+            <dt class="ui">Piece</dt>
+            <dd><a href={`/pieces/${piece.id}/`}><em>{piece.data.title}</em></a>{d.premiere && <span class="premiere"> premiere</span>}</dd>
+          </div>
+        )}
+        {d.format && (
+          <div><dt class="ui">Format</dt><dd>{d.format}</dd></div>
+        )}
+        {d.lineup.length > 0 && (
+          <div><dt class="ui">On stage</dt><dd><ul>{d.lineup.map((p) => <li>{p}</li>)}</ul></dd></div>
+        )}
+        {d.lecture.length > 0 && (
+          <div><dt class="ui">{d.kind === 'talk' ? 'Speaker' : 'Lecture'}</dt><dd><ul>{d.lecture.map((p) => <li>{p}</li>)}</ul></dd></div>
+        )}
+        {d.audience && (
+          <div><dt class="ui">Audience</dt><dd>{d.audience}</dd></div>
+        )}
+        {d.links.length > 0 && (
+          <div><dt class="ui">Links</dt><dd><ul>{d.links.map((l) => <li><a href={l.url}>{l.label}</a></li>)}</ul></dd></div>
+        )}
+      </dl>
+
+      {d.bell !== undefined && (
+        <div class="bell">
+          <p class="bell-title ui">Bell value measured that night</p>
+          <BellScale value={d.bell} compact />
+          <p class="bell-note dim">
+            Calculated from the photon pairs that conducted the performance. No classical source, and no human
+            conductor, can go above 2.
+          </p>
+        </div>
+      )}
+    </aside>
+  </article>
+
+  {d.gallery.length > 0 && (
+    <div class="wrap gallery-wrap">
+      <h2 class="gallery-title">Photographs</h2>
+      <Gallery items={d.gallery} label={`Photographs from ${d.title}`} />
+    </div>
+  )}
+
+  <nav class="wrap prevnext" aria-label="Other shows">
+    {prev ? (
+      <a class="pn prev" href={`/shows/${prev.id}/`}>
+        <span class="ui dim">Earlier</span>
+        <span class="pn-title">{prev.data.title}</span>
+        <span class="ui dim num">{formatDateShort(prev.data.date)}, {prev.data.city}</span>
+      </a>
+    ) : <span />}
+    {next ? (
+      <a class="pn next" href={`/shows/${next.id}/`}>
+        <span class="ui dim">Later</span>
+        <span class="pn-title">{next.data.title}</span>
+        <span class="ui dim num">{formatDateShort(next.data.date)}, {next.data.city}</span>
+      </a>
+    ) : <span />}
+  </nav>
+</Base>
+
+<style>
+  .cover :global(figure) { margin: 0; }
+  .cover :global(img) { aspect-ratio: 21 / 9; object-fit: cover; max-height: 78vh; }
+
+  .show {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    padding-top: clamp(2.5rem, 6vw, 5rem);
+  }
+  .textled { padding-top: clamp(4rem, 12vw, 9rem); }
+  .head { grid-column: 1 / -1; margin-bottom: clamp(2rem, 5vw, 4rem); }
+  .kind { color: var(--ash); margin: 0 0 1.25rem; display: flex; gap: 0.6rem; }
+  .kind a { color: var(--ash); text-decoration: none; }
+  .kind a:hover { color: var(--paper); }
+  h1 { font-size: var(--step-5); max-width: 18ch; }
+  .textled h1 { font-size: var(--step-4); max-width: 24ch; }
+  .when {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: var(--step-2);
+    margin: 1.5rem 0 0;
+    max-width: none;
+  }
+  .where { font-size: var(--step-1); margin: 0.5rem 0 0; color: var(--ash); max-width: none; }
+
+  .body { grid-column: 1 / span 7; }
+  .summary { font-size: var(--step-1); line-height: 1.45; margin-bottom: 1.5em; }
+  .prose :global(p) { color: var(--paper); }
+  .video { margin-top: 3rem; }
+
+  .facts { grid-column: 9 / span 4; }
+  dl { margin: 0; }
+  dl > div { padding-block: 0.9rem; border-top: 1px solid var(--graphite); }
+  dt { color: var(--ash); font-size: 0.8125rem; margin-bottom: 0.3rem; }
+  dd { margin: 0; font-size: 1.0625rem; line-height: 1.45; }
+  dd ul { list-style: none; margin: 0; padding: 0; }
+  .premiere { font-family: var(--font-display); font-size: 0.8125rem; color: var(--photon); }
+  .bell { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--graphite); }
+  .bell-title { color: var(--ash); font-size: 0.8125rem; margin: 0; }
+  .bell-note { font-size: 0.9375rem; line-height: 1.45; margin-top: 0.75rem; }
+
+  .gallery-wrap { padding-top: clamp(4rem, 9vw, 7rem); }
+  .gallery-title { font-size: var(--step-3); margin-bottom: 1.5rem; }
+
+  .prevnext {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--gutter);
+    padding-top: clamp(4rem, 8vw, 6rem);
+  }
+  .pn {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--graphite);
+    text-decoration: none;
+  }
+  .pn:hover { border-top-color: var(--paper); }
+  .next { text-align: right; }
+  .pn-title { font-family: var(--font-display); font-weight: 300; font-size: var(--step-1); line-height: 1.2; }
+
+  @media (max-width: 860px) {
+    .body, .facts { grid-column: 1 / -1; }
+    .facts { margin-top: 3rem; }
+    .cover :global(img) { aspect-ratio: 4 / 3; }
+    .prevnext { grid-template-columns: 1fr; }
+    .next { text-align: left; }
+  }
+</style>

@@ -3,14 +3,14 @@
  * or YAML so that it can be edited without touching components.
  * Facts must match docs/ (the verified knowledge base).
  */
-import { defineCollection, reference } from 'astro:content';
+import { defineCollection, reference, type SchemaContext } from 'astro:content';
 import { glob, file } from 'astro/loaders';
 import { z } from 'astro/zod';
 
 const link = z.object({ label: z.string(), url: z.url() });
 
 /** A photo with its mandatory credit. */
-const photo = (image: () => z.ZodType) =>
+const photo = (image: SchemaContext['image']) =>
   z.object({
     src: image(),
     alt: z.string(),

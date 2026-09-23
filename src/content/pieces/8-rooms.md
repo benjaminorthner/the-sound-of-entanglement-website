@@ -19,10 +19,10 @@ images:
     credit: © EFA / Luiza Puiu
   - src: ../../assets/photos/figures/8rooms-r1-r8.jpg
     alt: Eight panels of white-line landscapes, one for each room, labelled R1 to R8.
-    credit: Benjamin Orthner
+    credit: © Benjamin Orthner
   - src: ../../assets/photos/figures/quantum-random-walk.jpg
     alt: Arrows from the centre of a grid showing how often each step direction occurs; the diagonals dominate.
-    credit: The Sound of Entanglement
+    credit: © The Sound of Entanglement
 audio:
   - src: /media/audio/8rooms-clicks-correlation.mp3
     title: Clicks with echoes

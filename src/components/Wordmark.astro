@@ -22,4 +22,7 @@ const { size = 'small' } = Astro.props;
   .small { font-size: 0.8125rem; }
   .large { font-size: clamp(0.9rem, 0.6rem + 1vw, 1.25rem); }
   .of { font-weight: 300; color: var(--ash); }
+  @media (max-width: 480px) {
+    .small { font-size: 0.6875rem; letter-spacing: 0.16em; }
+  }
 </style>

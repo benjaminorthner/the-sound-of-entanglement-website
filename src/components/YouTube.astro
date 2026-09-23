@@ -69,6 +69,11 @@ const { id, title, poster, posterAlt = '', duration } = Astro.props;
     cursor: pointer;
   }
   svg { width: 64px; height: 64px; }
+  .play > .ui { padding-inline: 1rem; text-align: center; }
+  @media (max-width: 480px) {
+    svg { width: 48px; height: 48px; }
+    .play > .ui { display: none; } /* the button's aria-label carries the title */
+  }
   circle { fill: none; stroke: var(--paper); stroke-width: 1; }
   path { fill: var(--paper); }
   .note { margin-top: 0.5rem; font-size: 0.8125rem; }

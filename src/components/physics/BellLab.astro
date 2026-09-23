@@ -1,0 +1,496 @@
+---
+/**
+ * Interactive Bell test. Runs the client-side simulator (src/lib/bell.ts),
+ * which has the statistics of the real experiment, and shows the four
+ * correlations and the Bell value S converging. A toggle swaps the entangled
+ * source for a classical one (local hidden variables), where S cannot exceed 2.
+ *
+ * `measured` lists values actually measured at shows, drawn on the same scale.
+ */
+interface Props {
+  measured: { label: string; value: number }[];
+}
+const { measured } = Astro.props;
+const MAX = 3;
+const pos = (v: number) => `${(Math.min(v, MAX) / MAX) * 100}%`;
+const cells = [
+  { k: 0, a: 1, b: 1, sign: '+' },
+  { k: 1, a: 1, b: 2, sign: '+' },
+  { k: 2, a: 2, b: 1, sign: '+' },
+  { k: 3, a: 2, b: 2, sign: '−' },
+];
+---
+<div class="lab" data-lab>
+  <div class="controls">
+    <fieldset class="mode">
+      <legend class="visually-hidden">Source</legend>
+      <label>
+        <input type="radio" name="bell-mode" value="quantum" checked />
+        <span>Entangled photons</span>
+      </label>
+      <label>
+        <input type="radio" name="bell-mode" value="classical" />
+        <span>Classical source with hidden instructions</span>
+      </label>
+    </fieldset>
+    <div class="buttons">
+      <button type="button" class="btn primary" data-run>Run</button>
+      <button type="button" class="btn" data-step>Measure one pair</button>
+      <button type="button" class="btn" data-fast aria-pressed="false">Faster</button>
+      <button type="button" class="btn quiet" data-reset>Start again</button>
+    </div>
+  </div>
+
+  <div class="stage" aria-hidden="true">
+    <svg viewBox="0 0 800 220" class="scheme">
+      <!-- beams -->
+      <line x1="400" y1="110" x2="150" y2="110" class="beam alice-beam" />
+      <line x1="400" y1="110" x2="650" y2="110" class="beam bob-beam" />
+      <!-- source -->
+      <circle cx="400" cy="110" r="7" class="source" />
+      <text x="400" y="150" class="lbl" text-anchor="middle">source</text>
+      <!-- Alice -->
+      <g class="station" transform="translate(150 110)">
+        <circle r="34" class="dial" />
+        <line x1="-30" y1="0" x2="30" y2="0" class="setting-line" data-alice-dial />
+        <circle cx="-86" cy="-42" r="11" class="det" data-det="alice-plus" />
+        <circle cx="-86" cy="42" r="11" class="det" data-det="alice-minus" />
+        <text x="-108" y="-38" class="lbl" text-anchor="end">+1</text>
+        <text x="-108" y="46" class="lbl" text-anchor="end">−1</text>
+        <text x="0" y="62" class="lbl name alice-t" text-anchor="middle">Alice</text>
+      </g>
+      <!-- Bob -->
+      <g class="station" transform="translate(650 110)">
+        <circle r="34" class="dial" />
+        <line x1="-30" y1="0" x2="30" y2="0" class="setting-line" data-bob-dial />
+        <circle cx="86" cy="-42" r="11" class="det" data-det="bob-plus" />
+        <circle cx="86" cy="42" r="11" class="det" data-det="bob-minus" />
+        <text x="108" y="-38" class="lbl">+1</text>
+        <text x="108" y="46" class="lbl">−1</text>
+        <text x="0" y="62" class="lbl name bob-t" text-anchor="middle">Bob</text>
+      </g>
+    </svg>
+  </div>
+
+  <p class="last" aria-live="polite" data-last>Press run, or measure pairs one at a time.</p>
+
+  <div class="results">
+    <table class="corr">
+      <caption class="visually-hidden">Correlations for the four combinations of settings</caption>
+      <thead>
+        <tr><th scope="col">Settings</th><th scope="col">Pairs</th><th scope="col">Correlation E</th></tr>
+      </thead>
+      <tbody>
+        {cells.map((c) => (
+          <tr data-cell={c.k}>
+            <th scope="row"><span class="alice">a<sub>{c.a}</sub></span>, <span class="bob">b<sub>{c.b}</sub></span></th>
+            <td class="num" data-count>0</td>
+            <td>
+              <div class="ebar"><span class="zero"></span><span class="fill" data-fill></span></div>
+              <span class="num evalue" data-e>–</span>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+
+    <div class="s-panel">
+      <p class="s-formula">S = |E<sub>11</sub> + E<sub>12</sub> + E<sub>21</sub> − E<sub>22</sub>|</p>
+      <p class="s-value num"><span data-s>–</span><span class="sigma dim" data-sigma></span></p>
+      <p class="s-note dim" data-snote>From 0 pairs.</p>
+      <div class="scale" style="--x: 0%">
+        <div class="track">
+          <span class="band" aria-hidden="true"></span>
+          <span class="mark" style={`left: ${pos(2)}`}><span class="ui">classical limit 2</span></span>
+          <span class="mark" style={`left: ${pos(2 * Math.SQRT2)}`}><span class="ui q">2√2</span></span>
+          {measured.map((m) => <span class="show-tick" style={`left: ${pos(m.value)}`} title={`${m.label}: ${m.value.toFixed(2)}`}></span>)}
+          <span class="dot" data-dot></span>
+        </div>
+        <p class="scale-legend ui dim">
+          Grey ticks: values measured at our shows. Dot and shaded band: this simulation and its uncertainty.
+        </p>
+      </div>
+      <canvas class="history" data-history aria-label="Bell value as more pairs are measured" role="img"></canvas>
+    </div>
+  </div>
+
+  <p class="disclaimer ui dim">
+    This is a simulation that uses the same statistics as our experiment, with S ≈ 2.45 for
+    entangled photons. The classical source follows the best possible hidden-variable strategy.
+  </p>
+</div>
+
+<script>
+  import { BellTest, type Event } from '../../lib/bell';
+
+  const root = document.querySelector<HTMLElement>('[data-lab]')!;
+  const q = <T extends Element>(s: string) => root.querySelector<T>(s)!;
+  const runBtn = q<HTMLButtonElement>('[data-run]');
+  const stepBtn = q<HTMLButtonElement>('[data-step]');
+  const fastBtn = q<HTMLButtonElement>('[data-fast]');
+  const resetBtn = q<HTMLButtonElement>('[data-reset]');
+  const lastEl = q<HTMLElement>('[data-last]');
+  const sEl = q<HTMLElement>('[data-s]');
+  const sigmaEl = q<HTMLElement>('[data-sigma]');
+  const sNote = q<HTMLElement>('[data-snote]');
+  const scale = q<HTMLElement>('.scale');
+  const canvas = q<HTMLCanvasElement>('[data-history]');
+  const aliceDial = q<SVGLineElement>('[data-alice-dial]');
+  const bobDial = q<SVGLineElement>('[data-bob-dial]');
+  const dets = {
+    'alice-plus': q<SVGCircleElement>('[data-det="alice-plus"]'),
+    'alice-minus': q<SVGCircleElement>('[data-det="alice-minus"]'),
+    'bob-plus': q<SVGCircleElement>('[data-det="bob-plus"]'),
+    'bob-minus': q<SVGCircleElement>('[data-det="bob-minus"]'),
+  };
+  const cellEls = Array.from(root.querySelectorAll<HTMLElement>('[data-cell]'));
+
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let test = new BellTest({ mode: 'quantum' });
+  const history: number[] = []; // S after each pair (downsampled when long)
+  const counts = [0, 0, 0, 0];
+  let running = false;
+  let fast = false;
+  let raf = 0;
+  let lastTick = 0;
+  let acc = 0;
+
+  // Polarisation angles of the settings (degrees), for the dials.
+  const ALICE = [0, 45];
+  const BOB = [22.5, -22.5];
+
+  function sub(n: number) {
+    return n === 0 ? '₁' : '₂';
+  }
+
+  function flash(el: SVGCircleElement) {
+    el.classList.remove('on');
+    // force reflow so the transition restarts
+    void el.getBoundingClientRect();
+    el.classList.add('on');
+  }
+
+  function showPair(e: Event) {
+    aliceDial.setAttribute('transform', `rotate(${-ALICE[e.a]})`);
+    bobDial.setAttribute('transform', `rotate(${-BOB[e.b]})`);
+    flash(dets[e.A === 1 ? 'alice-plus' : 'alice-minus']);
+    flash(dets[e.B === 1 ? 'bob-plus' : 'bob-minus']);
+    const same = e.A === e.B ? 'the same result' : 'opposite results';
+    lastEl.textContent =
+      `Pair ${e.n + 1}: Alice measured a${sub(e.a)} and got ${e.A > 0 ? '+1' : '−1'}, ` +
+      `Bob measured b${sub(e.b)} and got ${e.B > 0 ? '+1' : '−1'}: ${same}.`;
+  }
+
+  function sigma(): number {
+    let v = 0;
+    for (let k = 0; k < 4; k++) {
+      const a = (k >> 1) as 0 | 1, b = (k & 1) as 0 | 1;
+      const c = counts[k];
+      if (c) v += (1 - test.E(a, b) ** 2) / c;
+    }
+    return Math.sqrt(v);
+  }
+
+  function measure(n: number) {
+    let e: Event | undefined;
+    for (let i = 0; i < n; i++) {
+      e = test.next();
+      counts[e.a * 2 + e.b] += 1;
+      history.push(test.S);
+    }
+    if (history.length > 4000) {
+      // keep the curve cheap: thin out the older half
+      const keep = history.filter((_, i) => i % 2 === 0 || i > history.length - 1000);
+      history.length = 0;
+      history.push(...keep);
+    }
+    if (e) showPair(e);
+    render();
+  }
+
+  function render() {
+    cellEls.forEach((el, k) => {
+      const a = (k >> 1) as 0 | 1, b = (k & 1) as 0 | 1;
+      const E = test.E(a, b);
+      el.querySelector<HTMLElement>('[data-count]')!.textContent = counts[k].toLocaleString('en-GB');
+      el.querySelector<HTMLElement>('[data-e]')!.textContent = counts[k] ? (E >= 0 ? '+' : '−') + Math.abs(E).toFixed(2) : '–';
+      const fill = el.querySelector<HTMLElement>('[data-fill]')!;
+      fill.style.left = E >= 0 ? '50%' : `${50 + E * 50}%`;
+      fill.style.width = `${Math.abs(E) * 50}%`;
+    });
+    const n = test.count;
+    if (n === 0) {
+      sEl.textContent = '–';
+      sigmaEl.textContent = '';
+      sNote.textContent = 'From 0 pairs.';
+      scale.style.setProperty('--x', '0%');
+      scale.style.setProperty('--lo', '0%');
+      scale.style.setProperty('--hi', '0%');
+    } else {
+      const S = test.S, sg = sigma();
+      sEl.textContent = S.toFixed(2);
+      sigmaEl.textContent = isFinite(sg) && n > 8 ? ` ± ${sg.toFixed(2)}` : '';
+      const pairs = `From ${n.toLocaleString('en-GB')} pair${n === 1 ? '' : 's'}.`;
+      let verdict = '';
+      if (n < 40) verdict = ' Too few pairs to say anything yet.';
+      else if (S - 2 * sg > 2) verdict = ' Above 2, by more than the uncertainty: no classical source can do this.';
+      else if (S > 2) verdict = ' Above 2, but not yet by more than the uncertainty.';
+      else verdict = ' At or below the classical limit.';
+      sNote.textContent = pairs + verdict;
+      const pct = (v: number) => `${(Math.max(0, Math.min(v, 3)) / 3) * 100}%`;
+      scale.style.setProperty('--x', pct(S));
+      const lo = isFinite(sg) ? S - sg : S, hi = isFinite(sg) ? S + sg : S;
+      scale.style.setProperty('--lo', pct(lo));
+      scale.style.setProperty('--hi', pct(hi));
+    }
+    drawHistory();
+  }
+
+  function drawHistory() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    if (!w || !h) return;
+    if (canvas.width !== w * dpr) { canvas.width = w * dpr; canvas.height = h * dpr; }
+    const ctx = canvas.getContext('2d')!;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    const y = (s: number) => h - 6 - (Math.min(s, 4) / 4) * (h - 12);
+    // reference lines
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = '#2a2825';
+    ctx.beginPath(); ctx.moveTo(0, y(0) + 0.5); ctx.lineTo(w, y(0) + 0.5); ctx.stroke();
+    ctx.setLineDash([3, 4]);
+    ctx.strokeStyle = '#99938a';
+    ctx.beginPath(); ctx.moveTo(0, Math.round(y(2)) + 0.5); ctx.lineTo(w, Math.round(y(2)) + 0.5); ctx.stroke();
+    ctx.strokeStyle = '#5d5952';
+    ctx.beginPath(); ctx.moveTo(0, Math.round(y(2 * Math.SQRT2)) + 0.5); ctx.lineTo(w, Math.round(y(2 * Math.SQRT2)) + 0.5); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#99938a';
+    ctx.font = '12px "Josefin Sans", sans-serif';
+    ctx.fillText('2', 4, y(2) - 5);
+    ctx.fillText('2√2', 4, y(2 * Math.SQRT2) - 5);
+    if (history.length < 2) return;
+    // log-scaled x so the noisy start and the slow convergence both show
+    const N = history.length;
+    const lx = (i: number) => 24 + (Math.log(i + 1) / Math.log(Math.max(N, 10))) * (w - 28);
+    ctx.strokeStyle = '#ebe7df';
+    ctx.lineWidth = 1.25;
+    ctx.beginPath();
+    history.forEach((s, i) => (i ? ctx.lineTo(lx(i), y(s)) : ctx.moveTo(lx(i), y(s))));
+    ctx.stroke();
+  }
+
+  function loop(t: number) {
+    if (!running) return;
+    const dt = lastTick ? t - lastTick : 16;
+    lastTick = t;
+    const rate = fast ? 400 : 6; // pairs per second
+    acc += (dt / 1000) * rate;
+    const n = Math.floor(acc);
+    if (n > 0) {
+      acc -= n;
+      measure(Math.min(n, 200));
+    }
+    raf = requestAnimationFrame(loop);
+  }
+
+  function setRunning(on: boolean) {
+    running = on;
+    runBtn.textContent = on ? 'Pause' : 'Run';
+    runBtn.setAttribute('aria-pressed', String(on));
+    if (on) { lastTick = 0; acc = 0; raf = requestAnimationFrame(loop); }
+    else cancelAnimationFrame(raf);
+  }
+
+  function reset() {
+    const mode = root.querySelector<HTMLInputElement>('input[name="bell-mode"]:checked')!.value as 'quantum' | 'classical';
+    test = new BellTest({ mode });
+    history.length = 0;
+    counts.fill(0);
+    lastEl.textContent = mode === 'quantum'
+      ? 'Entangled photons. Press run, or measure pairs one at a time.'
+      : 'Classical source: each pair carries hidden instructions for every setting. Press run.';
+    render();
+  }
+
+  runBtn.addEventListener('click', () => setRunning(!running));
+  stepBtn.addEventListener('click', () => { setRunning(false); measure(1); });
+  fastBtn.addEventListener('click', () => {
+    fast = !fast;
+    fastBtn.setAttribute('aria-pressed', String(fast));
+    fastBtn.textContent = fast ? 'Slower' : 'Faster';
+  });
+  resetBtn.addEventListener('click', () => { setRunning(false); reset(); });
+  root.querySelectorAll<HTMLInputElement>('input[name="bell-mode"]').forEach((r) =>
+    r.addEventListener('change', () => { const was = running; setRunning(false); reset(); if (was) setRunning(true); }),
+  );
+  new ResizeObserver(drawHistory).observe(canvas);
+  reset();
+
+  // Start running once the lab scrolls into view (not with reduced motion).
+  if (!reduce) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting) && test.count === 0) {
+        setRunning(true);
+        io.disconnect();
+      }
+    }, { threshold: 0.4 });
+    io.observe(root);
+  }
+</script>
+
+<style>
+  .lab {
+    border-top: 1px solid var(--graphite);
+    border-bottom: 1px solid var(--graphite);
+    padding-block: 2rem 1.5rem;
+  }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem 2rem;
+  }
+  .mode {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    font-family: var(--font-display);
+    font-size: 0.9375rem;
+  }
+  .mode label { cursor: pointer; }
+  .mode input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .mode span {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--graphite);
+    border-radius: 999px;
+    color: var(--ash);
+  }
+  .mode input:checked + span {
+    border-color: var(--paper);
+    color: var(--paper);
+  }
+  .mode input:focus-visible + span { outline: 2px solid var(--paper); outline-offset: 3px; }
+  .buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .btn {
+    font-family: var(--font-display);
+    font-size: 0.9375rem;
+    background: none;
+    color: var(--paper);
+    border: 1px solid var(--graphite);
+    border-radius: 999px;
+    padding: 0.5rem 1.1rem;
+    cursor: pointer;
+  }
+  .btn:hover { border-color: var(--ash); }
+  .btn.primary { background: var(--paper); color: var(--black); border-color: var(--paper); min-width: 5.5rem; }
+  .btn.quiet { border-color: transparent; color: var(--ash); }
+
+  .stage { margin-top: 1.5rem; }
+  .scheme { width: 100%; max-width: 820px; margin-inline: auto; overflow: visible; }
+  .beam { stroke-width: 1.5; opacity: 0.8; }
+  .alice-beam { stroke: var(--alice); }
+  .bob-beam { stroke: var(--bob); }
+  .source { fill: var(--pump); filter: drop-shadow(0 0 6px var(--pump)); }
+  .dial { fill: var(--black); stroke: var(--graphite); }
+  .setting-line { stroke: var(--paper); stroke-width: 2; transition: transform 0.25s ease; }
+  .det { fill: var(--black); stroke: var(--smoke); transition: fill 0.6s ease; }
+  [data-det^='alice'].on { fill: var(--alice); }
+  [data-det^='bob'].on { fill: var(--bob); }
+  .det.on { animation: fade 0.9s ease-out forwards; }
+  @keyframes fade { from { fill-opacity: 1; } to { fill-opacity: 0.15; } }
+  .lbl { fill: var(--ash); font-family: var(--font-display); font-size: 14px; }
+  .name { font-size: 16px; }
+  .alice-t { fill: var(--alice); }
+  .bob-t { fill: var(--bob); }
+
+  .last {
+    min-height: 3.2em;
+    margin: 0.5rem auto 1.5rem;
+    text-align: center;
+    font-size: 1rem;
+    color: var(--ash);
+    max-width: 52ch;
+  }
+
+  .results {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 2rem var(--gutter);
+    align-items: start;
+  }
+  .corr { width: 100%; border-collapse: collapse; font-size: 1rem; }
+  .corr th, .corr td { text-align: left; padding: 0.7rem 0.5rem 0.7rem 0; border-bottom: 1px solid var(--graphite); font-weight: 400; }
+  .corr thead th { font-family: var(--font-display); font-size: 0.8125rem; color: var(--ash); }
+  .corr td:nth-child(2) { width: 5rem; color: var(--ash); }
+  .corr td:last-child { display: flex; align-items: center; gap: 0.75rem; }
+  .ebar { position: relative; flex: 1; height: 10px; min-width: 60px; }
+  .ebar::before { content: ''; position: absolute; left: 0; right: 0; top: 4.5px; height: 1px; background: var(--graphite); }
+  .zero { position: absolute; left: 50%; top: 0; width: 1px; height: 10px; background: var(--smoke); }
+  .fill { position: absolute; top: 3px; height: 4px; background: var(--paper); left: 50%; width: 0; }
+  .evalue { width: 3.2rem; text-align: right; }
+  sub { font-size: 0.7em; }
+
+  .s-formula { font-size: 1rem; color: var(--ash); margin: 0; }
+  .s-value {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: var(--step-4);
+    line-height: 1;
+    margin: 0.75rem 0 0.25rem;
+  }
+  .sigma { font-size: 0.45em; }
+  .s-note { font-size: 0.9375rem; margin: 0; min-height: 3em; }
+  .scale { --x: 0%; --lo: 0%; --hi: 0%; margin-top: 1.25rem; }
+  .track { position: relative; height: 1px; background: var(--graphite); margin-top: 2rem; }
+  .mark { position: absolute; top: -6px; width: 1px; height: 13px; background: var(--ash); }
+  .mark span { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); white-space: nowrap; color: var(--ash); font-size: 0.75rem; }
+  .mark .q { transform: translateX(-40%); }
+  .band {
+    position: absolute;
+    top: -2px;
+    height: 5px;
+    left: var(--lo);
+    width: calc(var(--hi) - var(--lo));
+    background: rgb(235 231 223 / 0.15);
+  }
+  .show-tick { position: absolute; top: -3px; width: 1px; height: 7px; background: var(--smoke); }
+  .dot {
+    position: absolute;
+    left: var(--x);
+    top: -4px;
+    width: 9px;
+    height: 9px;
+    margin-left: -4.5px;
+    border-radius: 50%;
+    background: var(--paper);
+    box-shadow: 0 0 10px rgb(235 231 223 / 0.5);
+    transition: left 0.2s ease;
+  }
+  .scale-legend { margin: 0.75rem 0 0; font-size: 0.75rem; }
+  .history { width: 100%; height: 140px; margin-top: 1.25rem; }
+  .disclaimer { margin: 1.5rem 0 0; font-size: 0.8125rem; max-width: none; }
+
+  @media (max-width: 600px) {
+    .lbl { font-size: 26px; }
+    .name { font-size: 30px; }
+    .setting-line { stroke-width: 3; }
+  }
+  @media (max-width: 860px) {
+    .results { grid-template-columns: 1fr; }
+    .controls { flex-direction: column; align-items: stretch; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .setting-line, .dot { transition: none; }
+    .det.on { animation: none; fill-opacity: 0.7; }
+  }
+</style>

@@ -1,0 +1,71 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+
+const all = await getCollection('people', (p) => p.data.group !== 'organists' && !!p.data.portrait);
+const groupOrder = { team: 0, musicians: 1, organists: 2 } as const;
+const people = all.sort(
+  (a, b) => groupOrder[a.data.group] - groupOrder[b.data.group] || a.data.order - b.data.order,
+);
+---
+<section class="people section" aria-labelledby="people-title">
+  <div class="wrap">
+    <div class="head">
+      <h2 id="people-title">The people</h2>
+      <p class="dim">
+        A composer, a visual artist, quantum physicists and computer scientists from TU Wien, JKU Linz and the
+        University of Innsbruck, and a band.
+      </p>
+    </div>
+    <ul>
+      {people.map((p) => (
+        <li>
+          <a href={`/people/#${p.id}`}>
+            {p.data.portrait && (
+              <Image src={p.data.portrait.src} alt="" widths={[240, 400]} sizes="(min-width: 900px) 12vw, 30vw" format="webp" />
+            )}
+            <span class="name">{p.data.name}</span>
+            <span class="role ui dim">{p.data.role}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+    <p class="credits ui">
+      Portraits: {people.map((p) => {
+        const c = p.data.portrait!.credit.replace(/^©\s*/, '');
+        return `${p.data.name}, ${c === p.data.name ? 'own photo' : `© ${c}`}`;
+      }).join('; ')}.
+    </p>
+    <p class="all ui"><a href="/people/">Everyone involved</a></p>
+  </div>
+</section>
+
+<style>
+  .head { max-width: 40rem; margin-bottom: 3rem; }
+  h2 { font-size: var(--step-3); margin-bottom: 1rem; }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+    gap: 1.25rem calc(var(--gutter) * 0.6);
+  }
+  a { display: block; text-decoration: none; }
+  li :global(img) {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    filter: grayscale(1) brightness(0.85);
+    transition: filter 0.2s;
+    background: var(--soot);
+  }
+  a:hover :global(img), a:focus-visible :global(img) { filter: grayscale(0) brightness(1); }
+  .name { display: block; margin-top: 0.6rem; font-size: 0.9375rem; line-height: 1.3; }
+  .role { display: block; font-size: 0.75rem; line-height: 1.35; margin-top: 0.2rem; }
+  .credits { margin-top: 2rem; color: var(--smoke); font-size: 0.75rem; max-width: none; }
+  .all { margin-top: 1.5rem; }
+  @media (max-width: 1100px) { ul { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+  @media (max-width: 600px) { ul { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+</style>

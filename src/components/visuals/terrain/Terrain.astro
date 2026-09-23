@@ -1,0 +1,489 @@
+---
+/**
+ * 8 Rooms: white-line terrain built from the clicks, and the room map walked
+ * by the quantum random walk. Both are driven by the pairs measured at the
+ * Vienna Ball of Sciences, 25 January 2025 (metronome-locked, ~528 ms).
+ * Data: src/data/8rooms_wissenschaftsball_2025-01-25.json (see docs/data.md).
+ *
+ * Walk rule (paper, supplementary material):
+ *   x += A·δ(a,a1) + B·δ(b,b1),   y += A·δ(a,a2) + B·δ(b,b2)
+ */
+const rooms = Array.from({ length: 9 }, (_, i) => i + 1);
+---
+<section class="terrain-visual" data-terrain aria-label="Live replay of the 8 Rooms clicks and random walk, measured at the Vienna Ball of Sciences">
+  <canvas class="land" aria-hidden="true"></canvas>
+  <div class="overlay wrap">
+    <div class="caption">
+      <p class="ui source">
+        Measured on the night of the premiere, Vienna City Hall, 25 January 2025. Each pair sends a click with its echo pattern into Alice's half (left) and Bob's half (right); the clicks pile up into the landscape.
+      </p>
+      <p class="ui now num" data-now>&nbsp;</p>
+      <p class="ui bell num" data-bell>&nbsp;</p>
+      <button class="ui pause" type="button" aria-pressed="false" data-pause>Pause</button>
+    </div>
+    <figure class="map">
+      <div class="grid-map" aria-hidden="true">
+        <canvas></canvas>
+        {rooms.map((r) => <span class="room ui" data-room={r - 1}>{r === 9 ? '9, exit' : r}</span>)}
+      </div>
+      <figcaption class="ui" data-status aria-live="polite">The walk starts in the middle of room 1.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<script>
+  import ball from '../../../data/8rooms_wissenschaftsball_2025-01-25.json';
+  import { decodeExcerpt, RunningS, type Excerpt, type ReplayEvent } from '../../../lib/replay';
+  import { clockAt, whileVisible, REDUCED } from '../../pieces/liveBell';
+
+  // ---- the walk ----
+  const HALF = 5; // room interior is −5..5 in both axes
+  const FINALE_AFTER = 14; // doors passed before all doors lead to room 9
+  const EXIT = 8;
+  interface Walk { room: number; x: number; y: number; doors: number; finale: boolean }
+  interface Wall { room: number; horizontal: boolean; dir: number; along: number }
+  const newWalk = (): Walk => ({ room: 0, x: 0, y: 0, doors: 0, finale: false });
+
+  function walkStep(s: Walk, e: ReplayEvent) {
+    // settings are 0-based here: 0 = setting 1 (x axis), 1 = setting 2 (y axis)
+    const dx = (e.a === 0 ? e.A : 0) + (e.b === 0 ? e.B : 0);
+    const dy = (e.a === 1 ? e.A : 0) + (e.b === 1 ? e.B : 0);
+    const nx = s.x + dx, ny = s.y + dy;
+    const ox = Math.abs(nx) - HALF, oy = Math.abs(ny) - HALF;
+    const res: { door: (Wall & { to: number }) | null; locked: Wall | null } = { door: null, locked: null };
+    if (ox <= 0 && oy <= 0) { s.x = nx; s.y = ny; return res; }
+    const horizontal = ox >= oy;
+    const dir = horizontal ? Math.sign(nx) : Math.sign(ny);
+    const col = s.room % 3, row = Math.floor(s.room / 3);
+    let target = horizontal ? row * 3 + ((col + dir + 3) % 3) : ((row - dir + 3) % 3) * 3 + col;
+    const clampH = (v: number) => Math.max(-HALF, Math.min(HALF, v));
+    const wall: Wall = { room: s.room, horizontal, dir, along: horizontal ? clampH(ny) : clampH(nx) };
+    if (s.finale) target = EXIT;
+    if (target === EXIT && !s.finale) {
+      s.x = clampH(nx); s.y = clampH(ny);
+      res.locked = wall;
+      return res;
+    }
+    res.door = { ...wall, to: target };
+    s.room = target; s.x = 0; s.y = 0; s.doors++;
+    if (s.doors >= FINALE_AFTER) s.finale = true;
+    return res;
+  }
+
+  // Echo patterns: setting picks the frequency band, outcome the rhythm of the echoes.
+  const ECHOES: Record<number, { taps: number[]; gain: number[] }> = {
+    1: { taps: [0, 132, 264, 396], gain: [1, 0.62, 0.38, 0.22] },
+    [-1]: { taps: [0, 198, 396], gain: [1, 0.5, 0.25] },
+  };
+  const BANDS = { alice: [0.26, 0.6], bob: [0.34, 0.68] };
+
+  // Nine camera settings, one per room: each room is seen from its own angle.
+  const CAMS = [
+    { depth: 4.0, spread: 0.40, skew: 0.00, amp: 0.40, lift: 0.00 },
+    { depth: 6.5, spread: 0.52, skew: 0.18, amp: 0.32, lift: 0.10 },
+    { depth: 2.6, spread: 0.34, skew: -0.22, amp: 0.46, lift: 0.00 },
+    { depth: 5.0, spread: 0.58, skew: -0.08, amp: 0.50, lift: 0.06 },
+    { depth: 3.2, spread: 0.46, skew: 0.30, amp: 0.38, lift: 0.02 },
+    { depth: 7.5, spread: 0.60, skew: 0.00, amp: 0.30, lift: 0.14 },
+    { depth: 3.8, spread: 0.36, skew: 0.10, amp: 0.52, lift: 0.00 },
+    { depth: 5.8, spread: 0.50, skew: -0.30, amp: 0.36, lift: 0.08 },
+    { depth: 9.0, spread: 0.44, skew: 0.00, amp: 0.16, lift: 0.20 },
+  ];
+  type Cam = (typeof CAMS)[number];
+
+  document.querySelectorAll<HTMLElement>('[data-terrain]').forEach((root) => {
+    const data = ball as Excerpt;
+    const events = decodeExcerpt(data);
+    const land = root.querySelector<HTMLCanvasElement>('canvas.land')!;
+    const ctx = land.getContext('2d')!;
+    const mapWrap = root.querySelector<HTMLElement>('.grid-map')!;
+    const mapCanvas = mapWrap.querySelector('canvas')!;
+    const mctx = mapCanvas.getContext('2d')!;
+    const roomEls = Array.from(root.querySelectorAll<HTMLElement>('[data-room]'));
+    const $now = root.querySelector<HTMLElement>('[data-now]')!;
+    const $bell = root.querySelector<HTMLElement>('[data-bell]')!;
+    const $status = root.querySelector<HTMLElement>('[data-status]')!;
+    const $pause = root.querySelector<HTMLButtonElement>('[data-pause]')!;
+    const caption = root.querySelector<HTMLElement>('.overlay')!;
+
+    // ---- terrain state ----
+    const N = 112, ROWS = 58, ROW_EVERY = 0.075, DECAY = 7.5;
+    const T = {
+      alice: new Float32Array(N), bob: new Float32Array(N),
+      histA: new Float32Array(N), histB: new Float32Array(N),
+      rows: [] as [Float32Array, Float32Array][], acc: 0,
+      taps: [] as { side: 'alice' | 'bob'; at: number; center: number; gain: number }[],
+      events: 0, time: 0,
+    };
+    const cam: Cam = { ...CAMS[0] };
+    let camTarget: Cam = CAMS[0];
+    const WINDOW = new Float32Array(N);
+    for (let j = 0; j < N; j++) WINDOW[j] = Math.pow(Math.sin((Math.PI * j) / (N - 1)), 0.7);
+
+    const smoothNoise = (i: number, t: number, seed: number) =>
+      0.5 + 0.5 * (Math.sin(i * 0.37 + seed) * 0.5 + Math.sin(i * 0.113 + t * 0.7 + seed * 2.1) * 0.35 + Math.sin(i * 0.9 + t * 1.9) * 0.15);
+
+    function scheduleClick(side: 'alice' | 'bob', setting: number, outcome: number) {
+      const pat = ECHOES[outcome];
+      const center = BANDS[side][setting] + (Math.random() - 0.5) * 0.02;
+      pat.taps.forEach((ms, k) => T.taps.push({ side, at: T.time + ms / 1000, center, gain: pat.gain[k] * (0.85 + Math.random() * 0.3) }));
+    }
+    function fireTap(tap: (typeof T.taps)[number]) {
+      const arr = tap.side === 'alice' ? T.alice : T.bob;
+      const hist = tap.side === 'alice' ? T.histA : T.histB;
+      for (const [mult, g] of [[1, 1], [1.45, 0.55], [2.05, 0.3]]) {
+        const c = tap.center * mult * N;
+        if (c >= N - 2) continue;
+        const w = 0.9 + 0.7 * mult;
+        const lo = Math.max(0, Math.floor(c - 4 * w)), hi = Math.min(N - 1, Math.ceil(c + 4 * w));
+        for (let j = lo; j <= hi; j++) {
+          const v = tap.gain * g * Math.exp(-((j - c) ** 2) / (2 * w * w));
+          arr[j] += v;
+          hist[j] += v * 0.08;
+        }
+      }
+    }
+    function pushRow() {
+      const growth = Math.min(1, T.events / 260);
+      let maxA = 1e-6, maxB = 1e-6;
+      for (let j = 0; j < N; j++) { maxA = Math.max(maxA, T.histA[j]); maxB = Math.max(maxB, T.histB[j]); }
+      const a = new Float32Array(N), b = new Float32Array(N);
+      for (let j = 0; j < N; j++) {
+        const n = 0.025 * smoothNoise(j, T.time, 1.3);
+        const ra = 1 + (Math.random() - 0.5) * 0.7, rb = 1 + (Math.random() - 0.5) * 0.7;
+        a[j] = n + (T.alice[j] * 0.8 + growth * 0.5 * (T.histA[j] / maxA)) * ra;
+        b[j] = n + (T.bob[j] * 0.8 + growth * 0.5 * (T.histB[j] / maxB)) * rb;
+      }
+      T.rows.push([a, b]);
+      if (T.rows.length > ROWS) T.rows.shift();
+    }
+    function stepTerrain(dt: number) {
+      T.time += dt;
+      for (let k = T.taps.length - 1; k >= 0; k--) if (T.taps[k].at <= T.time) { fireTap(T.taps[k]); T.taps.splice(k, 1); }
+      const f = Math.exp(-dt * DECAY);
+      for (let j = 0; j < N; j++) { T.alice[j] *= f; T.bob[j] *= f; }
+      T.acc += dt;
+      while (T.acc >= ROW_EVERY) { T.acc -= ROW_EVERY; pushRow(); }
+      for (const k of Object.keys(cam) as (keyof Cam)[]) cam[k] += (camTarget[k] - cam[k]) * Math.min(1, dt * 0.9);
+    }
+
+    let W = 0, H = 0, DPR = 1, horizon = 0;
+    function resize() {
+      DPR = Math.min(window.devicePixelRatio || 1, 2);
+      const r = root.getBoundingClientRect();
+      W = Math.round(r.width * DPR); H = Math.round(r.height * DPR);
+      land.width = W; land.height = H;
+      // the landscape's horizon sits just below the caption and the room map
+      const overlayBottom = caption.getBoundingClientRect().bottom - r.top;
+      horizon = Math.min(H * 0.62, (overlayBottom + 28) * DPR);
+      const g = mapWrap.getBoundingClientRect();
+      mapCanvas.width = Math.round(g.width * DPR); mapCanvas.height = Math.round(g.height * DPR);
+      if (REDUCED || paused) { drawTerrain(); drawMap(performance.now()); }
+    }
+
+    function drawHalf(vals: Float32Array, x0: number, x1: number, yBase: number, amp: number, alpha: number, tint: 'alice' | 'bob' | null) {
+      const line = new Path2D();
+      for (let j = 0; j < N; j++) {
+        const x = x0 + (x1 - x0) * (j / (N - 1));
+        const y = yBase - vals[j] * WINDOW[j] * amp;
+        if (j === 0) line.moveTo(x, y); else line.lineTo(x, y);
+      }
+      // occlusion: fill black beneath the ridge so nearer ridges hide farther ones
+      const fill = new Path2D(line);
+      fill.lineTo(x1, H); fill.lineTo(x0, H); fill.closePath();
+      ctx.fillStyle = '#000';
+      ctx.fill(fill);
+      ctx.strokeStyle = `rgba(235,231,223,${alpha.toFixed(3)})`;
+      ctx.stroke(line);
+      if (tint) {
+        ctx.strokeStyle = tint === 'alice' ? 'rgba(255,125,125,0.3)' : 'rgba(143,143,255,0.34)';
+        ctx.stroke(line);
+      }
+    }
+    function drawTerrain() {
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, W, H);
+      const ground = H - 6 * DPR;
+      const hz = horizon + cam.lift * (ground - horizon) * 0.5;
+      const pMin = 1 / (1 + cam.depth);
+      const frac = T.acc / ROW_EVERY;
+      ctx.lineWidth = Math.max(1, DPR * 0.8);
+      ctx.lineJoin = 'round';
+      const gap = W * 0.018;
+      const rows = T.rows;
+      for (let i = 0; i < rows.length; i++) {
+        const z = (rows.length - 1 - i + frac) / ROWS;
+        if (z > 1) continue;
+        const p = 1 / (1 + z * cam.depth);
+        const t01 = (p - pMin) / (1 - pMin);
+        const yBase = hz + (ground - hz) * t01;
+        const halfW = W * Math.min(0.49, cam.spread * (W < H ? 1.35 : 1)) * (0.35 + 0.65 * t01);
+        const cx = W * 0.5 + cam.skew * W * (1 - t01) * 0.5;
+        const amp = cam.amp * (H - hz) * (0.25 + 0.75 * t01);
+        const alpha = Math.pow(1 - z, 1.3) * 0.95;
+        const newest = i === rows.length - 1;
+        drawHalf(rows[i][0], cx - halfW, cx - gap * t01, yBase, amp, alpha, newest ? 'alice' : null);
+        drawHalf(rows[i][1], cx + gap * t01, cx + halfW, yBase, amp, alpha, newest ? 'bob' : null);
+      }
+    }
+
+    // ---- room map ----
+    const walk = newWalk();
+    const trail: [number, number][] = [[0, 0]];
+    const flashes: { wall: Wall; t: number; locked?: boolean }[] = [];
+    let lastStep: ReplayEvent | null = null;
+    let hold = 0;
+
+    const cellPoint = (room: number, x: number, y: number): [number, number] => {
+      const cs = mapCanvas.width / 3;
+      const col = room % 3, row = Math.floor(room / 3);
+      return [col * cs + ((x + HALF + 1) / (2 * HALF + 2)) * cs, row * cs + ((HALF + 1 - y) / (2 * HALF + 2)) * cs];
+    };
+    function wallSegment(w: Wall): [number, number, number, number] {
+      const cs = mapCanvas.width / 3;
+      const col = w.room % 3, row = Math.floor(w.room / 3);
+      const t = (w.along + HALF + 1) / (2 * HALF + 2);
+      const len = cs * 0.22;
+      if (w.horizontal) {
+        const x = (col + (w.dir > 0 ? 1 : 0)) * cs, y = row * cs + (1 - t) * cs;
+        return [x, y - len / 2, x, y + len / 2];
+      }
+      const y = (row + (w.dir > 0 ? 0 : 1)) * cs, x = col * cs + t * cs;
+      return [x - len / 2, y, x + len / 2, y];
+    }
+    function drawMap(now: number) {
+      const w = mapCanvas.width, h = mapCanvas.height, cs = w / 3;
+      mctx.clearRect(0, 0, w, h);
+      mctx.lineWidth = Math.max(1, DPR * 0.8);
+      mctx.strokeStyle = '#3a3835';
+      mctx.beginPath();
+      for (let k = 0; k <= 3; k++) {
+        const p = Math.round(k * cs) + (k === 3 ? -0.5 : 0.5);
+        mctx.moveTo(p, 0); mctx.lineTo(p, h);
+        mctx.moveTo(0, p); mctx.lineTo(w, p);
+      }
+      mctx.stroke();
+      if (!walk.finale) {
+        mctx.strokeStyle = '#2a2825';
+        mctx.strokeRect(2 * cs + 4 * DPR, 2 * cs + 4 * DPR, cs - 8 * DPR, cs - 8 * DPR);
+      }
+      const col = walk.room % 3, row = Math.floor(walk.room / 3);
+      mctx.strokeStyle = 'rgba(235,231,223,0.6)';
+      mctx.strokeRect(col * cs + 0.5, row * cs + 0.5, cs - 1, cs - 1);
+      for (let k = flashes.length - 1; k >= 0; k--) {
+        const fl = flashes[k];
+        const life = (now - fl.t) / 1400;
+        if (life >= 1 || life < 0) { flashes.splice(k, 1); continue; }
+        const [x0, y0, x1, y1] = wallSegment(fl.wall);
+        mctx.strokeStyle = fl.locked ? `rgba(153,147,138,${1 - life})` : `rgba(235,231,223,${1 - life})`;
+        mctx.lineWidth = Math.max(2, DPR * 2);
+        mctx.beginPath(); mctx.moveTo(x0, y0); mctx.lineTo(x1, y1); mctx.stroke();
+        mctx.lineWidth = Math.max(1, DPR * 0.8);
+      }
+      if (trail.length > 1) {
+        mctx.beginPath();
+        trail.forEach(([x, y], k) => {
+          const [px, py] = cellPoint(walk.room, x, y);
+          if (k === 0) mctx.moveTo(px, py); else mctx.lineTo(px, py);
+        });
+        mctx.strokeStyle = 'rgba(235,231,223,0.3)';
+        mctx.stroke();
+      }
+      if (lastStep && trail.length > 1) {
+        // the last step, split into Alice's and Bob's contributions
+        const [x, y] = trail[trail.length - 2];
+        const [px, py] = cellPoint(walk.room, x, y);
+        const unit = cs / (2 * HALF + 2);
+        const ax = lastStep.a === 0 ? lastStep.A : 0, ay = lastStep.a === 1 ? lastStep.A : 0;
+        const bx = lastStep.b === 0 ? lastStep.B : 0, by = lastStep.b === 1 ? lastStep.B : 0;
+        mctx.strokeStyle = 'rgba(255,125,125,0.8)';
+        mctx.beginPath(); mctx.moveTo(px, py); mctx.lineTo(px + ax * unit, py - ay * unit); mctx.stroke();
+        mctx.strokeStyle = 'rgba(143,143,255,0.9)';
+        mctx.beginPath(); mctx.moveTo(px + ax * unit, py - ay * unit); mctx.lineTo(px + (ax + bx) * unit, py - (ay + by) * unit); mctx.stroke();
+      }
+      const [wx, wy] = cellPoint(walk.room, walk.x, walk.y);
+      mctx.fillStyle = '#ebe7df';
+      mctx.beginPath(); mctx.arc(wx, wy, 2.6 * DPR, 0, Math.PI * 2); mctx.fill();
+    }
+    function setHere(room: number) {
+      roomEls.forEach((el, k) => el.classList.toggle('here', k === room));
+      camTarget = CAMS[room];
+    }
+    function updateStatus() {
+      const r = walk.room;
+      let s = r === EXIT ? 'Room 9, the exit: the piece would end here. The walk starts again in room 1.' : `In room ${r + 1}.`;
+      if (r !== EXIT) s += walk.finale ? ' Every door now leads to room 9.' : ` ${walk.doors} ${walk.doors === 1 ? 'door' : 'doors'} passed; after ${FINALE_AFTER}, every door leads to room 9.`;
+      $status.textContent = s;
+    }
+    function restartWalk() {
+      Object.assign(walk, newWalk());
+      trail.length = 0; trail.push([0, 0]);
+      setHere(0);
+      updateStatus();
+    }
+
+    // ---- replay ----
+    let stats = new RunningS();
+    let cursor = 0, untilNext = 900, paused = false, elapsedMs = 0;
+    const sign = (v: number) => (v > 0 ? '+1' : '−1');
+
+    function applyEvent(e: ReplayEvent, now: number) {
+      T.events++;
+      stats.add(e);
+      scheduleClick('alice', e.a, e.A);
+      scheduleClick('bob', e.b, e.B);
+      if (hold <= 0) {
+        const prev = walk.room;
+        const res = walkStep(walk, e);
+        lastStep = e;
+        if (res.door) {
+          flashes.push({ wall: res.door, t: now });
+          trail.length = 0;
+          setHere(walk.room);
+          if (walk.room === EXIT) hold = 6;
+        } else if (res.locked) flashes.push({ wall: res.locked, t: now, locked: true });
+        trail.push(walk.room === prev ? [walk.x, walk.y] : [0, 0]);
+        if (trail.length > 36) trail.shift();
+        updateStatus();
+      }
+      $now.innerHTML = `${clockAt(data.start, elapsedMs)}, pair ${e.n + 1} of ${events.length}. ` +
+        `<span class="alice">Alice: setting ${e.a + 1}, ${sign(e.A)}.</span> <span class="bob">Bob: setting ${e.b + 1}, ${sign(e.B)}.</span>`;
+      $bell.textContent = stats.n < 60
+        ? 'Bell value so far: not enough pairs yet. Classical limit: 2.'
+        : `Bell value so far: ${stats.S.toFixed(2)} ± ${stats.sigma.toFixed(2)}. Classical limit: 2.`;
+    }
+
+    let last = 0;
+    function frame(ts: number) {
+      const dt = last ? Math.min(0.1, (ts - last) / 1000) : 0;
+      last = ts;
+      if (!paused) {
+        untilNext -= dt * 1000;
+        while (untilNext <= 0) {
+          applyEvent(events[cursor], ts);
+          cursor++;
+          if (cursor >= events.length) {
+            cursor = 0; elapsedMs = 0; stats = new RunningS(); T.events = 0; T.histA.fill(0); T.histB.fill(0);
+          } else elapsedMs += events[cursor].dt;
+          untilNext += events[cursor].dt || 528;
+        }
+        if (hold > 0) { hold -= dt; if (hold <= 0) restartWalk(); }
+        stepTerrain(dt);
+      }
+      drawTerrain();
+      drawMap(ts);
+    }
+
+    function fastForward(count: number) {
+      const n = Math.min(count, events.length - 1);
+      for (let k = 0; k < n; k++) {
+        if (k > 0) elapsedMs += events[k].dt;
+        applyEvent(events[k], -1e9);
+        for (let s = 0; s < 7; s++) stepTerrain((events[k + 1].dt || 528) / 7000);
+      }
+      cursor = n;
+      elapsedMs += events[cursor].dt;
+      untilNext = events[cursor].dt || 528;
+    }
+
+    $pause.addEventListener('click', () => {
+      paused = !paused;
+      $pause.textContent = paused ? 'Resume' : 'Pause';
+      $pause.setAttribute('aria-pressed', String(paused));
+    });
+
+    new ResizeObserver(resize).observe(root);
+    setHere(0);
+    updateStatus();
+    for (let k = 0; k < 8; k++) pushRow();
+    resize();
+
+    if (REDUCED) {
+      $pause.hidden = true;
+      fastForward(180);
+      drawTerrain();
+      drawMap(0);
+    } else {
+      // start with a little history so the landscape is never empty
+      fastForward(24);
+      whileVisible(root, frame);
+      document.addEventListener('visibilitychange', () => { last = 0; });
+    }
+  });
+</script>
+
+<style>
+  .terrain-visual {
+    position: relative;
+    height: clamp(600px, 92svh, 960px);
+    overflow: hidden;
+    background: var(--black);
+  }
+  .land {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .overlay {
+    position: absolute;
+    top: calc(var(--header-h) + 1.5rem);
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: var(--gutter);
+    pointer-events: none;
+  }
+  .overlay > * { pointer-events: auto; }
+  .caption { max-width: 46ch; }
+  .caption p {
+    margin: 0 0 0.35rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--ash);
+  }
+  .caption .source { color: var(--paper); }
+  .pause {
+    margin-top: 0.4rem;
+    background: none;
+    border: 0;
+    padding: 0.25rem 0;
+    color: var(--paper);
+    text-decoration: underline;
+    text-decoration-color: var(--smoke);
+    text-underline-offset: 0.25em;
+    cursor: pointer;
+  }
+  .map { margin: 0; width: clamp(150px, 18vw, 240px); }
+  .grid-map {
+    position: relative;
+    aspect-ratio: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    background: rgb(0 0 0 / 0.55);
+  }
+  .grid-map canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .room {
+    position: relative;
+    padding: 0.35rem 0.45rem;
+    font-size: 0.6875rem;
+    color: var(--smoke);
+  }
+  .room.here { color: var(--paper); }
+  .map figcaption {
+    margin-top: 0.6rem;
+    font-size: 0.75rem;
+    line-height: 1.45;
+    color: var(--ash);
+  }
+  @media (max-width: 700px) {
+    .overlay { flex-direction: column; gap: 1rem; }
+    .map { width: 120px; }
+    /* the status is still announced to screen readers */
+    .map figcaption {
+      position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+    }
+  }
+</style>

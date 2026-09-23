@@ -1,0 +1,47 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import Portrait from './Portrait.astro';
+
+interface Props {
+  person: CollectionEntry<'people'>;
+}
+const { person } = Astro.props;
+const { Content } = await render(person);
+const d = person.data;
+---
+<article class="person" id={person.id}>
+  {d.portrait && <Portrait src={d.portrait.src} alt={d.portrait.alt} credit={d.portrait.credit} />}
+  <div class="text">
+    <h3>{d.name}</h3>
+    <p class="role">{d.role}</p>
+    {d.affiliation && <p class="aff dim">{d.affiliation}</p>}
+    <div class="bio"><Content /></div>
+    {d.links.length > 0 && (
+      <ul class="links ui">
+        {d.links.map((l) => <li><a href={l.url}>{l.label}</a></li>)}
+      </ul>
+    )}
+  </div>
+</article>
+
+<style>
+  .person {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    gap: clamp(1rem, 2vw, 1.75rem);
+    align-items: start;
+  }
+  .person:not(:has(:global(.portrait))) { grid-template-columns: 1fr; }
+  @media (max-width: 560px) {
+    .person { grid-template-columns: minmax(0, 1fr); }
+    .person :global(.portrait) { max-width: 70%; }
+  }
+  h3 { font-size: var(--step-2); font-weight: 300; }
+  .role { margin: 0.6rem 0 0; font-family: var(--font-display); font-size: 1rem; }
+  .aff { margin: 0.2rem 0 0; font-family: var(--font-display); font-size: 0.9375rem; }
+  .bio { margin-top: 1.1rem; font-size: 1.0625rem; }
+  .bio :global(p) { margin-bottom: 0.8em; }
+  .links { list-style: none; padding: 0; margin: 0.5rem 0 0; display: flex; flex-wrap: wrap; gap: 0.4rem 1.25rem; }
+  .links a { color: var(--ash); font-size: 0.875rem; }
+  .links a:hover { color: var(--paper); }
+</style>

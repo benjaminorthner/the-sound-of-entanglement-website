@@ -1,0 +1,82 @@
+---
+import { getCollection } from 'astro:content';
+import Photo from '../Photo.astro';
+
+const pieces = (await getCollection('pieces', (p) => p.data.status === 'repertoire')).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+// Each piece gets its own proportion, so the three read as a sequence of
+// different pictures rather than a row of identical cards.
+const layouts = ['wide-left', 'wide-right', 'narrow-left'];
+// Photos already shown higher up on the landing page; use the piece's next image instead.
+const shownAbove = ['landscape-above-stage', 'haze-over-case'];
+const pictureFor = (p: (typeof pieces)[number]) => {
+  const cover = p.data.cover;
+  if (cover && shownAbove.some((name) => cover.src.src.includes(name))) return p.data.images[0] ?? cover;
+  return cover;
+};
+---
+<section class="pieces section" aria-labelledby="pieces-title">
+  <div class="wrap">
+    <header class="head">
+      <h2 id="pieces-title">Three pieces</h2>
+      <p class="dim">
+        Every piece receives the same kind of data: one result for Alice and one for Bob, twice a second. What
+        changes is what the results are allowed to decide.
+      </p>
+    </header>
+
+    {pieces.map((piece, i) => (
+      <article class:list={['piece', 'grid', layouts[i % layouts.length]]}>
+        {pictureFor(piece) && (
+          <a class="image" href={`/pieces/${piece.id}/`} tabindex="-1" aria-hidden="true">
+            <Photo
+              src={pictureFor(piece)!.src}
+              alt={pictureFor(piece)!.alt}
+              credit={pictureFor(piece)!.credit}
+              ratio={i === 2 ? '4 / 5' : '3 / 2'}
+              sizes="(min-width: 900px) 60vw, 100vw"
+            />
+          </a>
+        )}
+        <div class="text">
+          <p class="meta ui dim num">{piece.data.year}</p>
+          <h3><a href={`/pieces/${piece.id}/`}>{piece.data.title}</a></h3>
+          <p class="forces dim">{piece.data.forces}</p>
+          <p>{piece.data.summary}</p>
+          <p class="more ui"><a href={`/pieces/${piece.id}/`}>About {piece.data.title}</a></p>
+        </div>
+      </article>
+    ))}
+
+    <p class="all ui"><a href="/pieces/">All pieces, including two experimental studies</a></p>
+  </div>
+</section>
+
+<style>
+  .head { max-width: 40rem; margin-bottom: clamp(3rem, 7vw, 5.5rem); }
+  .head h2 { font-size: var(--step-4); margin-bottom: 1.25rem; }
+  .piece { align-items: end; row-gap: 1.5rem; }
+  .piece + .piece { margin-top: clamp(4rem, 9vw, 8rem); }
+  .image { display: block; text-decoration: none; }
+  .text h3 { font-size: var(--step-4); margin: 0.25rem 0 0.75rem; }
+  .text h3 a { text-decoration: none; }
+  .text h3 a:hover { text-decoration: underline; text-decoration-thickness: 1px; }
+  .forces { font-size: 1rem; line-height: 1.45; font-style: italic; }
+  .meta { margin: 0; }
+  .more { margin-top: 1.5rem; }
+
+  .wide-left .image { grid-column: 1 / span 7; }
+  .wide-left .text { grid-column: 9 / -1; }
+  .wide-right .image { grid-column: 5 / -1; grid-row: 1; }
+  .wide-right .text { grid-column: 1 / span 4; grid-row: 1; }
+  .narrow-left .image { grid-column: 2 / span 4; }
+  .narrow-left .text { grid-column: 7 / span 5; align-self: center; }
+
+  .all { margin-top: clamp(3rem, 6vw, 5rem); }
+
+  @media (max-width: 900px) {
+    .piece .image, .piece .text { grid-column: 1 / -1 !important; grid-row: auto !important; }
+    .narrow-left .image { grid-column: 1 / span 10 !important; }
+  }
+</style>
