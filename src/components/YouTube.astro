@@ -1,10 +1,20 @@
 ---
 /**
  * Click-to-load YouTube embed (privacy-enhanced domain). Nothing is fetched
- * from YouTube until the visitor presses play. The poster is a local photo.
+ * from YouTube until the visitor presses play. The poster is a local photo,
+ * or the video's official thumbnail where one is registered below.
  */
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
+import documentaryThumb from '../assets/photos/film/documentary-thumbnail.jpg';
+
+/** Official thumbnails by video id. They carry their own title, so no caption is overlaid. */
+const THUMBNAILS: Record<string, { src: ImageMetadata; alt: string }> = {
+  _mIf_OFN1YI: {
+    src: documentaryThumb,
+    alt: 'Title card of the documentary: The Sound of Entanglement, over the optics of the experiment with its two red rotation mounts.',
+  },
+};
 
 interface Props {
   id: string;
@@ -15,12 +25,13 @@ interface Props {
   duration?: string;
 }
 const { id, title, poster, posterAlt = '', duration } = Astro.props;
+const official = THUMBNAILS[id];
 ---
-<div class="yt" data-yt={id} data-title={title}>
-  <Image src={poster} alt={posterAlt} widths={[800, 1200, 1600]} sizes="(min-width: 1000px) 60vw, 100vw" format="webp" />
+<div class:list={['yt', { official }]} data-yt={id} data-title={title}>
+  <Image src={official?.src ?? poster} alt={official?.alt ?? posterAlt} widths={[800, 1200, 1600]} sizes="(min-width: 1000px) 60vw, 100vw" format="webp" />
   <button class="play" aria-label={`Play video: ${title}`}>
     <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="31" /><path d="M26 20 L46 32 L26 44 Z" /></svg>
-    <span class="ui">{title}{duration && <span class="dim"> ({duration})</span>}</span>
+    <span class:list={['ui', { 'visually-hidden': official }]}>{title}{duration && <span class="dim"> ({duration})</span>}</span>
   </button>
 </div>
 <p class="note ui dim">Plays from YouTube. Nothing loads until you press play.</p>
@@ -55,6 +66,9 @@ const { id, title, poster, posterAlt = '', duration } = Astro.props;
   }
   .yt :global(img) { filter: brightness(0.6); transition: filter 0.3s; }
   .yt:hover :global(img) { filter: brightness(0.8); }
+  .official :global(img) { filter: brightness(0.92); }
+  .official:hover :global(img) { filter: none; }
+  .official .play { justify-content: flex-end; padding-bottom: 7%; }
   .play {
     position: absolute;
     inset: 0;
