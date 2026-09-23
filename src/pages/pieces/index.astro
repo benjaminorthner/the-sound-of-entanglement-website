@@ -109,17 +109,18 @@ const premiereOf = (id: string) =>
     <a class="album-record" href="/album/" aria-label="Sounds of Entanglement, the album"><Vinyl size="small" /></a>
     <div class="album-text">
       <h2 id="album"><a href="/album/"><em>Sounds of Entanglement</em></a></h2>
-      <p>
-        The band’s first album: music conducted by pairs of entangled photons, recorded live with the
-        experiment in the studio.
-      </p>
       <p class="status">Recorded. Not released yet. Vinyl and digital.</p>
-      <p class="dim ui">The Uncertain Question: Clemens Wenger, Manu Mayr and Judith Schwarz.</p>
+      <p class="about">
+        The first album of The Uncertain Question (Clemens Wenger, Manu Mayr, Judith Schwarz): music conducted
+        by pairs of entangled photons, recorded live with the experiment in the studio.
+      </p>
       <a class="studio-strip" href="/album/" aria-label="Photographs from the recording, on the album page">
-        {studio.map((i) => <Image src={i.src} alt={i.alt} widths={[240, 360, 480]} sizes="(min-width: 1000px) 12vw, 30vw" format="webp" />)}
+        {studio.map((i) => <Image src={i.src} alt={i.alt} widths={[320, 480, 640]} sizes="(min-width: 1000px) 16vw, 30vw" format="webp" />)}
       </a>
-      <p class="ui studio-caption dim">From the recording. Photos: Benjamin Orthner</p>
-      <p class="ui album-more"><a href="/album/">About the album</a></p>
+      <p class="strip-foot ui">
+        <a href="/album/">About the album</a>
+        <span class="dim">Photos from the recording: Benjamin Orthner</span>
+      </p>
     </div>
   </section>
 </Base>
@@ -197,31 +198,57 @@ const premiereOf = (id: string) =>
   .exp-list p { font-size: 1rem; }
 
   .album {
-    padding-block: clamp(4rem, 9vw, 7rem);
+    padding-block: clamp(3rem, 6vw, 5rem);
     border-top: 1px solid var(--graphite);
+    align-items: center;
+    row-gap: 2rem;
   }
-  .album { align-items: center; row-gap: 2.5rem; }
-  .album-record { grid-column: 2 / span 4; }
-  .album-text { grid-column: 7 / span 6; }
-  .album .status { font-size: var(--step-1); font-weight: 300; margin-top: 1.25rem; }
-  .album-more { margin-top: 1.25rem; font-size: 1rem; }
-  .album-record { display: block; border-radius: 50%; transition: transform 0.4s ease; }
+  .album-record {
+    grid-column: 1 / span 5;
+    justify-self: end;
+    display: block;
+    width: min(100%, 360px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    transition: transform 0.4s ease;
+  }
+  .album-record :global(.vinyl.small) { --d: 100%; }
   .album-record:hover { transform: scale(1.02); }
-  .album-record:focus-visible { outline-offset: 8px; }
+  .album-record:focus-visible { outline-offset: 6px; }
+  .album-text { grid-column: 7 / span 6; max-width: 34rem; }
+  .album h2 { font-size: var(--step-3); margin: 0; }
+  .album h2 em { font-style: normal; }
   .album h2 a { text-decoration: none; }
   .album h2 a:hover { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.15em; }
-  .album .studio-strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; margin-top: 1.75rem; max-width: 30rem; }
-  .album .studio-strip :global(img) { display: block; height: auto; }
-  .studio-strip :global(img) { width: 100%; aspect-ratio: 1; object-fit: cover; filter: brightness(0.8); transition: filter 0.3s ease; }
-  .studio-strip:hover :global(img) { filter: brightness(1); }
-  .studio-caption { margin: 0.5rem 0 0; font-size: 0.8125rem; }
+  .album .status { font-size: var(--step-1); font-weight: 300; margin: 0.75rem 0 0; }
+  .album .about { margin: 0.75rem 0 0; font-size: 1rem; color: var(--ash); }
+  .album .studio-strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 1.5rem; }
+  .album .studio-strip :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    filter: brightness(0.82);
+    transition: filter 0.3s ease;
+  }
+  .album .studio-strip:hover :global(img) { filter: brightness(1); }
+  .strip-foot {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+    margin: 0.6rem 0 0;
+    font-size: 0.8125rem;
+  }
+  .strip-foot a { font-size: 0.9375rem; }
   @media (prefers-reduced-motion: reduce) { .album-record { transition: none; } .album-record:hover { transform: none; } }
-  .album-more a { text-decoration-color: var(--smoke); }
-  .album h2 { font-size: var(--step-3); margin-bottom: 1.25rem; }
-  .album h2 em { font-style: normal; }
 
   @media (max-width: 900px) {
-    .image, .text, .flip .image, .flip .text, .exp-head, .exp-list, .album-text, .album-record, .statement h2, .statement-text { grid-column: 1 / -1; grid-row: auto; }
+    .album-record { grid-column: 1 / -1; justify-self: center; width: min(70vw, 300px); }
+  }
+  @media (max-width: 900px) {
+    .image, .text, .flip .image, .flip .text, .exp-head, .exp-list, .album-text, .statement h2, .statement-text { grid-column: 1 / -1; grid-row: auto; }
     .idea { grid-template-columns: 1fr; }
   }
 </style>
