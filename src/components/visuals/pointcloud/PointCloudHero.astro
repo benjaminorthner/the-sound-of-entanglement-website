@@ -37,7 +37,15 @@ const stops = [
         ok = false;
       }
     }
-    if (ok) document.documentElement.dataset.hero = 'live';
+    if (ok) {
+      document.documentElement.dataset.hero = 'live';
+      // Watchdog: if the hero's module script never runs (failed to load or
+      // blocked), fall back to the static hero. Load errors after the script
+      // has started are handled there.
+      setTimeout(function () {
+        if (!window.__heroBoot) document.documentElement.dataset.hero = '';
+      }, 6000);
+    }
   })();
 </script>
 
@@ -87,10 +95,11 @@ const stops = [
 </section>
 
 <script>
-  import { createScene, type PointCloudScene } from './scene';
+  import type { PointCloudScene } from './scene';
   import { decodeExcerpt, Replay, RunningS, clock, type Excerpt } from '../../../lib/replay';
   import premiere from '../../../data/bruqner_premiere_2024-09-04.json';
 
+  (window as unknown as { __heroBoot?: boolean }).__heroBoot = true;
   const hero = document.querySelector<HTMLElement>('[data-hero-root]')!;
   const live = document.documentElement.dataset.hero === 'live';
 
@@ -141,7 +150,10 @@ const stops = [
     }).observe(hero);
     document.addEventListener('visibilitychange', () => scene?.setRunning(visible && !document.hidden));
 
-    createScene(canvas, '/media/setup-pointcloud.bin')
+    // Dynamic import so a failure to load three.js is caught below and the
+    // static hero takes over, instead of leaving a half-initialised page.
+    import('./scene')
+      .then(({ createScene }) => createScene(canvas, '/media/setup-pointcloud.bin'))
       .then((s) => {
         scene = s;
         onScroll();
@@ -158,7 +170,8 @@ const stops = [
         });
         setTimeout(() => replay.start(), 1800);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error('Point-cloud hero failed, showing the static version.', err);
         document.documentElement.dataset.hero = '';
       });
   }
@@ -279,10 +292,6 @@ const stops = [
     height: 28px;
     margin: 0.6rem auto 0;
     background: linear-gradient(var(--ash), transparent);
-  }
-
-  @media (min-width: 1500px) {
-    :global(html[data-hero='live']) .stop { left: calc((100vw - var(--max)) / 2 + var(--gutter)); }
   }
 
   @media (max-width: 760px) {
