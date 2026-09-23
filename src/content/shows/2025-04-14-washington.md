@@ -50,6 +50,22 @@ gallery:
 - src: ../../assets/photos/2025-washington/team-rooftop.jpg
   alt: The team on a rooftop, the Capitol behind them.
   credit: Johannes Kofler
+- src: ../../assets/photos/2025-washington/featured-summit-events.jpg
+  alt: 'The screen in the Bloomberg Center theater announcing the featured summit events: The Sound of Entanglement quantum performance on Monday, Yann LeCun on AI frontiers on Tuesday, and a performance by pianist Martin Labazevitch.'
+  credit: Benjamin Orthner
+  caption: Before the summit
+- src: ../../assets/photos/2025-washington/bloomberg-theater-empty.jpg
+  alt: The empty Bloomberg Center theater seen from the top row, the stage lit.
+  credit: Benjamin Orthner
+  caption: Before the summit
+- src: ../../assets/photos/2025-washington/setup-in-living-room.jpg
+  alt: The experiment unpacked on a living-room rug, cables and tools on the sofa, a box of lab snacks on the floor.
+  credit: Benjamin Orthner
+  caption: Before the summit
+- src: ../../assets/photos/2025-washington/team-at-work.jpg
+  alt: The open flight case with the optics on the rug in the foreground, three team members at laptops at a table behind it.
+  credit: Benjamin Orthner
+  caption: Before the summit
 links:
 - label: Austrian Cultural Forum Washington
   url: https://www.acfdc.org/events/the-sound-of-entanglement-jhu2025
@@ -60,3 +76,8 @@ The first international performance, at the Science Diplomacy Summit
 at the Johns Hopkins University Bloomberg Center, supported by the
 Austrian Cultural Forum Washington. The lecture was given by Clemens
 Wenger, Alexander Ploier and Johannes Kofler.
+
+The summit announced it as one of three featured events, next to a
+conversation with Yann LeCun on the frontiers of AI and a performance by the
+pianist Martin Labazevitch. The day before, the experiment was unpacked and
+aligned on a living-room floor in Washington.

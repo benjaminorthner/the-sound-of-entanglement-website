@@ -86,6 +86,8 @@ const people = defineCollection({
       role: z.string(),
       group: z.enum(['team', 'musicians', 'organists']),
       affiliation: z.string().optional(),
+      /** Personal or company website; the name links to it. */
+      website: z.url().optional(),
       order: z.number(),
       portrait: photo(image).optional(),
       links: z.array(link).default([]),

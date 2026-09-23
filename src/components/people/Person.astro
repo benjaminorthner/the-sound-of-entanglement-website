@@ -12,7 +12,7 @@ const d = person.data;
 <article class="person" id={person.id}>
   {d.portrait && <Portrait src={d.portrait.src} alt={d.portrait.alt} credit={d.portrait.credit} />}
   <div class="text">
-    <h3>{d.name}</h3>
+    <h3>{d.website ? <a class="name-link" href={d.website}>{d.name}</a> : d.name}</h3>
     <p class="role">{d.role}</p>
     {d.affiliation && <p class="aff dim">{d.affiliation}</p>}
     <div class="bio"><Content /></div>
@@ -37,6 +37,8 @@ const d = person.data;
     .person :global(.portrait) { max-width: 70%; }
   }
   h3 { font-size: var(--step-2); font-weight: 300; }
+  .name-link { text-decoration: none; background-image: linear-gradient(currentColor, currentColor); background-size: 100% 1px; background-position: 0 100%; background-repeat: no-repeat; }
+  .name-link:hover { color: var(--ash); }
   .role { margin: 0.6rem 0 0; font-family: var(--font-display); font-size: 1rem; }
   .aff { margin: 0.2rem 0 0; font-family: var(--font-display); font-size: 0.9375rem; }
   .bio { margin-top: 1.1rem; font-size: 1.0625rem; }

@@ -607,5 +607,57 @@
  {
   "src": "DOWNLOADS/palermo/signal-2025-10-29-160041.jpeg",
   "dest": "src/assets/photos/2025-palermo/gelato.jpg"
+ },
+ {
+  "src": "DOWNLOADS/tsoe studio/DSCF5003.jpg",
+  "dest": "src/assets/photos/2026-album-studio/experiment-in-studio.jpg"
+ },
+ {
+  "src": "DOWNLOADS/tsoe studio/DSCF5148.jpg",
+  "dest": "src/assets/photos/2026-album-studio/control-room.jpg"
+ },
+ {
+  "src": "DOWNLOADS/tsoe studio/DSCF5160.jpg",
+  "dest": "src/assets/photos/2026-album-studio/engineer-at-desk.jpg"
+ },
+ {
+  "src": "DOWNLOADS/tsoe studio/DSCF5176.jpg",
+  "dest": "src/assets/photos/2026-album-studio/bass-and-keys.jpg"
+ },
+ {
+  "src": "DOWNLOADS/tsoe studio/DSCF5234.jpg",
+  "dest": "src/assets/photos/2026-album-studio/drums-room.jpg"
+ },
+ {
+  "src": "DOWNLOADS/tsoe studio/DSCF5297.jpg",
+  "dest": "src/assets/photos/2026-album-studio/drums-close.jpg"
+ },
+ {
+  "src": "DOWNLOADS/tsoe studio/DSCF5333.jpg",
+  "dest": "src/assets/photos/2026-album-studio/keys-portrait.jpg"
+ },
+ {
+  "src": "DOWNLOADS/tsoe studio/DSCF5349.jpg",
+  "dest": "src/assets/photos/2026-album-studio/keys-overhead.jpg"
+ },
+ {
+  "src": "DOWNLOADS/tsoe studio/DSCF5409.jpg",
+  "dest": "src/assets/photos/2026-album-studio/aligning-in-studio.jpg"
+ },
+ {
+  "src": "DOWNLOADS/TOSE Washington/TSOE_Washington_Benny-16.jpg",
+  "dest": "src/assets/photos/2025-washington/featured-summit-events.jpg"
+ },
+ {
+  "src": "DOWNLOADS/TOSE Washington/TSOE_Washington_Benny-2.jpg",
+  "dest": "src/assets/photos/2025-washington/setup-in-living-room.jpg"
+ },
+ {
+  "src": "DOWNLOADS/TOSE Washington/TSOE_Washington_Benny-11.jpg",
+  "dest": "src/assets/photos/2025-washington/bloomberg-theater-empty.jpg"
+ },
+ {
+  "src": "DOWNLOADS/TOSE Washington/TSOE_Washington_Benny-8.jpg",
+  "dest": "src/assets/photos/2025-washington/team-at-work.jpg"
  }
 ]
