@@ -42,8 +42,8 @@ export const videoInfo: Record<string, { title: string; duration?: string; note?
     duration: '52 min',
     note: 'The whole event: the lecture, then 8 Rooms with the landscape visuals on the big screen.',
   },
-  '2024-06-13-test-performance-vienna': {
-    title: 'Second test performance, Vienna',
+  '2024-06-13-preview-vienna': {
+    title: 'Preview performance, Vienna, 13 June 2024',
     note: 'The recording is low in picture and sound quality; it is kept because it shows how it all started.',
   },
 };

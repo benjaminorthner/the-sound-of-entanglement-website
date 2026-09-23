@@ -1,0 +1,5 @@
+{
+  "redirects": [
+    { "source": "/shows/2024-06-13-test-performance-vienna/", "destination": "/shows/2024-06-13-preview-vienna/", "permanent": true }
+  ]
+}

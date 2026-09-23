@@ -1,12 +1,12 @@
 ---
-title: Second test performance
+title: Preview performance
 date: '2024-06-13'
 venue: Vienna
 city: Vienna
 country: Austria
 kind: performance
-format: Test lecture-performance before the premiere
-summary: 'Three months before the premiere, a test run in Vienna: the experiment, the first projections into haze and an audience, to see whether any of it would work.'
+format: Preview lecture-performance, before the premiere
+summary: 'Three months before the premiere, a preview in Vienna: the experiment, the first projections into haze and an audience, to see whether it would all come together.'
 cover:
   src: ../../assets/photos/2024-early-sessions/haze-sheet.jpg
   alt: A sheet of projected light in haze above the silhouettes of the audience.
@@ -27,8 +27,7 @@ gallery:
 youtube: tTz13cvry2Y
 ---
 
-Before the cathedral, the setup was tried out in front of audiences in Vienna,
+Before the cathedral, the performance was previewed for audiences in Vienna,
 on 21 May and 13 June 2024: the experiment running live, the first
 projections into haze, early versions of the mappings and a small band. The
-video of the second test performance is low in quality but shows how it all
-started.
+video of the June preview is low in quality but shows how it all started.

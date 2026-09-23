@@ -19,7 +19,7 @@ only. **Exhibition** = video or display.
 
 | Date | Venue, city | Event | Piece | Type | Line-up / notes |
 |---|---|---|---|---|---|
-| 21 May & **13 Jun 2024** | Vienna (venue to confirm) | Test performances before the premiere | early versions | Test lecture-performances | Video of the second: YouTube `tTz13cvry2Y` (low quality). Photos in the "Osaka" folder are from these two dates. |
+| 21 May & **13 Jun 2024** | Vienna (venue to confirm) | Preview performances before the premiere | early versions | Preview lecture-performances | Video of the second: YouTube `tTz13cvry2Y` (low quality). Photos in the "Osaka" folder are from these two dates. |
 | **4 Sept 2024**, 22:00 | Mariendom (New Cathedral), Linz, AT | Opening of Ars Electronica Festival 2024 · antonbruckner2024 (OÖ KulturEXPO), Bruckner's 200th birthday | BruQner (**world premiere**) | Performance, English lecture | Organists Gerhard Raab (Alice) and Wolfgang Kreuzhuber (Bob). Lecture by Wenger, Haslinger, Kofler. 3 000+ people, free. S ≈ 2.45. |
 | **6 Sept 2024**, 16:00 | Mariendom, Linz | same | BruQner | Performance, German lecture, family-friendly | Lecture incl. Wenger, Ringbauer |
 | 26 Sept 2024 | Linz | SFB BeyondC Autumn Workshop | – | Talk (Kofler) | |

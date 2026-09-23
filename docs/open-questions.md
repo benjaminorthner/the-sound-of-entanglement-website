@@ -29,7 +29,7 @@ clear what was confirmed. Answers from Benjamin (23 Sept 2026) are in
       (Clemens, Art & Science finalist): outcomes. *TBD. Don't claim awards.*
 - [x] Deutsches Museum Munich, 25 Oct 2025: *talk only.*
 - [ ] Pint of Science, May 2026: city, venue, date?
-- [ ] Test performances 21 May and 13 June 2024: where in Vienna?
+- [ ] Preview performances 21 May and 13 June 2024: where in Vienna?
 - [x] Palermo (ISQCMC 2025): *no photos exist on either drive.*
 - [ ] ISWC for BruQner (3307761800) correct? ISWC for 8 Rooms?
 - [x] "John's Bells" and "FM Drums, inverse control": *yes, publishable as
@@ -39,7 +39,7 @@ clear what was confirmed. Answers from Benjamin (23 Sept 2026) are in
 - [x] "Indeterminate Apparatus": *final title of that piece.*
 
 ## Rights and credits
-- [x] Album studio photos (`src/assets/photos/2026-album-studio/`): who took *Benjamin Orthner took the studio photos and the 2024 test-performance photos.*
+- [x] Album studio photos (`src/assets/photos/2026-album-studio/`): who took *Benjamin Orthner took the studio photos and the 2024 preview-performance photos.*
       them? Credited "The Sound of Entanglement" for now. Also: who is the
       bass player in `bass-and-keys.jpg`, and may studio name and recording
       date (plan: Tonstudio Huppmann, 1 May 2026) be published? The site says
@@ -51,7 +51,7 @@ open for final clearance before launch.
 - [x] weitblickfilm stills (*fine*)
 - [ ] Hi-res originals and credit for the Vienna Ball photos; hi-res CIVA
       photos from eSeL.at (*use what we have for now*)
-- [x] "Osaka" folder photos (the 2024 test performances): *taken by Benjamin Orthner.*
+- [x] "Osaka" folder photos (the 2024 preview performances): *taken by Benjamin Orthner.*
 - [ ] Visual-test photos in the Mariendom (July 2024): photographer? (*use for now*)
 - [ ] Musician and organist bios and portraits; approval of team bios (*use
       the drafts for now*)
