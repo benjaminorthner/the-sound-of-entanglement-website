@@ -31,10 +31,11 @@ const upcomingPieces = await Promise.all(upcoming.map(pieceOf));
 
   {upcoming.length > 0 && (
     <section class="wrap upcoming" aria-labelledby="next">
-      <h2 id="next" class="ui label">Next</h2>
+      <h2 id="next" class="next-head"><span class="live-dot" aria-hidden="true"></span>{upcoming.length > 1 ? 'Upcoming shows' : 'Next show'}</h2>
       {upcoming.map((s, i) => (
         <a class="next" href={`/shows/${s.id}/`}>
           <p class="next-date num">{formatRange(s.data.date, s.data.endDate)}</p>
+          <p class="countdown ui" data-countdown={s.data.date.toISOString()}></p>
           <p class="next-where">{s.data.venue}, {place(s)}</p>
           <p class="next-what dim">
             {s.data.title}.{' '}
@@ -75,12 +76,44 @@ const upcomingPieces = await Promise.all(upcoming.map(pieceOf));
   </section>
 </Base>
 
+<script>
+  // Written at view time, not build time, so it never goes stale.
+  document.querySelectorAll<HTMLElement>('[data-countdown]').forEach((el) => {
+    const day = 86_400_000;
+    const start = new Date(el.dataset.countdown!).setUTCHours(0, 0, 0, 0);
+    const today = new Date().setUTCHours(0, 0, 0, 0);
+    const d = Math.round((start - today) / day);
+    el.textContent = d > 1 ? `In ${d} days` : d === 1 ? 'Tomorrow' : d === 0 ? 'Today' : '';
+  });
+</script>
+
 <style>
   .intro { padding-top: clamp(4rem, 10vw, 8rem); padding-bottom: clamp(2rem, 5vw, 4rem); }
   .lede { margin-top: 1.5rem; font-size: var(--step-1); line-height: 1.45; max-width: 40ch; color: var(--ash); }
 
   .label { color: var(--ash); font-weight: 400; font-size: var(--step--1); margin-bottom: 1rem; }
   .upcoming { padding-bottom: clamp(3rem, 7vw, 6rem); }
+  .next-head {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: var(--step-2);
+    font-weight: 300;
+    margin-bottom: 1.25rem;
+  }
+  /* a small ring, the project's sign for something live */
+  .live-dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    border: 1.5px solid var(--photon);
+    box-shadow: 0 0 10px rgb(255 255 179 / 0.6);
+    animation: breathe 2.4s ease-in-out infinite;
+  }
+  @keyframes breathe { 50% { box-shadow: 0 0 2px rgb(255 255 179 / 0.2); opacity: 0.6; } }
+  @media (prefers-reduced-motion: reduce) { .live-dot { animation: none; } }
+  .countdown { margin: 0.9rem 0 0; font-size: 1rem; color: var(--photon); }
+  .countdown:empty { display: none; }
   .next {
     display: block;
     text-decoration: none;
