@@ -1,0 +1,65 @@
+---
+/**
+ * The full list of supporters with roles and grant numbers, for /people/#support.
+ */
+import Logo from './Logo.astro';
+import { GROUPS, supportersByGroup } from './data';
+
+const by = await supportersByGroup();
+const listed = GROUPS.filter((g) => g.id !== 'thanks');
+---
+<div class="support-list">
+  {listed.map((g) => (
+    <section class="group" aria-labelledby={`support-${g.id}`}>
+      <h3 id={`support-${g.id}`} class="group-h">{g.title}</h3>
+      <ul>
+        {by[g.id].map((s) => (
+          <li>
+            <div class="mark">{s.data.logo ? <Logo supporter={s} area={6400} min={18} max={48} /> : null}</div>
+            <div class="text">
+              <p class="name">{s.data.url ? <a href={s.data.url}>{s.data.name}</a> : s.data.name}</p>
+              {s.data.role && <p class="role dim">{s.data.role}</p>}
+              {s.data.note && <p class="note dim">{s.data.note}</p>}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))}
+  {by.thanks.length > 0 && (
+    <p class="thanks">
+      <span class="ui dim">Thanks to </span>
+      {by.thanks.map((t, i) => (
+        <>
+          {t.data.name}{t.data.role && <span class="dim"> ({t.data.role})</span>}{i < by.thanks.length - 1 ? ', ' : '.'}
+        </>
+      ))}
+    </p>
+  )}
+</div>
+
+<style>
+  .group + .group { margin-top: clamp(3rem, 6vw, 4.5rem); }
+  .group-h { font-size: var(--step-1); font-weight: 400; color: var(--ash); margin-bottom: 1rem; }
+  ul { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--graphite); }
+  li {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    align-items: center;
+    padding: 1.1rem 0;
+    border-bottom: 1px solid var(--graphite);
+  }
+  .mark { grid-column: 1 / span 3; min-height: 1px; }
+  .text { grid-column: 4 / -1; }
+  .name { margin: 0; font-family: var(--font-display); font-size: 1.0625rem; line-height: 1.4; }
+  .name a { text-decoration: none; }
+  .name a:hover { text-decoration: underline; }
+  .role, .note { margin: 0.2rem 0 0; font-size: 0.9375rem; line-height: 1.45; }
+  .thanks { margin-top: 3rem; font-size: 1rem; max-width: 70ch; }
+  @media (max-width: 700px) {
+    .mark, .text { grid-column: 1 / -1; }
+    .text { margin-top: 0.6rem; }
+    .mark:empty { display: none; }
+  }
+</style>

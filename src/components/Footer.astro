@@ -2,18 +2,11 @@
 import { getCollection } from 'astro:content';
 import Wordmark from './Wordmark.astro';
 import { formatDate } from '../lib/format';
+import FooterLogos from './support/FooterLogos.astro';
 
 const now = new Date();
 const next = (await getCollection('shows', (s) => !s.data.draft && s.data.kind === 'performance' && s.data.date >= now))
   .sort((a, b) => +a.data.date - +b.data.date)[0];
-
-const partners = [
-  'TU Wien', 'Johannes Kepler University Linz', 'University of Innsbruck',
-  'Anton Bruckner Private University Linz', 'University of Art and Design Linz',
-  'Vienna Center for Quantum Science and Technology', 'FWF SFB BeyondC',
-  'FWF Cluster of Excellence quantA', 'LIT – Linz Institute of Technology',
-  'Ars Electronica', 'OÖ KulturEXPO Anton Bruckner 2024', 'Stadt Wien Kultur',
-];
 ---
 <footer class="site-footer">
   <div class="wrap grid">
@@ -31,10 +24,11 @@ const partners = [
       <p><a href="mailto:clemenswenger@mac.com">clemenswenger@mac.com</a></p>
       <p><a href="https://www.youtube.com/@BruQnerTheSoundofEntanglement">YouTube</a></p>
     </div>
-    <div class="partners">
-      <h2 class="ui label">With the support of</h2>
-      <p class="dim">{partners.join(', ')}.</p>
-    </div>
+  </div>
+  <div class="wrap partners">
+    <h2 class="ui label">With the support of</h2>
+    <FooterLogos />
+    <p class="ui"><a href="/people/#support">Full list of supporters and grants</a></p>
   </div>
   <div class="wrap small ui dim">
     <p>Photographs are credited where they appear. The measurements shown on this site come from the performance logs of the experiment.</p>
@@ -49,14 +43,16 @@ const partners = [
   }
   .grid { row-gap: 2.5rem; }
   .about { grid-column: 1 / span 5; }
-  .contact { grid-column: 7 / span 2; }
-  .partners { grid-column: 9 / span 4; }
+  .contact { grid-column: 9 / span 4; }
+  .partners { margin-top: 3.5rem; padding-top: 2rem; border-top: 1px solid var(--graphite); }
+  .partners .label { margin-bottom: 1.5rem; }
+  .partners p { margin-top: 2rem; }
   .about p { margin-top: 1rem; font-size: 1rem; }
   .label { font-weight: 400; color: var(--paper); margin-bottom: 0.75rem; font-size: var(--step--1); }
   .contact p, .partners p { font-size: 0.9375rem; line-height: 1.5; margin: 0 0 0.4rem; }
   .small { margin-top: 3rem; }
   .small p { font-size: 0.8125rem; max-width: none; }
   @media (max-width: 860px) {
-    .about, .contact, .partners { grid-column: 1 / -1; }
+    .about, .contact { grid-column: 1 / -1; }
   }
 </style>

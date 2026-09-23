@@ -106,4 +106,26 @@ const publications = defineCollection({
   }),
 });
 
-export const collections = { shows, pieces, people, publications };
+/** Institutions, funders and hosts that made the project possible. */
+const supporters = defineCollection({
+  loader: file('./src/content/supporters.yaml'),
+  schema: ({ image }) =>
+    z.object({
+      name: z.string(),
+      group: z.enum(['funding', 'institutions', 'premiere', 'hosts', 'thanks']),
+      /** What they did for the project, e.g. "In cooperation with". */
+      role: z.string().optional(),
+      /** Details such as grant numbers. */
+      note: z.string().optional(),
+      url: z.url().optional(),
+      /** Monochrome logo from src/assets/logos/ (see scripts/prepare_logos.py). */
+      logo: image().optional(),
+      /** Optical size correction for the logo (1 = default). */
+      scale: z.number().default(1),
+      /** Shown in the compact logo row in the footer. */
+      featured: z.boolean().default(false),
+      order: z.number().default(100),
+    }),
+});
+
+export const collections = { shows, pieces, people, publications, supporters };

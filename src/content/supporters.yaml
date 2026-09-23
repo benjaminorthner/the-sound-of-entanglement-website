@@ -1,0 +1,195 @@
+# Institutions, funders and hosts. Sources: the paper's acknowledgements
+# (arXiv:2509.08892), the documentary credits and the 2025 tour texts
+# (docs/research/drive_documents.md §5d). Logos: src/assets/logos/, made with
+# scripts/prepare_logos.py from official files. Keep grant numbers exact.
+
+# Funding
+- id: fwf
+  name: FWF Austrian Science Fund
+  group: funding
+  note: "Grants Y1121, P36041 and P35953; START Award q-shadows, 713361001."
+  url: https://www.fwf.ac.at/
+  logo: ../assets/logos/fwf.png
+  scale: 0.95
+  featured: true
+  order: 1
+- id: beyondc
+  name: FWF SFB BeyondC
+  group: funding
+  role: Special Research Programme on quantum computation
+  note: "SFB BeyondC, 10.55776/FG7."
+  url: https://www.beyondc.at/
+  logo: ../assets/logos/beyondc.png
+  scale: 0.9
+  featured: true
+  order: 2
+- id: quanta
+  name: "FWF Cluster of Excellence quantA – Quantum Austria"
+  group: funding
+  role: Supported the performances in 2025
+  url: https://www.quantumaustria.at/
+  logo: ../assets/logos/quanta.png
+  scale: 0.9
+  featured: true
+  order: 3
+- id: lit
+  name: "LIT – Linz Institute of Technology, JKU"
+  group: funding
+  note: "The LIT-Ars call funded the quantum hardware and the documentary."
+  url: https://www.jku.at/lit/
+  logo: ../assets/logos/jku-lit.png
+  order: 4
+- id: stadt-wien-kultur
+  name: Stadt Wien Kultur
+  group: funding
+  role: Cultural department of the City of Vienna
+  note: "Arbeitsstipendium Komposition (working grant for composition)."
+  url: https://www.wien.gv.at/kultur/
+  logo: ../assets/logos/stadt-wien-kultur.png
+  scale: 0.85
+  order: 5
+- id: bmwkms
+  name: Federal Ministry for Housing, Arts, Culture, Media and Sport (BMWKMS)
+  group: funding
+  note: "Staatsstipendium Komposition (state grant for composition)."
+  url: https://www.bmwkms.gv.at/
+  logo: ../assets/logos/bmwkms.png
+  scale: 0.95
+  order: 6
+
+# Research and arts institutions
+- id: tu-wien
+  name: TU Wien
+  group: institutions
+  role: Atominstitut, where the experiment was built
+  url: https://www.tuwien.at/
+  logo: ../assets/logos/tu-wien.png
+  scale: 0.85
+  featured: true
+  order: 1
+- id: jku
+  name: Johannes Kepler University Linz
+  group: institutions
+  role: Department of Quantum Information and Computation at Kepler (QUICK)
+  url: https://www.jku.at/
+  logo: ../assets/logos/jku.png
+  scale: 0.82
+  featured: true
+  order: 2
+- id: uibk
+  name: University of Innsbruck
+  group: institutions
+  role: Institute for Experimental Physics
+  url: https://www.uibk.ac.at/
+  logo: ../assets/logos/uibk.png
+  featured: true
+  order: 3
+- id: vcq
+  name: Vienna Center for Quantum Science and Technology (VCQ)
+  group: institutions
+  url: https://vcq-quantum.at/
+  logo: ../assets/logos/vcq.png
+  scale: 1.05
+  order: 4
+- id: bruckneruni
+  name: Anton Bruckner Private University Linz
+  group: institutions
+  role: Institute for Composition, Conducting and Computer Music
+  url: https://www.bruckneruni.ac.at/
+  logo: ../assets/logos/bruckneruni.png
+  scale: 0.9
+  order: 5
+- id: kunstuni-linz
+  name: University of Art and Design Linz
+  group: institutions
+  url: https://www.kunstuni-linz.at/
+  logo: ../assets/logos/kunstuni-linz.png
+  scale: 0.95
+  order: 6
+
+# The premiere
+- id: kulturexpo
+  name: OÖ KulturEXPO Anton Bruckner 2024
+  group: premiere
+  role: A project of
+  note: "BruQner was commissioned through the Brucknerjahr 2024 project call of Land Oberösterreich."
+  url: https://www.anton-bruckner-2024.at/
+  logo: ../assets/logos/anton-bruckner-2024.png
+  scale: 1.1
+  featured: true
+  order: 1
+- id: ars-electronica
+  name: Ars Electronica
+  group: premiere
+  role: In cooperation with
+  note: "BruQner opened the Ars Electronica Festival 2024."
+  url: https://ars.electronica.art/
+  logo: ../assets/logos/ars-electronica.png
+  featured: true
+  order: 2
+- id: mariendom
+  name: Mariendom Linz
+  group: premiere
+  role: Host of the premiere
+  url: https://www.mariendom.at/
+  logo: ../assets/logos/mariendom.png
+  scale: 0.72
+  order: 3
+
+# Hosts on tour
+- id: acf-washington
+  name: Austrian Cultural Forum Washington
+  group: hosts
+  role: Presented the performance at the Science Diplomacy Summit 2025
+  url: https://www.acfdc.org/
+  logo: ../assets/logos/acf-washington.png
+  order: 1
+- id: jhu
+  name: Johns Hopkins University, Science Diplomacy Summit 2025
+  group: hosts
+  order: 2
+- id: ball
+  name: Vienna Ball of Sciences
+  group: hosts
+  url: https://www.wissenschaftsball.at/
+  order: 3
+- id: expo
+  name: EXPO 2025 Osaka, Austrian Pavilion
+  group: hosts
+  url: https://www.expoaustria.at/en/
+  order: 4
+- id: millstatt
+  name: TechForum Millstatt
+  group: hosts
+  order: 5
+- id: alpbach
+  name: European Forum Alpbach
+  group: hosts
+  url: https://www.alpbach.org/
+  order: 6
+- id: civa
+  name: CIVA Festival, Belvedere 21
+  group: hosts
+  url: https://www.belvedere.at/en/civa-2025
+  order: 7
+- id: zirkus
+  name: Zirkus des Wissens, JKU Linz
+  group: hosts
+  order: 8
+
+# Thanks (from the paper's acknowledgements)
+- id: thanks-trawoeger
+  name: Norbert Trawöger
+  group: thanks
+  role: Bruckner Festival 2024, for fruitful discussions
+  order: 1
+- id: thanks-hochreiter
+  name: Martina Hochreiter
+  group: thanks
+  role: for insights into the history of aleatoric music
+  order: 2
+- id: thanks-acf
+  name: Verena Daughton and Sarah Bamberger
+  group: thanks
+  role: Austrian Cultural Forum Washington
+  order: 3

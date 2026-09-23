@@ -1,0 +1,30 @@
+---
+/** Compact monochrome row of the key funders and institutions, for the footer. */
+import { getCollection } from 'astro:content';
+import Logo from './Logo.astro';
+import { GROUPS } from './data';
+
+const rank = Object.fromEntries(GROUPS.map((g, i) => [g.id, i]));
+const featured = (await getCollection('supporters', (s) => s.data.featured && !!s.data.logo)).sort(
+  (a, b) => rank[a.data.group] - rank[b.data.group] || a.data.order - b.data.order,
+);
+---
+<ul class="footer-logos">
+  {featured.map((s) => (
+    <li><Logo supporter={s} area={4200} min={16} max={40} /></li>
+  ))}
+</ul>
+
+<style>
+  .footer-logos {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.25rem 2.25rem;
+  }
+  .footer-logos :global(.logo) { opacity: 0.7; }
+  .footer-logos :global(a.logo:hover) { opacity: 1; }
+</style>

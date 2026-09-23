@@ -9,6 +9,8 @@ portrait:
   alt: Benjamin Orthner behind the experiment at the European Forum Alpbach, explaining the setup.
   credit: © EFA / Luiza Puiu
 links:
+- label: LinkedIn
+  url: https://www.linkedin.com/in/benjamin-orthner-ab94b415b/
 - label: Instagram
   url: https://www.instagram.com/benjaminorthner/
 ---

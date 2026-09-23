@@ -3,6 +3,7 @@ import { getCollection, render } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Photo from '../components/Photo.astro';
 import Person from '../components/people/Person.astro';
+import SupportList from '../components/support/SupportList.astro';
 
 import teamOnStage from '../assets/photos/2025-alpbach/team-on-stage.jpg';
 import organConsole from '../assets/photos/2024-bruqner-linz/organist-console.jpg';
@@ -114,6 +115,16 @@ const credits = [
       ))}
     </dl>
   </section>
+
+  <section class="wrap group" id="support" aria-labelledby="support-h">
+    <h2 id="support-h" class="group-title">Support and funding</h2>
+    <p class="support-intro dim">
+      The project depends on research institutions, funding bodies, festivals and hosts. These are the ones
+      that made the experiment, the music and the performances possible, with the grants as they are credited in
+      the paper.
+    </p>
+    <SupportList />
+  </section>
 </Base>
 
 <style>
@@ -158,6 +169,8 @@ const credits = [
   dt { grid-column: 1 / span 5; font-family: var(--font-display); font-size: 1rem; line-height: 1.5; }
   dd { grid-column: 6 / span 7; margin: 0; font-size: 1.0625rem; color: var(--ash); }
   .source { margin-top: 1rem; font-size: 0.8125rem; }
+  .support-intro { max-width: 62ch; margin-bottom: 3rem; font-size: 1.0625rem; }
+  #support { scroll-margin-top: calc(var(--header-h) + 1rem); }
   .sub { font-size: var(--step-1); color: var(--ash); margin: 4rem 0 1.5rem; }
 
   @media (max-width: 900px) {

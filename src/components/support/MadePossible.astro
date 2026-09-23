@@ -1,0 +1,70 @@
+---
+/**
+ * Landing-page section: funders, institutions and the premiere partners as
+ * logos in labelled groups, the tour hosts as a line of text.
+ */
+import Logo from './Logo.astro';
+import { GROUPS, supportersByGroup } from './data';
+
+const by = await supportersByGroup();
+const logoGroups = GROUPS.filter((g) => ['funding', 'institutions', 'premiere'].includes(g.id));
+---
+<section class="made-possible section" aria-labelledby="support-title">
+  <div class="wrap grid">
+    <div class="head">
+      <h2 id="support-title">Made possible by</h2>
+      <p class="dim">
+        The experiment was built at TU Wien with research funding, the music with composition grants, and the
+        premiere was commissioned for the Bruckner year 2024. Research institutions, funders and festivals have
+        carried the project since.
+      </p>
+      <p class="ui"><a href="/people/#support">Grants, roles and thanks</a></p>
+    </div>
+    <div class="groups">
+      {logoGroups.map((g) => (
+        <div class="group">
+          <h3 class="ui label">{g.title}</h3>
+          <ul>
+            {by[g.id].map((s) => (
+              <li><Logo supporter={s} /></li>
+            ))}
+          </ul>
+        </div>
+      ))}
+      <div class="group hosts">
+        <h3 class="ui label">Hosts on tour</h3>
+        <p>{by.hosts.map((s) => s.data.name).join(', ')}.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .made-possible { border-top: 1px solid var(--graphite); }
+  .grid { row-gap: 3rem; }
+  .head { grid-column: 1 / span 4; align-self: start; position: sticky; top: calc(var(--header-h) + 2rem); }
+  .groups { grid-column: 6 / -1; display: grid; gap: clamp(2.5rem, 5vw, 3.5rem); }
+  h2 { font-size: var(--step-3); margin-bottom: 1rem; }
+  .head p { font-size: 1.0625rem; }
+  .label {
+    font-weight: 400;
+    color: var(--ash);
+    margin: 0 0 1.25rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--graphite);
+  }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.75rem clamp(2rem, 4vw, 3.25rem);
+  }
+  .hosts p { font-size: 1rem; color: var(--ash); max-width: 60ch; }
+  @media (max-width: 900px) {
+    .head, .groups { grid-column: 1 / -1; }
+    .head { position: static; }
+  }
+</style>

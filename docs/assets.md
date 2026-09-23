@@ -116,3 +116,22 @@ Check each partner's logo guidelines.
 - Filenames on the shared drive can contain decomposed Unicode (`Ö`), so match
   with globs in scripts.
 - ffmpeg is available: `ffmpeg -i in.jpg -vf "scale='min(2400,iw)':-2" -q:v 3 out.jpg`.
+
+## Supporter logos (in the repo)
+
+`src/assets/logos/*.png` are normalised by `scripts/prepare_logos.py` (dark logos
+become white on transparent; official negative variants are kept). The list of
+supporters, their roles and grant numbers is in `src/content/supporters.yaml`,
+and it drives the landing section, the footer row (`featured: true`) and
+/people/#support. Sources:
+- **Shared drive:** TU Wien (SVG), Ars Electronica, VCQ, SFB BeyondC, JKU LIT,
+  Stadt Wien Kultur, Mariendom (PDF), anton bruckner 2024 (official grey
+  white-variant, "Aniver_Logo_GRA-GRA_white_EN"; the brand manual forbids new
+  colour combinations).
+- **Official websites:** FWF (fwf.ac.at/aktuelles/presse/logos), JKU (site
+  footer SVG), University of Innsbruck (negative SVG), Anton Bruckner Private
+  University, Kunstuniversität Linz, BMWKMS, Austrian Cultural Forum Washington.
+- **quantA:** taken from the team's Berlin slides (quantumaustria.at was
+  unreachable); replace with the official file when available.
+- Text only (no logo): Johns Hopkins, Vienna Ball of Sciences, EXPO Osaka,
+  TechForum Millstatt, European Forum Alpbach, CIVA, Zirkus des Wissens.
