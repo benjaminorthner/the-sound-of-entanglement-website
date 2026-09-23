@@ -206,6 +206,7 @@ const stops = [
     };
 
     let scene: PointCloudScene | undefined;
+    const sound = new HeroSound();
     let visible = true;
     const running = new RunningS();
     let latest: ReplayEvent | undefined;
@@ -215,12 +216,13 @@ const stops = [
       const p = progress();
       updateText(p);
       scene?.setProgress(p);
+      // the sound fades out as the hero scrolls off the screen
+      sound.setLevel(Math.min(1, Math.max(0, hero.getBoundingClientRect().bottom / innerHeight)));
     };
     addEventListener('scroll', onScroll, { passive: true });
     addEventListener('resize', onScroll);
     onScroll();
 
-    const sound = new HeroSound();
     const soundBtn = $('[data-sound]');
     soundBtn.addEventListener('click', async () => {
       const on = !sound.on;
@@ -243,7 +245,7 @@ const stops = [
     const setRunning = () => {
       const on = visible && !document.hidden;
       scene?.setRunning(on);
-      sound.pause(!on);
+      sound.pause(document.hidden);
       if (!replay) return;
       if (on && !replay.running) replay.start();
       if (!on && replay.running) replay.stop();

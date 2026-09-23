@@ -7,14 +7,16 @@
  * - Hum: one low A (55 Hz) and a few of its natural overtones, each breathing
  *   slowly at its own rate, slightly detuned between left and right. No
  *   melody, no chords that change.
- * - Detection: a faint high glint (an overtone of the same A), Alice left and
- *   Bob right. Rate-limited, so fast forward doesn't turn into a rain of pings.
+ * - Detection: the hum blooms for a moment on each side (Alice left, Bob
+ *   right): a few higher overtones of the same A swell and fade. Every pair
+ *   adds to the bloom, so in fast forward the hum simply gets brighter.
+ * - The volume follows the scroll: it fades out as the hero leaves the screen.
  *
  * Everything is synthesised with Web Audio; no files are loaded.
  */
 
 const F0 = 55;
-/** overtone number and level */
+/** overtone number and level of the hum */
 const PARTIALS: [number, number][] = [
   [1, 0.5],
   [2, 1],
@@ -23,39 +25,83 @@ const PARTIALS: [number, number][] = [
   [6, 0.2],
   [8, 0.08],
 ];
-const GLINT = F0 * 24; // 1320 Hz
+/** overtones that bloom at a detection */
+const BLOOM: [number, number][] = [
+  [5, 0.5],
+  [6, 0.7],
+  [8, 0.5],
+  [10, 0.25],
+];
+const BLOOM_TAU = 0.7; // seconds
 
 export class HeroSound {
   private ctx?: AudioContext;
-  private out?: GainNode;
-  private lastGlint = -9;
+  private out?: GainNode; // on/off
+  private level?: GainNode; // scroll
+  private bloom: { gain: GainNode; env: number; at: number }[] = [];
+  private idle?: ReturnType<typeof setTimeout>;
+  private hidden = false;
+  private scroll = 1;
   on = false;
 
   /** Must be called from a user gesture (browsers block audio otherwise). */
   async enable() {
     if (!this.ctx) this.build();
-    await this.ctx!.resume();
     this.on = true;
-    this.fade(1, 3);
+    await this.wake();
+    this.ramp(this.out!.gain, 1, 3);
   }
 
   disable() {
     this.on = false;
-    this.fade(0, 1);
+    if (this.out) this.ramp(this.out.gain, 0, 1);
+    this.sleepSoon(1.2);
   }
 
-  /** Pause while the hero is off screen or the tab is hidden. */
-  pause(paused: boolean) {
+  /** Pause while the tab is hidden. */
+  pause(hidden: boolean) {
+    this.hidden = hidden;
     if (!this.ctx || !this.on) return;
-    if (paused) void this.ctx.suspend();
-    else void this.ctx.resume();
+    if (hidden) void this.ctx.suspend();
+    else if (this.scroll > 0) void this.wake();
+  }
+
+  /** 1 while the hero fills the screen, falling to 0 as it scrolls away. */
+  setLevel(x: number) {
+    this.scroll = x;
+    if (!this.ctx || !this.level) return;
+    this.level.gain.setTargetAtTime(x * x, this.ctx.currentTime, 0.08);
+    if (!this.on) return;
+    if (x > 0) void this.wake();
+    else this.sleepSoon(0.6);
+  }
+
+  private async wake() {
+    clearTimeout(this.idle);
+    if (this.ctx && !this.hidden && this.ctx.state !== 'running') await this.ctx.resume();
+  }
+
+  /** Suspend the context once it has gone quiet, to save the CPU. */
+  private sleepSoon(seconds: number) {
+    clearTimeout(this.idle);
+    this.idle = setTimeout(() => void this.ctx?.suspend(), seconds * 1000);
+  }
+
+  private ramp(param: AudioParam, to: number, seconds: number) {
+    const t = this.ctx!.currentTime;
+    param.cancelScheduledValues(t);
+    param.setValueAtTime(param.value, t);
+    param.linearRampToValueAtTime(to, t + seconds);
   }
 
   private build() {
     const ctx = (this.ctx = new AudioContext());
+    this.level = ctx.createGain();
+    this.level.gain.value = this.scroll * this.scroll;
+    this.level.connect(ctx.destination);
     this.out = ctx.createGain();
     this.out.gain.value = 0;
-    this.out.connect(ctx.destination);
+    this.out.connect(this.level);
 
     const lp = ctx.createBiquadFilter();
     lp.type = 'lowpass';
@@ -65,57 +111,54 @@ export class HeroSound {
     hum.gain.value = 0.018;
     lp.connect(hum).connect(this.out);
 
+    const tone = (f: number, pan: number, level: number, into: AudioNode) => {
+      const osc = ctx.createOscillator();
+      osc.frequency.value = f;
+      const g = ctx.createGain();
+      g.gain.value = level;
+      const p = ctx.createStereoPanner();
+      p.pan.value = pan;
+      osc.connect(g).connect(p).connect(into);
+      osc.start();
+      return g;
+    };
+
     for (const [n, level] of PARTIALS) {
       for (const pan of [-0.6, 0.6]) {
-        const osc = ctx.createOscillator();
-        osc.frequency.value = F0 * n + pan * 0.25 * Math.sqrt(n); // slow beating between the sides
-        const g = ctx.createGain();
-        g.gain.value = level * 0.6;
-        // each overtone breathes at its own slow rate
+        // slightly detuned sides beat slowly; each overtone breathes at its own rate
+        const g = tone(F0 * n + pan * 0.25 * Math.sqrt(n), pan, level * 0.6, lp);
         const lfo = ctx.createOscillator();
         lfo.frequency.value = 0.02 + Math.random() * 0.05;
         const depth = ctx.createGain();
         depth.gain.value = level * 0.4;
         lfo.connect(depth).connect(g.gain);
-        const p = ctx.createStereoPanner();
-        p.pan.value = pan;
-        osc.connect(g).connect(p).connect(lp);
-        osc.start();
         lfo.start(ctx.currentTime + Math.random() * 10);
       }
     }
-  }
 
-  private fade(to: number, seconds: number) {
-    if (!this.ctx || !this.out) return;
-    const t = this.ctx.currentTime;
-    this.out.gain.cancelScheduledValues(t);
-    this.out.gain.setValueAtTime(this.out.gain.value, t);
-    this.out.gain.linearRampToValueAtTime(to, t + seconds);
+    // the bloom: one group of higher overtones per side, silent until a detection
+    for (const pan of [-0.75, 0.75]) {
+      const gain = ctx.createGain();
+      gain.gain.value = 0;
+      gain.connect(this.out);
+      for (const [n, level] of BLOOM) tone(F0 * n + pan * 0.4, pan, level * 0.007, gain);
+      this.bloom.push({ gain, env: 0, at: 0 });
+    }
   }
 
   /** Both detectors click. */
   detect() {
-    if (!this.on || !this.ctx) return;
-    const t = this.ctx.currentTime + 0.01;
-    if (t - this.lastGlint < 0.35) return;
-    this.lastGlint = t;
-    this.glint(-0.7, t);
-    this.glint(0.7, t + 0.004);
-  }
-
-  private glint(pan: number, t: number) {
-    const ctx = this.ctx!;
-    const osc = ctx.createOscillator();
-    osc.frequency.value = GLINT;
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(0.012, t + 0.008);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + 1.4);
-    const p = ctx.createStereoPanner();
-    p.pan.value = pan;
-    osc.connect(g).connect(p).connect(this.out!);
-    osc.start(t);
-    osc.stop(t + 1.5);
+    if (!this.on || !this.ctx || this.ctx.state !== 'running') return;
+    const t = this.ctx.currentTime;
+    for (const b of this.bloom) {
+      // every detection adds to what is left of the previous blooms
+      b.env = Math.min(3, b.env * Math.exp(-(t - b.at) / BLOOM_TAU) + 1);
+      b.at = t;
+      const peak = Math.sqrt(b.env); // many blooms in a row get brighter, not louder in proportion
+      b.gain.gain.cancelScheduledValues(t);
+      b.gain.gain.setValueAtTime(b.gain.gain.value, t);
+      b.gain.gain.linearRampToValueAtTime(peak, t + 0.12);
+      b.gain.gain.setTargetAtTime(0, t + 0.12, BLOOM_TAU);
+    }
   }
 }

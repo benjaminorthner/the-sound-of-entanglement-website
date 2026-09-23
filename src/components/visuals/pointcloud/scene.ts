@@ -856,6 +856,17 @@ export async function createScene(
       progress = p;
     },
     setSpeed(k) {
+      if (k === speed) return;
+      const now = performance.now();
+      if (k > speed) {
+        // speeding up: the pairs in flight switch to the new speed at once, and
+        // the next pair doesn't wait for them
+        for (const pr of pairs) {
+          pr.t0 = now - ((now - pr.t0) * pr.k) / k;
+          pr.k = k;
+          release(pr);
+        }
+      }
       speed = k;
     },
     play(e) {

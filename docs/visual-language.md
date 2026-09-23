@@ -85,11 +85,13 @@ Two small toggles sit next to the readout of the point-cloud hero
 music**: the pieces are Clemens Wenger's, and nothing on the landing page may
 pass for them (Benjamin, Sept 2026). A soft hum so a site about sound isn't
 silent: a low A (55 Hz) and a few natural overtones, each breathing slowly,
-slightly detuned left and right; no melody. At a detection, a faint high glint
-(an overtone of the same A), Alice left, Bob right, rate-limited. Tried and
-rejected: bells tuned to the outcomes (too prominent, too music-like) and
-filtered noise (sounded like white noise, unpleasant).
+slightly detuned left and right; no melody. At each detection the hum blooms
+for a moment on each side (a few higher overtones of the same A swell and
+fade); blooms add up, so in fast forward the hum gets brighter. The volume
+follows the scroll and fades as the hero leaves the screen. Tried and
+rejected: bells tuned to the outcomes (too prominent, too music-like), filtered
+noise (sounded like white noise), a high glint per detection ("dinging").
 
-**Fast forward** („Vorspulen"): the recording replays 20 times faster and the
+**Fast forward** („Vorspulen"), effective at once (pairs in flight switch speed): the recording replays 20 times faster and the
 pairs fly 6 times faster, many at once (up to 10 in flight). The ±1 labels
 and the thread between the two photons of a pair are only drawn in slow mode.
