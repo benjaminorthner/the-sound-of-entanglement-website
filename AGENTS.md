@@ -28,6 +28,18 @@ npm run preview
 Design mockups (static HTML) are in `design/mockups/`. Serve them with
 `python -m http.server 8765` from that folder.
 
+## Deployment
+
+- Hosted on **Vercel** (project `benjaminorthners-projects/the-sound-of-entanglement`),
+  connected to this GitHub repo: **every push to `main` deploys to production**
+  at https://the-sound-of-entanglement.vercel.app, and every other branch gets
+  its own preview URL. So only push to `main` when the build passes
+  (`npm run build`).
+- Preview phase: the site has `noindex` (in `src/layouts/Base.astro`) and a
+  `public/robots.txt` blocking crawlers until photo rights are cleared. Remove
+  both at launch.
+- Launch: point soundofentanglement.com (owned by Clemens) at Vercel via DNS.
+
 ## Repository layout
 
 ```
