@@ -1,0 +1,360 @@
+---
+/**
+ * Booking. Facts come from docs/ (shows, pieces, operational notes from the
+ * bruQner repo) and the 2025 tech rider. Anything wrapped in <Confirm> still
+ * needs the team's confirmation; see "Booking" in docs/open-questions.md.
+ */
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Photo from '../components/Photo.astro';
+import Confirm from '../components/booking/Confirm.astro';
+import { year } from '../lib/format';
+
+import lecture from '../assets/photos/2024-bruqner-linz/lecture-before-3000.jpg';
+import stage from '../assets/photos/2025-alpbach/wide-stage.jpg';
+import peering from '../assets/photos/2025-alpbach/audience-peering.jpg';
+
+const CONTACT = 'clemenswenger@mac.com';
+const now = new Date();
+
+const played = (await getCollection('shows', (s) => !s.data.draft && s.data.kind !== 'talk' && s.data.date < now && !s.id.includes('test')))
+  .sort((a, b) => +a.data.date - +b.data.date);
+
+const pieces = (await getCollection('pieces', (p) => p.data.status === 'repertoire')).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+const needs: Record<string, string> = {
+  bruqner: 'Needs two organs that are tuned to each other and can be played together, like those of the Mariendom Linz, and two organists.',
+  '8-rooms': 'With the band The Uncertain Question: Clemens Wenger on synthesizer, Manu Mayr on electric bass, Judith Schwarz on drums. It has also been played as a duo without drums.',
+  'indeterminate-apparatus': 'With the band as a trio: Clemens Wenger on synthesizers and the VoQoder, Manu Mayr on electric bass, Judith Schwarz on drums.',
+};
+
+const mailSubject = encodeURIComponent('Booking enquiry: The Sound of Entanglement');
+---
+<Base
+  title="Booking"
+  description="Book The Sound of Entanglement: a live Bell experiment, a band and a physics lecture for festivals, conferences, universities and concert series."
+>
+  <header class="wrap intro">
+    <h1>Booking</h1>
+    <p class="lede">
+      We bring the experiment, the music and the physics. A laser, a crystal and four single-photon
+      detectors travel with us in a glass case, and for the length of a performance they conduct a band,
+      two organs or a room full of people.
+    </p>
+    <p class="ui cta">
+      <a class="primary" href={`mailto:${CONTACT}?subject=${mailSubject}`}>Write to us</a>
+      <span class="dim">In English or German.</span>
+    </p>
+  </header>
+
+  <Photo
+    src={lecture}
+    alt="The lecture before the premiere: two speakers in front of more than 3 000 people sitting on the floor of the Mariendom Linz, the organ at the far end."
+    credit="Florian Voggeneder / Ars Electronica"
+    caption="The lecture before the premiere of BruQner, Mariendom Linz, 4 September 2024."
+    bleed
+    loading="eager"
+    ratio="21 / 9"
+  />
+
+  <section class="wrap block" aria-labelledby="formats-h">
+    <h2 id="formats-h">Formats</h2>
+    <dl class="formats">
+      <div class="format">
+        <dt>
+          <span class="name">Lecture-performance</span>
+          <span class="len ui dim">about 45 to 60 minutes</span>
+        </dt>
+        <dd>
+          <p>
+            Our usual format. A short, accessible physics lecture of 20 to 25 minutes explains entanglement and
+            how the experiment is used to make music. Then about 20 minutes of live audiovisual performance,
+            conducted by the photons, and questions afterwards. In English or German.
+          </p>
+          <p class="dim">Played at the Mariendom Linz, Johns Hopkins University, the European Forum Alpbach, CIVA and JKU Linz.</p>
+        </dd>
+      </div>
+      <div class="format">
+        <dt>
+          <span class="name">Sets through an evening</span>
+          <span class="len ui dim">sets of about 15 minutes</span>
+        </dt>
+        <dd>
+          <p>
+            Without a lecture, for balls, receptions and festivals where people come and go. At the Vienna Ball
+            of Sciences we played six sets between 21:30 and two in the morning, with an information screen
+            explaining the project and the team answering questions at the experiment between sets.
+          </p>
+        </dd>
+      </div>
+      <div class="format">
+        <dt>
+          <span class="name">Talk</span>
+          <span class="len ui dim">conference or festival slot</span>
+        </dt>
+        <dd>
+          <p>
+            A talk about the project for physicists, musicians or a general audience, with audio and video from
+            the performances. Where the experiment can't travel, we show a demonstration with simulated data
+            that has the same statistics, as at the symposium on quantum computing and music in Palermo.
+          </p>
+        </dd>
+      </div>
+      <div class="format">
+        <dt>
+          <span class="name">Film and exhibition</span>
+          <span class="len ui dim">18-minute documentary</span>
+        </dt>
+        <dd>
+          <p>
+            The documentary <em>BruQner – The Sound of Entanglement</em> (weitblickfilm, 2025) and material from
+            the project for exhibitions, as in the Austrian Pavilion at EXPO 2025 in Osaka.{' '}
+            <Confirm>Screening and exhibition rights on request.</Confirm>
+          </p>
+        </dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="wrap block pieces" aria-labelledby="pieces-h">
+    <h2 id="pieces-h">What we can play</h2>
+    <ul class="piece-list">
+      {pieces.map((p) => (
+        <li>
+          <a class="piece-name" href={`/pieces/${p.id}/`}><em>{p.data.title}</em></a>
+          <span class="year ui dim">{p.data.year}</span>
+          <p>{needs[p.id] ?? p.data.forces}</p>
+        </li>
+      ))}
+    </ul>
+    <p class="note dim">
+      Every performance is different: the photon pairs measured that evening decide what is played. The Bell
+      value measured at each show is listed with the <a href="/shows/">shows</a>.
+    </p>
+  </section>
+
+  <section class="wrap after" aria-labelledby="after-h">
+    <div class="after-photo">
+      <Photo
+        src={peering}
+        alt="After the performance, members of the audience lean over the open case to look at the optics of the experiment."
+        credit="© EFA / Luiza Puiu"
+        caption="After the performance at the European Forum Alpbach, 26 August 2025."
+        sizes="(min-width: 900px) 55vw, 100vw"
+      />
+    </div>
+    <div class="after-text">
+      <h2 id="after-h">After the show</h2>
+      <p>
+        The experiment is not a prop. After the performance the case is opened, and the audience can come up,
+        look at the laser, the crystal and the detectors, and ask the physicists who built it. In Alpbach, at CIVA
+        and at JKU, people gathered round the open case once the music had stopped.
+      </p>
+    </div>
+  </section>
+
+  <section class="wrap block" aria-labelledby="played-h">
+    <h2 id="played-h">Where we've played</h2>
+    <ul class="played">
+      {played.map((s) => (
+        <li>
+          <span class="y num dim">{year(s.data.date)}</span>
+          <a href={`/shows/${s.id}/`}>{s.data.title}</a>
+          <span class="where dim">{s.data.venue === s.data.city ? s.data.city : `${s.data.venue}, ${s.data.city}`}{s.data.audience && `, ${s.data.audience} people`}</span>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="wrap block tech" aria-labelledby="tech-h">
+    <div class="tech-head">
+      <h2 id="tech-h">What we need from you</h2>
+      <p class="dim">
+        Every venue is different and we adapt: so far we have played in two churches, a ballroom, a cinema,
+        theatres and a congress centre. As a starting point, based on our shows so far:
+      </p>
+      <Photo
+        src={stage}
+        alt="The trio and the lit experiment case on a stage in purple light, white-line visuals projected above."
+        credit="© EFA / Luiza Puiu"
+        caption="Stage set-up at the European Forum Alpbach."
+        sizes="(min-width: 900px) 35vw, 100vw"
+      />
+    </div>
+    <dl class="needs">
+      <div>
+        <dt>Time</dt>
+        <dd>
+          2 to 4 hours on site to set up and align the experiment, then 30 to 60 minutes of sound check. About an
+          hour to pack up afterwards.
+        </dd>
+      </div>
+      <div>
+        <dt>The experiment</dt>
+        <dd>
+          A stable table for the glass case (the optics sit on a 60 × 60 cm breadboard), central on stage or in
+          the room so that people can see it. <Confirm>Table size and height.</Confirm>
+        </dd>
+      </div>
+      <div>
+        <dt>Stage</dt>
+        <dd><Confirm>About 6 × 4 m for the band and the experiment, slightly raised.</Confirm></dd>
+      </div>
+      <div>
+        <dt>Sound</dt>
+        <dd>
+          <Confirm>A PA suited to the room, with subwoofer; two side-fill monitors; microphones and stands for the
+          drums, one microphone for announcements; DI boxes (six stereo, two mono).</Confirm>
+        </dd>
+      </div>
+      <div>
+        <dt>Visuals</dt>
+        <dd>
+          The visuals run live from the experiment and are projected behind the performers.{' '}
+          <Confirm>A projector and screen suited to the room (two projectors in larger halls), and a room that can be darkened.</Confirm>{' '}
+          Haze is used only where the venue's fire regulations allow it.
+        </dd>
+      </div>
+      <div>
+        <dt>Light</dt>
+        <dd><Confirm>Dimmable warm-white stage light and dimmable room light.</Confirm></dd>
+      </div>
+      <div>
+        <dt>Power</dt>
+        <dd><Confirm>Separate power on stage for the music, the experiment and the visuals.</Confirm></dd>
+      </div>
+      <div>
+        <dt>Network</dt>
+        <dd>
+          None needed: we bring our own router. The experiment, the music and the visuals talk over a private
+          network, cabled where possible, because thousands of phones make ordinary WiFi unusable.
+        </dd>
+      </div>
+      <div>
+        <dt>Travel</dt>
+        <dd>
+          The experiment travels in its own case, by car or by plane: it has been flown to Washington DC.{' '}
+          <Confirm>Team size on tour depending on the format.</Confirm>
+        </dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="wrap contact" aria-labelledby="contact-h">
+    <h2 id="contact-h">Get in touch</h2>
+    <p>
+      Tell us the date, the venue, the audience and the format you have in mind, and we'll get back to you.
+      Fees depend on the format, the line-up and travel.
+    </p>
+    <p class="mail"><a href={`mailto:${CONTACT}?subject=${mailSubject}`}>{CONTACT}</a></p>
+    <p class="dim small">Clemens Wenger, musical direction, on behalf of the team.</p>
+  </section>
+</Base>
+
+<style>
+  .intro { padding-block: clamp(4rem, 12vw, 9rem) clamp(2.5rem, 6vw, 4.5rem); }
+  .lede { margin-top: 1.75rem; font-size: var(--step-1); line-height: 1.5; max-width: 34ch; }
+  .cta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1.25rem; margin-top: 2rem; font-size: 1rem; }
+  .primary {
+    text-decoration: none;
+    border: 1px solid var(--paper);
+    border-radius: 999px;
+    padding: 0.55rem 1.3rem;
+  }
+  .primary:hover { background: var(--paper); color: var(--black); }
+
+  .block { padding-top: clamp(4rem, 9vw, 7rem); }
+  h2 { font-size: var(--step-3); margin-bottom: 2rem; }
+
+  /* Formats: a definition list, name and length on the left */
+  .formats { margin: 0; border-top: 1px solid var(--graphite); }
+  .format {
+    display: grid;
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    column-gap: var(--gutter);
+    padding-block: 1.75rem;
+    border-bottom: 1px solid var(--graphite);
+  }
+  .format dt { display: flex; flex-direction: column; gap: 0.35rem; }
+  .name { font-family: var(--font-display); font-size: var(--step-1); font-weight: 300; }
+  .len { font-size: 0.875rem; }
+  .format dd { margin: 0; }
+  .format dd p:last-child { margin-bottom: 0; }
+
+  /* Pieces */
+  .piece-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gutter); }
+  .piece-list li { border-top: 1px solid var(--graphite); padding-top: 1.25rem; }
+  .piece-name { font-family: var(--font-display); font-size: var(--step-2); font-weight: 300; text-decoration: none; }
+  .piece-name em { font-style: normal; }
+  .piece-name:hover { text-decoration: underline; text-decoration-thickness: 1px; }
+  .year { margin-left: 0.6rem; font-size: 0.875rem; }
+  .piece-list p { margin-top: 0.9rem; font-size: 1.0625rem; }
+  .note { margin-top: 2.25rem; font-size: 1rem; }
+
+  /* After the show */
+  .after {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    row-gap: 2rem;
+    align-items: end;
+    padding-top: clamp(4rem, 9vw, 7rem);
+  }
+  .after-photo { grid-column: 1 / span 7; }
+  .after-text { grid-column: 9 / -1; padding-bottom: 2.5rem; }
+
+  /* Where we've played */
+  .played { list-style: none; margin: 0; padding: 0; columns: 2; column-gap: var(--gutter); }
+  .played li {
+    break-inside: avoid;
+    display: grid;
+    grid-template-columns: 3.5rem minmax(0, 1fr);
+    column-gap: 1rem;
+    padding-block: 0.7rem;
+    border-top: 1px solid var(--graphite);
+  }
+  .played a { grid-column: 2; }
+  .played .y { grid-row: 1 / span 2; font-size: 0.9375rem; padding-top: 0.2rem; font-family: var(--font-display); }
+  .where { grid-column: 2; font-size: 0.9375rem; }
+
+  /* What we need */
+  .tech {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    row-gap: 2rem;
+    align-items: start;
+  }
+  .tech-head { grid-column: 1 / span 5; position: sticky; top: calc(var(--header-h) + 2rem); }
+  .tech-head p { font-size: 1.0625rem; margin-bottom: 2rem; }
+  .needs { grid-column: 7 / -1; margin: 0; border-top: 1px solid var(--graphite); }
+  .needs > div {
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 1fr);
+    column-gap: 1.5rem;
+    padding-block: 1.1rem;
+    border-bottom: 1px solid var(--graphite);
+  }
+  .needs dt { font-family: var(--font-display); font-size: 1rem; padding-top: 0.15rem; }
+  .needs dd { margin: 0; font-size: 1.0625rem; line-height: 1.55; }
+
+  /* Contact */
+  .contact { padding-top: clamp(5rem, 11vw, 9rem); }
+  .contact p { font-size: var(--step-1); line-height: 1.5; max-width: 38ch; }
+  .mail { margin-top: 1.5rem; }
+  .mail a { font-family: var(--font-display); font-size: var(--step-3); font-weight: 300; text-decoration-thickness: 1px; overflow-wrap: anywhere; }
+  .small { font-size: 1rem !important; }
+
+  @media (max-width: 900px) {
+    .format { grid-template-columns: 1fr; row-gap: 0.75rem; }
+    .piece-list { grid-template-columns: 1fr; }
+    .after-photo, .after-text, .tech-head, .needs { grid-column: 1 / -1; }
+    .after-text { padding-bottom: 0; }
+    .tech-head { position: static; }
+    .played { columns: 1; }
+  }
+  @media (max-width: 480px) {
+    .needs > div { grid-template-columns: 1fr; row-gap: 0.3rem; }
+  }
+</style>

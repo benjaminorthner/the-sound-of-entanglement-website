@@ -52,3 +52,14 @@ open for final clearance before launch.
       the drafts for now*)
 - [x] BruQner audio: *use the available recordings where it makes sense*
       (the phone recordings are low quality; excerpt carefully).
+
+## Booking (page /booking/, items marked "to confirm" on the page)
+- [ ] Should enquiries go to a dedicated booking address instead of clemenswenger@mac.com?
+- [ ] Screening and exhibition rights for the documentary and exhibition material.
+- [ ] Table for the experiment: size and height needed.
+- [ ] Stage: about 6 × 4 m, slightly raised (from the 2025 Ball tech rider).
+- [ ] Sound: PA with subwoofer, two side-fill monitors, drum microphones and stands, one announcement microphone, DI boxes (six stereo, two mono) (Ball tech rider).
+- [ ] Visuals: projector and screen suited to the room (two projectors in larger halls), a room that can be darkened.
+- [ ] Light: dimmable warm-white stage light and dimmable room light (Ball tech rider).
+- [ ] Power: separate power on stage for music, experiment and visuals (Ball tech rider lists 4 + 3 + 2 multi-sockets).
+- [ ] Team size on tour for each format.
