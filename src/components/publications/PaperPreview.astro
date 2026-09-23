@@ -154,7 +154,8 @@ const sheetLabel = (n: number) => (lang === 'de' ? `Seite ${n}. Öffnet das PDF 
 </script>
 
 <style>
-  .paper-object { --at: 0; }
+  /* isolate: the sheets' z-indexes (up to 101) must not compete with the fixed header */
+  .paper-object { --at: 0; isolation: isolate; }
   .stack {
     position: relative;
     aspect-ratio: 1600 / 2263;
