@@ -230,12 +230,18 @@ export async function createScene(
     uRes: { value: new THREE.Vector2(1, 1) },
     uEdge: { value: 0.6 },
     uShade: { value: 0.5 },
+    /** 0: text on the left (wide screens), 1: text below the board (narrow screens). */
+    uVertical: { value: 0 },
   };
   const SHADE_GLSL = /* glsl */ `
     uniform vec2 uRes;
-    uniform float uEdge, uShade;
+    uniform float uEdge, uShade, uVertical;
+    // Keeps the hero text legible: the cloud is quieter where the text sits.
+    // Wide screens: the left side. Narrow screens: the lower part, below the board.
     vec3 shadeSide(vec3 c) {
-      float side = smoothstep(uEdge - 0.22, uEdge + 0.04, gl_FragCoord.x / uRes.x);
+      float sideX = smoothstep(uEdge - 0.22, uEdge + 0.04, gl_FragCoord.x / uRes.x);
+      float sideY = smoothstep(0.34, 0.52, gl_FragCoord.y / uRes.y);
+      float side = mix(sideX, sideY, uVertical);
       float l = dot(c, vec3(0.299, 0.587, 0.114));
       return mix(vec3(l), c, 0.25 + 0.75 * side) * mix(1.0 - uShade, 1.0, side);
     }`;
@@ -628,7 +634,8 @@ export async function createScene(
       Math.max(0, 1 - Math.abs(focusS - 2)),
       Math.max(0, 1 - Math.abs(focusS - 3)),
     );
-    shade.uEdge.value = narrow ? 2.0 : 0.58;
+    shade.uEdge.value = 0.58;
+    shade.uVertical.value = narrow ? 1 : 0;
     shade.uShade.value = st.shade;
     camera.updateMatrixWorld();
 
