@@ -71,7 +71,7 @@ const stops = [
         <p class="readout">
           <span class="live-only">
             A 3D scan of the experiment, replaying photon pairs measured at the premiere in the Mariendom Linz on
-            4 September 2024.
+            4 September 2024. One pair at a time is drawn, slowed down.
           </span>
           <span class="static-only">The experiment we take on stage: a Bell test in a glass case.</span>
         </p>
@@ -85,31 +85,15 @@ const stops = [
 
     <div class="labels" data-labels aria-hidden="true"></div>
 
-    <aside class="instrument live-only waiting" aria-label="The pair being drawn" data-instrument>
-      <p class="pair ui">
-        Pair <span class="num" data-pair>–</span>, measured at <span class="num" data-clock>–</span>
-      </p>
-      <dl class="sides">
-        <div class="side">
-          <dt class="ui">Alice</dt>
-          <dd><span class="ui dim">setting</span> <span class="num" data-a-set>–</span></dd>
-          <dd class="num result" data-a-out>–</dd>
-        </div>
-        <div class="side">
-          <dt class="ui">Bob</dt>
-          <dd><span class="ui dim">setting</span> <span class="num" data-b-set>–</span></dd>
-          <dd class="num result" data-b-out>–</dd>
-        </div>
-      </dl>
-      <p class="agree ui" data-agree>&nbsp;</p>
-      <p class="bell ui">
-        <span data-s>Bell value: still settling</span><span class="dim">, classical limit 2</span>
-      </p>
-      <p class="note ui dim">
-        The count follows the recording at its real pace. One pair at a time is drawn, slowed down; the others
-        pass unseen.
-      </p>
-    </aside>
+    <p
+      class="tally ui live-only waiting"
+      data-tally
+      title="The count and the Bell value follow the recording at its real pace. One pair at a time is drawn, slowed down; the others pass unseen."
+    >
+      <span class="tally-pair">Pair <span class="num" data-pair>–</span>, <span class="num" data-clock>–</span>.</span>
+      <span>Alice <span class="num" data-a-out>–</span>, Bob <span class="num" data-b-out>–</span>.</span>
+      <span class="num" data-s>–</span>
+    </p>
 
     <p class="scroll-hint ui live-only" aria-hidden="true">Scroll to follow the light</p>
   </div>
@@ -131,11 +115,8 @@ const stops = [
     const el = {
       pair: $('[data-pair]'),
       clock: $('[data-clock]'),
-      aSet: $('[data-a-set]'),
-      bSet: $('[data-b-set]'),
       aOut: $('[data-a-out]'),
       bOut: $('[data-b-out]'),
-      agree: $('[data-agree]'),
       s: $('[data-s]'),
     };
     const COUNT = 3; // stops after the first
@@ -189,23 +170,17 @@ const stops = [
     document.addEventListener('visibilitychange', setRunning);
 
     const showS = () => {
-      el.s.textContent =
-        running.n < 60
-          ? `Bell value: still settling (${running.n} pairs)`
-          : `S = ${running.S.toFixed(2)} from ${running.n.toLocaleString('en')} pairs`;
+      el.s.textContent = running.n < 60 ? 'S still settling' : `S = ${running.S.toFixed(2)}`;
     };
     const sign = (x: number) => (x === 1 ? '+1' : '−1');
     const onDetect = ({ e, colours }: DetectInfo) => {
       el.pair.textContent = String(e.n + 1);
       el.clock.textContent = clock(e);
-      el.aSet.textContent = String(e.a + 1);
-      el.bSet.textContent = String(e.b + 1);
       el.aOut.textContent = sign(e.A);
       el.bOut.textContent = sign(e.B);
       el.aOut.style.color = colours[0];
       el.bOut.style.color = colours[1];
-      el.agree.textContent = e.A === e.B ? 'Same result' : 'Different results';
-      $('[data-instrument]').classList.remove('waiting');
+      $('[data-tally]').classList.remove('waiting');
       showS();
     };
 
@@ -316,39 +291,20 @@ const stops = [
     font-variant-numeric: tabular-nums;
   }
 
-  /* The pair currently being drawn, like the readout of an instrument. */
-  .instrument {
+  /* One quiet line: the pair being drawn and the running Bell value. */
+  .tally {
     position: absolute;
-    z-index: 1;
     right: var(--gutter);
-    bottom: 2.25rem;
-    width: 17.5rem;
+    bottom: 1.6rem;
     margin: 0;
-    color: var(--ash);
-    font-size: 0.875rem;
+    display: flex;
+    gap: 0.9rem;
+    color: var(--smoke);
+    font-size: 0.8125rem;
+    transition: opacity 0.6s;
   }
-  .instrument::before {
-    content: '';
-    position: absolute;
-    inset: -3rem -2rem -2rem -3rem;
-    z-index: -1;
-    background: radial-gradient(closest-side, rgb(0 0 0 / 0.82), rgb(0 0 0 / 0.55) 60%, transparent);
-    pointer-events: none;
-  }
-  .instrument { transition: opacity 0.6s; }
-  .instrument.waiting { opacity: 0; }
-  .instrument p { margin: 0; }
-  .instrument .num { color: var(--paper); }
-  .pair { padding-bottom: 0.6rem; border-bottom: 1px solid var(--graphite); }
-  .sides { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin: 0.75rem 0 0.4rem; }
-  .side { display: grid; gap: 0.1rem; margin: 0; }
-  .side dt { color: var(--paper); font-size: 0.875rem; }
-  .side dd { margin: 0; }
-  .result { font-family: var(--font-display); font-size: 1.75rem; font-weight: 300; line-height: 1.1; }
-  .agree { color: var(--paper); min-height: 1.4em; }
-  .bell { margin-top: 0.6rem !important; padding-top: 0.6rem; border-top: 1px solid var(--graphite); }
-  .bell [data-s] { color: var(--paper); font-variant-numeric: tabular-nums; }
-  .note { margin-top: 0.75rem !important; font-size: 0.75rem; line-height: 1.45; }
+  .tally .num { color: var(--ash); font-variant-numeric: tabular-nums; }
+  .tally.waiting { opacity: 0; }
 
   /* Live version: a pinned stage with the scan and one stop visible at a time. */
   :global(html[data-hero='live']) .hero { height: 320vh; }
@@ -368,8 +324,8 @@ const stops = [
   :global(html[data-hero='live']) .fallback,
   :global(html[data-hero='live']) .static-only { display: none; }
   :global(html[data-hero='live']) .live-only { display: inline; }
-  :global(html[data-hero='live']) p.live-only,
-  :global(html[data-hero='live']) aside.live-only { display: block; }
+  :global(html[data-hero='live']) p.live-only { display: block; }
+  :global(html[data-hero='live']) p.tally { display: flex; }
   :global(html[data-hero='live']) .copy {
     position: absolute;
     inset: 0;
@@ -417,31 +373,8 @@ const stops = [
       right: var(--gutter);
     }
     :global(html[data-hero='live']) .stop-0 { bottom: 4.5rem; }
-    .instrument {
-      left: var(--gutter);
-      right: var(--gutter);
-      top: calc(var(--header-h) + 0.25rem);
-      bottom: auto;
-      width: auto;
-      font-size: 0.8125rem;
-    }
-    .instrument .pair, .instrument .note { display: none; }
-    .instrument::before {
-      inset: calc(-1 * var(--header-h) - 0.5rem) calc(-1 * var(--gutter)) -2.5rem;
-      background: linear-gradient(rgb(0 0 0 / 0.85) 55%, transparent);
-    }
-    :global(html[data-hero='live']) aside.instrument {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: baseline;
-      gap: 0.1rem 1.25rem;
-    }
-    .sides { display: contents; }
-    .side { display: flex; align-items: baseline; gap: 0.4rem; }
-    .side dd:first-of-type { display: none; }
-    .result { font-size: 1.125rem; }
-    .agree { min-height: 0; }
-    .bell { flex-basis: 100%; margin-top: 0.2rem !important; padding-top: 0; border-top: 0; }
+    .tally { left: var(--gutter); right: auto; bottom: 1rem; font-size: 0.75rem; opacity: calc(1 - var(--hint, 1)); }
+    .tally-pair { display: none; }
     .stop p { font-size: 1.1875rem; }
     .readout { font-size: 0.875rem; }
   }

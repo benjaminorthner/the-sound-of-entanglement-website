@@ -13,7 +13,9 @@
  * setup's axis x = 0.085, as the real setup is.
  *
  * Coordinates (scan, normalised): x −1 (left) .. 1 (right), y −1 (front,
- * detectors) .. 1 (back), z height; board surface ≈ −0.23, beam ≈ −0.03.
+ * detectors) .. 1 (back), z height; board surface ≈ −0.23. The beam height
+ * (0.095) was measured from elevation slices of the scan: the centres of the
+ * rotation-mount apertures (z ≈ 0.10–0.11) and mirror faces (z ≈ 0.09).
  */
 import * as THREE from 'three';
 import type { ReplayEvent } from '../../../lib/replay';
@@ -21,7 +23,7 @@ import type { ReplayEvent } from '../../../lib/replay';
 /* ------------------------------------------------------------------ geometry */
 
 const AXIS = 0.085;
-const ZB = -0.03; // beam height
+const ZB = 0.095; // beam height: optical centre of the mounts, measured in the scan
 const v = (x: number, y: number, z = ZB) => new THREE.Vector3(x, y, z);
 const CRYSTAL = v(AXIS, 0.3);
 const PUMP = [v(0.52, 0.31), v(0.3, 0.305), CRYSTAL];
@@ -39,6 +41,24 @@ function arm(side: -1 | 1) {
 }
 const ALICE = arm(-1);
 const BOB = arm(1);
+
+/** Parts of the setup that matter at each camera stop (x, y, radius in the
+ *  board plane). Everything else fades to monochrome as the camera arrives. */
+const both = (d: number, y: number, r: number) => [
+  [AXIS - d, y, r],
+  [AXIS + d, y, r],
+];
+const FOCUS = {
+  // 1: laser, crystal and the source box
+  source: [[0.4, 0.3, 0.3], [0.2, 0.3, 0.2], [AXIS, 0.3, 0.12]],
+  // 2: the arms: central mirrors, side mirrors, half-wave plates, bottom mirrors
+  arms: [...both(0.03, -0.37, 0.07), ...both(0.29, -0.37, 0.09), ...both(0.285, -0.5, 0.11), ...both(0.285, -0.78, 0.1)],
+  // 3: beam splitters and fibre couplers (the detectors)
+  detectors: [...both(0.46, -0.53, 0.08), ...both(0.6, -0.34, 0.09), ...both(0.62, -0.63, 0.09)],
+};
+const focusUniform = (list: number[][], n: number) => ({
+  value: Array.from({ length: n }, (_, i) => new THREE.Vector3(...(list[i] ?? [9, 9, 0]))),
+});
 
 /** Polarisation angles (degrees) of the two settings, for the plate glyph. */
 const SETTING_ANGLE = { a: [0, 45], b: [22.5, -22.5] };
@@ -241,6 +261,11 @@ export async function createScene(
     uFlashB: { value: new THREE.Vector4(0, 0, 0.006, 0) },
     uColA: { value: new THREE.Color() },
     uColB: { value: new THREE.Color() },
+    // weight of each stop's focus (wide, source, arms, detectors), from scroll
+    uFocusW: { value: new THREE.Vector4(1, 0, 0, 0) },
+    uFocusSrc: focusUniform(FOCUS.source, 3),
+    uFocusArm: focusUniform(FOCUS.arms, 8),
+    uFocusDet: focusUniform(FOCUS.detectors, 6),
   };
   const cloud = new THREE.Points(
     geo,
@@ -256,7 +281,18 @@ export async function createScene(
         uniform float uTime, uSettle, uPR, uViewH, uCamDist;
         uniform vec4 uFlashA, uFlashB;
         uniform vec3 uColA, uColB;
+        uniform vec4 uFocusW;
+        uniform vec3 uFocusSrc[3];
+        uniform vec3 uFocusArm[8];
+        uniform vec3 uFocusDet[6];
         varying vec3 vColor;
+
+        float inFocus(vec3 f, vec3 p) {
+          // soft-edged cylinder above the board
+          float d = length(p.xy - f.xy);
+          return (1.0 - smoothstep(f.z * 0.7, f.z, d)) * smoothstep(-0.215, -0.19, p.z);
+        }
+
         void main() {
           float k = clamp(uSettle * 1.8 - aDelay, 0.0, 1.0);
           float e = k * k * (3.0 - 2.0 * k);
@@ -271,6 +307,16 @@ export async function createScene(
           c = max(mix(vec3(l), c, 1.35), 0.0) * 1.25;
           float plane = 1.0 - smoothstep(-0.225, -0.2, position.z);
           c *= mix(1.0, 0.38, plane);
+
+          // focus: the parts that matter at this stop keep their colour,
+          // everything else fades to a dim monochrome
+          float mSrc = 0.0, mArm = 0.0, mDet = 0.0;
+          for (int i = 0; i < 3; i++) mSrc = max(mSrc, inFocus(uFocusSrc[i], position));
+          for (int i = 0; i < 8; i++) mArm = max(mArm, inFocus(uFocusArm[i], position));
+          for (int i = 0; i < 6; i++) mDet = max(mDet, inFocus(uFocusDet[i], position));
+          float focus = uFocusW.x + uFocusW.y * mSrc + uFocusW.z * mArm + uFocusW.w * mDet;
+          float grey = dot(c, vec3(0.299, 0.587, 0.114));
+          c = mix(vec3(grey) * 0.42, c * 1.12, clamp(focus, 0.0, 1.0));
           c = mix(vec3(0.5, 0.45, 0.85) * 0.22, c, e); // unmeasured points are faintly violet
 
           // detector glow after a click
@@ -482,6 +528,7 @@ export async function createScene(
   let progress = 0;
   let narrow = false;
   let camOff = 0;
+  let focusS = 0;
   const camPos = camFrom(stops[0]);
   const camTgt = new THREE.Vector3(...stops[0].tgt);
   const wantPos = new THREE.Vector3();
@@ -573,6 +620,14 @@ export async function createScene(
     const h = canvas.clientHeight;
     // narrow screens: lift the board into the upper part, above the text
     camera.setViewOffset(w, h, -camOff * w, narrow ? h * 0.16 : 0, w, h);
+    // focus weights: a tent around each stop, following the (smoothed) scroll
+    focusS += (s - focusS) * k;
+    cloudU.uFocusW.value.set(
+      Math.max(0, 1 - Math.abs(focusS - 0)),
+      Math.max(0, 1 - Math.abs(focusS - 1)),
+      Math.max(0, 1 - Math.abs(focusS - 2)),
+      Math.max(0, 1 - Math.abs(focusS - 3)),
+    );
     shade.uEdge.value = narrow ? 2.0 : 0.58;
     shade.uShade.value = st.shade;
     camera.updateMatrixWorld();
