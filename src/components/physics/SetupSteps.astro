@@ -18,10 +18,11 @@ const steps = [
 ---
 <div class="setup-steps" data-steps>
   <div class="figure">
-    <svg viewBox="0 0 920 440" role="img" aria-labelledby="ss-title">
+    <svg data-advance tabindex="0" aria-describedby="ss-hint" viewBox="0 0 920 440" role="img" aria-labelledby="ss-title">
       <title id="ss-title">The measurement chain of the experiment, drawn step by step. The steps are described in the list next to the drawing.</title>
       <defs>
-        <filter id="ss-glow" x="-50%" y="-50%" width="200%" height="200%">
+        <!-- userSpaceOnUse: a bounding-box filter region collapses on horizontal lines (zero height) and hides them -->
+        <filter id="ss-glow" filterUnits="userSpaceOnUse" x="0" y="0" width="920" height="440">
           <feGaussianBlur stdDeviation="3.5" result="b" />
           <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
         </filter>
@@ -101,6 +102,13 @@ const steps = [
         <text x="842" y="312" class="t dim tail" text-anchor="middle">to the music</text>
       </g>
     </svg>
+    <div class="stepper">
+      <p class="progress ui" aria-live="polite"><span data-progress>Step 1 of 7</span><span class="hint dim" id="ss-hint"> Click the drawing or use the arrow keys.</span></p>
+      <div class="nav">
+        <button type="button" class="btn" data-prev>Previous</button>
+        <button type="button" class="btn primary" data-next>Next: Crystal</button>
+      </div>
+    </div>
   </div>
 
   <div class="text">
@@ -115,10 +123,6 @@ const steps = [
         </li>
       ))}
     </ol>
-    <div class="nav">
-      <button type="button" class="btn" data-prev>Previous</button>
-      <button type="button" class="btn primary" data-next>Next step</button>
-    </div>
   </div>
 </div>
 
@@ -129,6 +133,9 @@ const steps = [
     const prev = root.querySelector<HTMLButtonElement>('[data-prev]')!;
     const next = root.querySelector<HTMLButtonElement>('[data-next]')!;
     const N = buttons.length;
+    const svg = root.querySelector<SVGSVGElement>('[data-advance]')!;
+    const progress = root.querySelector<HTMLElement>('[data-progress]')!;
+    const titles = buttons.map((b) => b.querySelector('.step-title')!.textContent ?? '');
     let step = 1;
 
     function show(n: number) {
@@ -147,12 +154,18 @@ const steps = [
         else b.removeAttribute('aria-current');
       });
       prev.disabled = step === 1;
-      next.textContent = step === N ? 'Start again' : 'Next step';
+      next.textContent = step === N ? 'Start again' : `Next: ${titles[step]}`;
+      progress.textContent = `Step ${step} of ${N}: ${titles[step - 1]}`;
     }
 
     buttons.forEach((b) => b.addEventListener('click', () => show(Number(b.dataset.step))));
     prev.addEventListener('click', () => show(step - 1));
     next.addEventListener('click', () => show(step === N ? 1 : step + 1));
+    svg.addEventListener('click', () => show(step === N ? 1 : step + 1));
+    svg.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') { e.preventDefault(); show(step === N ? 1 : step + 1); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); show(step - 1); }
+    });
     root.classList.add('js');
     show(1);
   });
@@ -170,7 +183,11 @@ const steps = [
   svg { width: 100%; height: auto; overflow: visible; }
 
   /* Without JavaScript everything is shown; with it, parts appear step by step. */
-  .js .part { opacity: 0; transition: opacity 0.5s ease; }
+  /* upcoming parts show faintly, so it is clear there is more to step through */
+  .js .part { opacity: 0.1; transition: opacity 0.5s ease; }
+  .js svg { cursor: pointer; }
+  .js svg:focus { outline: none; }
+  .js svg:focus-visible { outline: 1px solid var(--smoke); outline-offset: 6px; }
   .js .part.on { opacity: 0.45; }
   .js .part.now { opacity: 1; }
   .js[data-current='7'] .part.on { opacity: 0.85; }
@@ -244,7 +261,20 @@ const steps = [
   .js .step-text { display: none; }
   .js .current .step-text { display: block; }
 
-  .nav { display: flex; gap: 0.5rem; margin-top: 1.25rem; }
+  .stepper {
+    display: none;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1.5rem;
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--graphite);
+  }
+  .progress { margin: 0; font-size: 0.9375rem; color: var(--paper); }
+  .hint { font-size: 0.8125rem; }
+  .js .stepper { display: flex; } /* without JavaScript every step is shown at once */
+  .nav { display: flex; gap: 0.5rem; }
   .btn {
     font-family: var(--font-display);
     font-size: 0.9375rem;
