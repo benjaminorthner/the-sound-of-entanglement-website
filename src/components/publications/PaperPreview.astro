@@ -37,7 +37,7 @@ const shown = pages.length;
   data-pdf={pdfUrl}
   role="region"
   aria-roledescription="page preview"
-  aria-label={`Preview of the paper, first ${shown} of ${totalPages} pages`}
+  aria-label={shown < totalPages ? `Preview of the paper, first ${shown} of ${totalPages} pages` : `Preview of the paper, ${totalPages} pages`}
 >
   <div class="stack" tabindex="0" aria-describedby="paper-help">
     {pages.map(({ n, img }, i) => (
@@ -75,8 +75,7 @@ const shown = pages.length;
     </button>
   </div>
   <p id="paper-help" class="help ui dim">
-    Arrow keys turn the pages. The preview shows the first {shown} pages; the rest are in the{' '}
-    <a href={pdfUrl}>PDF</a>.
+    Arrow keys turn the pages.{shown < totalPages && <> The preview shows the first {shown} pages; the rest are in the <a href={pdfUrl}>PDF</a>.</>}
   </p>
 </div>
 
