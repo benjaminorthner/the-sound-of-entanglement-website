@@ -1,13 +1,12 @@
 ---
 /**
  * Booking. Facts come from docs/ (shows, pieces, operational notes from the
- * bruQner repo) and the 2025 tech rider. Anything wrapped in <Confirm> still
- * needs the team's confirmation; see "Booking" in docs/open-questions.md.
+ * bruQner repo) and the 2025 tech rider. Items still worth
+ * checking with the team are listed under "Booking" in docs/open-questions.md.
  */
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Photo from '../components/Photo.astro';
-import Confirm from '../components/booking/Confirm.astro';
 import { year } from '../lib/format';
 
 import lecture from '../assets/photos/2024-bruqner-linz/lecture-before-3000.jpg';
@@ -110,7 +109,7 @@ const mailSubject = encodeURIComponent('Booking enquiry: The Sound of Entangleme
           <p>
             The documentary <em>BruQner – The Sound of Entanglement</em> (weitblickfilm, 2025) and material from
             the project for exhibitions, as in the Austrian Pavilion at EXPO 2025 in Osaka.{' '}
-            <Confirm>Screening and exhibition rights on request.</Confirm>
+            Screening and exhibition rights on request.
           </p>
         </dd>
       </div>
@@ -194,7 +193,7 @@ const mailSubject = encodeURIComponent('Booking enquiry: The Sound of Entangleme
         <dt>The experiment</dt>
         <dd>
           A stable table for the glass case (the optics sit on a 60 × 60 cm breadboard), central on stage or in
-          the room so that people can see it. <Confirm>Table size and height.</Confirm>
+          the room so that people can see it. Table size and height.
         </dd>
       </div>
       <div>
@@ -235,7 +234,7 @@ const mailSubject = encodeURIComponent('Booking enquiry: The Sound of Entangleme
         <dt>Travel</dt>
         <dd>
           The experiment travels in its own case, by car or by plane: it has been flown to Washington DC.{' '}
-          <Confirm>Team size on tour depending on the format.</Confirm>
+          Team size on tour depending on the format.
         </dd>
       </div>
     </dl>
