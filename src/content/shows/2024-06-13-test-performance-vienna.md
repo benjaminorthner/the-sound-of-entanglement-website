@@ -10,20 +10,20 @@ summary: 'Three months before the premiere, a test run in Vienna: the experiment
 cover:
   src: ../../assets/photos/2024-early-sessions/haze-sheet.jpg
   alt: A sheet of projected light in haze above the silhouettes of the audience.
-  credit: The Sound of Entanglement
+  credit: Benjamin Orthner
 gallery:
 - src: ../../assets/photos/2024-early-sessions/blue-cloud.jpg
   alt: A blue cloud of projected light over the audience.
-  credit: The Sound of Entanglement
+  credit: Benjamin Orthner
 - src: ../../assets/photos/2024-early-sessions/blue-cone-rehearsal.jpg
   alt: A blue cone of light in a rehearsal hall, 21 May 2024.
-  credit: The Sound of Entanglement
+  credit: Benjamin Orthner
 - src: ../../assets/photos/2024-early-sessions/optics-bench-piano.jpg
   alt: The optics on a bench with red mounts, a piano behind, 21 May 2024.
-  credit: The Sound of Entanglement
+  credit: Benjamin Orthner
 - src: ../../assets/photos/2024-early-sessions/pianist-and-bench.jpg
   alt: A pianist next to the experiment, 21 May 2024.
-  credit: The Sound of Entanglement
+  credit: Benjamin Orthner
 youtube: tTz13cvry2Y
 ---
 

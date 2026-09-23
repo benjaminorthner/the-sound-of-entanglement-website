@@ -37,7 +37,7 @@ accreditation list, CVs with personal data, crew call sheets
 | Vienna Ball | credit unknown | `2025 01 - Vienna Science Ball/Photos/Ball Website (Low Quality)/` (1200 px) | Request hi-res and the credit from the Ball organisers |
 | JKU Zirkus des Wissens | Johannes Kofler | `2025 11 - Zirkus des Wissens (JKU)/JK Pictures & Videos/` (HEIC) | Phone photos |
 | Millstatt | Benjamin Orthner | `2025 06 - Millstatt/Photos/` | Setup-only phone photos |
-| "Osaka" folder | Benjamin Orthner (to confirm) | `2025 05 - Osaka/Photos and Graphics/Photos/` | Actually 2024 pre-premiere sessions (haze, band), not Osaka |
+| "Osaka" folder | Benjamin Orthner (confirmed) | `2025 05 - Osaka/Photos and Graphics/Photos/` | Actually 2024 pre-premiere sessions (haze, band), not Osaka |
 | Setup, top-down in its glass case | Benjamin (to confirm) | `H:\…\TSOE\Presentations\EFS Application Presentation\DSCF9327.jpg` (6003 px) | Physics page |
 | Setup with beam paths | Benjamin | `D:\Programming\The-Sound-of-Entanglement\Figures\SetupLabelledBeamPaths.png`; `D:\Programming\Master-Thesis\sections\setup\figures\whole_setup_photo_beams.png` | Physics page |
 

@@ -39,7 +39,7 @@ clear what was confirmed. Answers from Benjamin (23 Sept 2026) are in
 - [x] "Indeterminate Apparatus": *final title of that piece.*
 
 ## Rights and credits
-- [ ] Album studio photos (`src/assets/photos/2026-album-studio/`): who took
+- [x] Album studio photos (`src/assets/photos/2026-album-studio/`): who took *Benjamin Orthner took the studio photos and the 2024 test-performance photos.*
       them? Credited "The Sound of Entanglement" for now. Also: who is the
       bass player in `bass-and-keys.jpg`, and may studio name and recording
       date (plan: Tonstudio Huppmann, 1 May 2026) be published? The site says
@@ -51,7 +51,7 @@ open for final clearance before launch.
 - [x] weitblickfilm stills (*fine*)
 - [ ] Hi-res originals and credit for the Vienna Ball photos; hi-res CIVA
       photos from eSeL.at (*use what we have for now*)
-- [ ] Visual-test photos (July 2024) and "Osaka" photos: photographer unknown
+- [x] Visual-test photos (July 2024) and "Osaka" photos: photographer unknown *Benjamin Orthner took the studio photos and the 2024 test-performance photos.*
       (*use for now*; credit "The Sound of Entanglement")
 - [ ] Musician and organist bios and portraits; approval of team bios (*use
       the drafts for now*)
