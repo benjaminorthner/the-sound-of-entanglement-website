@@ -31,8 +31,8 @@ const og = image
 const ogAlt = image
   ? (imageAlt ?? '')
   : lang === 'de'
-    ? 'The Sound of Entanglement: der Titel über der Optik des Experiments mit den beiden roten Drehhalterungen.'
-    : 'The Sound of Entanglement: the title over the optics of the experiment, with its two red rotation mounts.';
+    ? 'BruQner im Mariendom Linz: projizierte Lichtwolken über dem leuchtenden Glaskasten mit dem Experiment.'
+    : 'BruQner in the Mariendom Linz: clouds of projected light above the glowing glass case of the experiment.';
 const alt = alternates(Astro.url.pathname);
 const canonical = new URL(Astro.url.pathname, site).href;
 const fullTitle = title ? `${title} · The Sound of Entanglement` : 'The Sound of Entanglement';
