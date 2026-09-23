@@ -1,0 +1,807 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Sound of Entanglement</title>
+<link rel="icon" href="data:,">
+<meta name="description" content="Pairs of entangled photons conduct a live audiovisual performance.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@200;300;400;600&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #000000;
+    --board: #3a3833;
+    --paper: #ece8df;
+    --dim: #8f8a7e;
+    --faint: #4a4740;
+    --red: #e0463c;
+    --blue: #3f6fd8;
+    --yellow: #e6b422;
+    --violet: #8a5cff;
+    --alice: #ff7d7d;
+    --bob: #8f8fff;
+
+    --display: "Josefin Sans", system-ui, sans-serif;
+    --text: "Newsreader", Georgia, serif;
+
+    --measure: 34rem;
+    --gutter: clamp(1.25rem, 4vw, 3.5rem);
+  }
+
+  * { box-sizing: border-box; }
+  html { background: var(--black); color: var(--paper); scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    margin: 0;
+    font-family: var(--text);
+    font-size: clamp(1.05rem, 0.98rem + 0.3vw, 1.2rem);
+    line-height: 1.62;
+    font-optical-sizing: auto;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; text-decoration-color: var(--faint); }
+  a:hover { text-decoration-color: var(--paper); }
+  :focus-visible { outline: 2px solid var(--yellow); outline-offset: 3px; border-radius: 1px; }
+
+  /* ---------- scene ---------- */
+  #scene {
+    position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100lvh;
+    display: block; z-index: 0;
+  }
+  .fallback {
+    position: fixed; inset: 0; z-index: 0;
+    background: #000 center / cover no-repeat;
+    opacity: 0; transition: opacity 1.2s;
+  }
+  .fallback::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,.85), rgba(0,0,0,.35) 60%, rgba(0,0,0,.6)); }
+  .no-webgl .fallback, .reduced .fallback { opacity: 1; }
+  .no-webgl #scene { display: none; }
+
+  /* ---------- header ---------- */
+  .top {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+    display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+    padding: 1.1rem var(--gutter);
+    padding-bottom: 2.2rem;
+    background: linear-gradient(#000 65%, rgba(0,0,0,.85) 80%, rgba(0,0,0,0));
+  }
+  .wordmark {
+    font-family: var(--display); font-weight: 400; font-size: 0.95rem;
+    letter-spacing: 0.24em; text-transform: uppercase; text-decoration: none; white-space: nowrap;
+  }
+  .wordmark span { color: var(--dim); }
+  .top nav { display: flex; gap: clamp(0.9rem, 2.4vw, 2rem); font-family: var(--display); font-weight: 300; font-size: 1rem; }
+  .top nav a { text-decoration: none; color: var(--dim); }
+  .top nav a:hover, .top nav a[aria-current="true"] { color: var(--paper); }
+
+  /* ---------- beam rail (where you are along the beam path) ---------- */
+  .rail {
+    position: fixed; z-index: 10; left: var(--gutter); top: 50%; transform: translateY(-50%);
+    width: 9rem; height: min(56vh, 26rem);
+    font-family: var(--display); font-weight: 300; font-size: 0.85rem;
+  }
+  .rail svg { position: absolute; left: 0; top: 0; width: 14px; height: 100%; overflow: visible; }
+  .rail ol { list-style: none; margin: 0; padding: 0; position: absolute; inset: 0; }
+  .rail li { position: absolute; left: 1.4rem; transform: translateY(-50%); white-space: nowrap; }
+  .rail li a { color: var(--dim); text-decoration: none; text-shadow: 0 0 6px #000, 0 0 12px #000; }
+  .rail li a[aria-current="true"] { color: var(--paper); }
+  .rail li small { display: block; font-size: 0.75rem; color: var(--dim); opacity: 0.75; letter-spacing: 0.02em; }
+
+  /* ---------- sections ---------- */
+  main { position: relative; z-index: 2; overflow-x: clip; }
+  .stop {
+    min-height: 100vh; min-height: 100svh;
+    display: flex; align-items: center;
+    padding: 8rem var(--gutter) 5rem calc(var(--gutter) + 11rem);
+  }
+  .stop.tall { min-height: 150vh; align-items: flex-start; }
+  .panel { max-width: var(--measure); position: relative; min-width: 0; }
+  /* a soft pool of darkness behind text, so the points never fight the words */
+  .panel::before {
+    content: ""; position: absolute; inset: -7rem -9rem; z-index: -1; pointer-events: none;
+    background: radial-gradient(closest-side, rgba(0,0,0,.93), rgba(0,0,0,.8) 50%, rgba(0,0,0,.4) 78%, rgba(0,0,0,0));
+  }
+
+  h1, h2, h3 { font-family: var(--display); font-weight: 300; line-height: 1.08; margin: 0; letter-spacing: -0.005em; }
+  h1 { font-size: clamp(2.3rem, 1.5rem + 3.2vw, 4.4rem); font-weight: 200; }
+  h2 { font-size: clamp(2rem, 1.5rem + 2.2vw, 3.3rem); margin-bottom: 1.4rem; }
+  h3 { font-size: 1.55rem; font-weight: 400; }
+  p { margin: 0 0 1.1em; }
+  .lede { font-size: clamp(1.25rem, 1.05rem + 0.9vw, 1.7rem); line-height: 1.4; margin: 1.4rem 0 1.6rem; max-width: 26ch; }
+  .note { color: var(--dim); font-size: 0.92em; }
+  .note em { color: var(--paper); font-style: normal; font-variant-numeric: tabular-nums; }
+  .wave { font-family: var(--display); font-weight: 400; font-size: 0.9rem; letter-spacing: 0.04em; color: var(--dim); display: block; margin-bottom: 1rem; }
+  .wave.v { color: var(--violet); }
+  .wave.ab { background: linear-gradient(90deg, var(--alice), var(--bob)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  .hero { align-items: flex-end; padding-bottom: 12vh; }
+  .hero .panel { max-width: 34rem; }
+  .scroll-cue { font-family: var(--display); font-size: 0.9rem; color: var(--dim); text-decoration: none; display: inline-flex; gap: 0.6rem; align-items: center; }
+  .scroll-cue::after { content: ""; width: 1px; height: 2.2rem; background: linear-gradient(var(--violet), transparent); }
+
+  /* Bell scale */
+  .bell { margin: 2rem 0 1.4rem; }
+  .bell-scale { position: relative; height: 2.8rem; margin: 0 0 0.4rem; }
+  .bell-scale .axis { position: absolute; left: 0; right: 0; top: 1.3rem; height: 1px; background: var(--faint); }
+  .bell-scale .fill { position: absolute; left: 0; top: calc(1.3rem - 1px); height: 3px; width: 0; background: linear-gradient(90deg, var(--alice), var(--bob)); transition: width .25s linear; }
+  .bell-scale .tick { position: absolute; top: 0.8rem; width: 1px; height: 1.1rem; background: var(--paper); }
+  .bell-scale .tick span { position: absolute; top: 1.35rem; transform: translateX(-50%); font-family: var(--display); font-size: 0.78rem; color: var(--dim); white-space: nowrap; }
+  .bell-scale .tick.q { background: var(--dim); }
+  .bell-read { font-variant-numeric: tabular-nums; }
+  .bell-read b { font-family: var(--display); font-weight: 300; font-size: 2.2rem; letter-spacing: 0; margin-right: 0.35rem; transition: opacity .4s; }
+  .bell.few b, .bell.few .fill { opacity: 0.4; }
+
+  /* Pieces as a concert programme */
+  .programme { list-style: none; margin: 0; padding: 0; }
+  .programme li { padding: 1.4rem 0; border-top: 1px solid var(--faint); }
+  .programme li:last-child { border-bottom: 1px solid var(--faint); }
+  .programme .for { font-style: italic; color: var(--dim); margin: 0.2rem 0 0.7rem; }
+  .programme h3 .yr { color: var(--dim); font-weight: 300; margin-left: 0.5rem; font-size: 1.1rem; }
+  .programme p:last-child { margin-bottom: 0; }
+
+  /* Shows */
+  .next { margin: 0 0 2.4rem; padding-left: 1.2rem; border-left: 1px solid var(--yellow); }
+  .next time { font-family: var(--display); font-weight: 300; font-size: clamp(1.6rem, 1.3rem + 1.4vw, 2.4rem); display: block; line-height: 1.1; }
+  .next p { margin: 0.4rem 0 0; }
+  .shows { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+  .shows caption { text-align: left; font-family: var(--display); font-size: 1.05rem; color: var(--dim); padding-bottom: 0.8rem; caption-side: top; }
+  .shows td, .shows th { text-align: left; vertical-align: top; padding: 0.7rem 0.9rem 0.7rem 0; border-top: 1px solid #25231f; font-weight: 400; }
+  .shows th { white-space: nowrap; font-family: var(--display); font-weight: 300; color: var(--dim); font-variant-numeric: tabular-nums; }
+  .shows .piece { font-style: italic; }
+  .shows .venue small { display: block; color: var(--dim); font-size: 0.86em; }
+  .shows .s { text-align: right; padding-right: 0; color: var(--dim); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .shows .s.cl { color: var(--faint); }
+  .shows-wrap { max-width: 44rem; }
+
+  /* Record */
+  .record { display: grid; gap: 2.6rem; }
+  .record article p { margin-bottom: 0.5rem; }
+  .record figure { margin: 0 0 1rem; }
+  .record img { width: 100%; height: auto; display: block; aspect-ratio: 16 / 9; object-fit: cover; }
+  .record figcaption { font-size: 0.8rem; color: var(--faint); margin-top: 0.4rem; }
+  .authors { color: var(--dim); font-size: 0.92em; }
+
+  footer {
+    position: relative; z-index: 2; background: #000;
+    padding: 4rem var(--gutter) 3rem;
+    display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    border-top: 1px solid #1c1a17; font-size: 0.9rem; color: var(--dim);
+  }
+  footer h2 { font-size: 1.05rem; font-weight: 400; color: var(--paper); margin-bottom: 0.6rem; }
+  footer p { margin: 0 0 0.4rem; }
+
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  @media (max-width: 960px) {
+    .rail { display: none; }
+    .stop { padding: 6rem var(--gutter) 4rem; }
+    .panel { width: 100%; }
+    .panel::before { inset: -2rem -1.25rem; background: rgba(0,0,0,.8); filter: blur(14px); }
+    .top nav { display: none; }
+  }
+  @media (max-width: 560px) {
+    .wordmark { letter-spacing: 0.16em; font-size: 0.8rem; }
+    .shows td.venue small { display: block; }
+    .shows .s { display: none; }
+    .shows, .shows tbody, .shows tr, .shows th, .shows td { display: block; }
+    .shows caption { display: block; }
+    .shows tr { border-top: 1px solid #25231f; padding: 0.8rem 0; }
+    .shows td, .shows th { border: 0; padding: 0.05rem 0; }
+  }
+</style>
+</head>
+<body>
+<canvas id="scene" aria-hidden="true"></canvas>
+<div class="fallback" style="background-image:url('../assets/img/case-foreground.jpg')" aria-hidden="true"></div>
+
+<header class="top">
+  <a class="wordmark" href="#source">The Sound <span>of</span> Entanglement</a>
+  <nav aria-label="Sections">
+    <a href="#bell">Physics</a>
+    <a href="#pieces">Pieces</a>
+    <a href="#shows">Shows</a>
+    <a href="#record">Paper &amp; film</a>
+  </nav>
+</header>
+
+<aside class="rail" aria-label="Along the beam path">
+  <svg viewBox="0 0 14 100" preserveAspectRatio="none" aria-hidden="true">
+    <line x1="3" y1="0" x2="3" y2="100" stroke="#2a2824" stroke-width="1" vector-effect="non-scaling-stroke"/>
+    <line x1="9" y1="25" x2="9" y2="100" stroke="#2a2824" stroke-width="1" vector-effect="non-scaling-stroke"/>
+    <line id="railV" x1="3" y1="0" x2="3" y2="0" stroke="#8a5cff" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
+    <line id="railA" x1="3" y1="25" x2="3" y2="25" stroke="#ff7d7d" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
+    <line id="railB" x1="9" y1="25" x2="9" y2="25" stroke="#8f8fff" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
+  </svg>
+  <ol>
+    <li style="top:0%"><a href="#source">Source<small>405 nm</small></a></li>
+    <li style="top:25%"><a href="#bell">Crystal<small>two photons of 810 nm</small></a></li>
+    <li style="top:50%"><a href="#pieces">Alice &amp; Bob</a></li>
+    <li style="top:75%"><a href="#shows">Detectors</a></li>
+    <li style="top:100%"><a href="#record">Record</a></li>
+  </ol>
+</aside>
+
+<main>
+  <section class="stop hero" id="top" data-stop="0">
+    <div class="panel">
+      <h1>The Sound of Entanglement</h1>
+      <p class="lede">Pairs of entangled photons conduct a live audiovisual performance.</p>
+      <p class="note">This is the experiment itself, a 3D scan of the breadboard we take on stage. Each flash is a real photon pair, measured in Linz Cathedral on 4&nbsp;September 2024 and replayed at the pace it happened: pair <em id="pairN">0</em>, detected at <em id="pairT">23:00:10</em>.</p>
+      <a class="scroll-cue" href="#source">Follow the beam</a>
+    </div>
+  </section>
+
+  <section class="stop" id="source" data-stop="1">
+    <div class="panel">
+      <span class="wave v">405 nm, the only light here you can see</span>
+      <h2>A laser, a crystal and four detectors</h2>
+      <p>The Sound of Entanglement is a collaboration between physicists, computer scientists, a composer and a visual artist from Vienna, Linz and Innsbruck. We take a working quantum optics experiment on stage and let it conduct the music and the visuals, live.</p>
+      <p>A violet laser shines into a nonlinear crystal. Very rarely, about once in every hundred billion photons, one of them splits into two infrared photons, invisible to the eye and entangled in their polarisation.</p>
+    </div>
+  </section>
+
+  <section class="stop" id="bell" data-stop="2">
+    <div class="panel">
+      <span class="wave ab">810 nm, one photon for Alice and one for Bob</span>
+      <h2>Stronger than any classical conductor</h2>
+      <p>Each photon is measured at its own station, called Alice or Bob, and each result is a coin toss that nobody can predict. Compared side by side, though, the two results agree more often than any classical mechanism allows.</p>
+      <p>The Bell value <i>S</i> measures that agreement. Anything classical, a human conductor or a computer included, stays at or below 2. Entangled photons can reach 2√2.</p>
+      <div class="bell" role="group" aria-label="Bell value of the replayed premiere data">
+        <div class="bell-scale" aria-hidden="true">
+          <div class="axis"></div>
+          <div class="fill" id="bellFill"></div>
+          <div class="tick" style="left:66.67%"><span>2, classical limit</span></div>
+          <div class="tick q" style="left:94.28%"><span>2√2</span></div>
+        </div>
+        <p class="bell-read" aria-live="off"><b id="bellS">0.00</b> <span class="note">after <span id="bellN">0</span> pairs from the premiere</span></p>
+        <p class="note">With only a few pairs the value jumps around. It settles as the pairs add up, well above 2.</p>
+      </div>
+      <p><a href="#">How the physics works</a></p>
+    </div>
+  </section>
+
+  <section class="stop tall" id="pieces" data-stop="3">
+    <div class="panel">
+      <h2>Three pieces, three ways to listen</h2>
+      <ol class="programme">
+        <li>
+          <h3><a href="#">BruQner</a><span class="yr">2024</span></h3>
+          <p class="for">for two cathedral organs and entangled photons</p>
+          <p>After Anton Bruckner's <i>Perger Präludium</i>. With every photon pair, each organ receives one of four motifs. The two organists sit 30 metres apart and play what the photons choose.</p>
+        </li>
+        <li>
+          <h3><a href="#">8 Rooms</a><span class="yr">2025</span></h3>
+          <p class="for">for keys, bass, drums and entangled photons</p>
+          <p>The clicking of the motorised wave plates becomes the metronome, and a quantum random walk decides which of eight rooms the band moves into next.</p>
+        </li>
+        <li>
+          <h3><a href="#">Indeterminate Apparatus</a><span class="yr">2025</span></h3>
+          <p class="for">for synthesisers, bass, drums and entangled photons</p>
+          <p>The Bell value sets the tempo: loose and noisy at first, steady once the correlations build up, and audibly slower when the experiment is switched to classical.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="stop tall" id="shows" data-stop="4">
+    <div class="panel shows-wrap">
+      <h2>Shows</h2>
+      <div class="next">
+        <time datetime="2026-10-16">16 October 2026</time>
+        <p>University of Innsbruck, Dies Academicus and MIP Alumni Day. Details to follow.</p>
+      </div>
+      <table class="shows">
+        <caption>Past performances, with the Bell value we measured</caption>
+        <tbody>
+          <tr><th scope="row"><time datetime="2025-11-19">19 Nov 2025</time></th><td class="venue">Zirkus des Wissens <small>JKU Linz</small></td><td class="piece">Indeterminate Apparatus</td><td class="s">2.51</td></tr>
+          <tr><th scope="row"><time datetime="2025-10-03">3 Oct 2025</time></th><td class="venue">CIVA Festival <small>Belvedere 21, Vienna</small></td><td class="piece">Indeterminate Apparatus, premiere</td><td class="s">2.41</td></tr>
+          <tr><th scope="row"><time datetime="2025-08-26">26 Aug 2025</time></th><td class="venue">European Forum Alpbach</td><td class="piece">8 Rooms</td><td class="s">2.29</td></tr>
+          <tr><th scope="row"><time datetime="2025-06-03">3 Jun 2025</time></th><td class="venue">Tech Forum Millstatt</td><td class="piece">8 Rooms</td><td class="s">2.32</td></tr>
+          <tr><th scope="row"><time datetime="2025-04-14">14 Apr 2025</time></th><td class="venue">Science Diplomacy Summit <small>Johns Hopkins University, Washington DC</small></td><td class="piece">8 Rooms</td><td class="s">2.19</td></tr>
+          <tr><th scope="row">Apr–Oct 2025</th><td class="venue">EXPO 2025 Osaka <small>Austrian Pavilion</small></td><td>Film in the exhibition <i>composing the future</i></td><td class="s cl">—</td></tr>
+          <tr><th scope="row"><time datetime="2025-01-25">25 Jan 2025</time></th><td class="venue">Vienna Ball of Sciences <small>City Hall</small></td><td class="piece">8 Rooms, premiere</td><td class="s">2.62</td></tr>
+          <tr><th scope="row"><time datetime="2024-09-06">6 Sep 2024</time></th><td class="venue">Mariendom Linz</td><td class="piece">BruQner, in German</td><td class="s">2.43</td></tr>
+          <tr><th scope="row"><time datetime="2024-09-04">4 Sep 2024</time></th><td class="venue">Mariendom Linz <small>Ars Electronica, antonbruckner2024</small></td><td class="piece">BruQner, premiere, 3,000 people</td><td class="s">2.45</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="stop" id="record" data-stop="5">
+    <div class="panel record">
+      <article>
+        <h2>On the record</h2>
+        <h3><a href="https://arxiv.org/abs/2509.08892">The Sound of Entanglement</a></h3>
+        <p class="authors">E. de Dios Rodríguez, P. Haslinger, J. Kofler, R. Kueng, B. Orthner, A. Ploier, M. Ringbauer, C. Wenger</p>
+        <p class="note">arXiv:2509.08892, 2025</p>
+      </article>
+      <article>
+        <figure>
+          <img src="../assets/img/pump-crystal.jpg" alt="The violet pump laser striking the crystal inside the experiment" loading="lazy" width="2400" height="1350">
+          <figcaption>Film still, weitblickfilm</figcaption>
+        </figure>
+        <h3><a href="https://www.youtube.com/watch?v=_mIf_OFN1YI">BruQner, a documentary</a></h3>
+        <p class="note">19 minutes. The team in the days before the premiere in Linz Cathedral. Directed by Deniz Lindenberg, weitblickfilm, 2025.</p>
+      </article>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div>
+    <h2>The Sound of Entanglement</h2>
+    <p>Clemens Wenger, Enar de Dios Rodríguez, Benjamin Orthner, Philipp Haslinger, Johannes Kofler, Richard Küng, Alexander Ploier, Martin Ringbauer. With Manu Mayr and Judith Schwarz.</p>
+  </div>
+  <div>
+    <h2>With the support of</h2>
+    <p>TU Wien, Johannes Kepler University Linz, University of Innsbruck, quantA, VCQ, SFB BeyondC, Ars Electronica, OÖ KulturEXPO Anton Bruckner 2024.</p>
+  </div>
+  <div>
+    <h2>About this page</h2>
+    <p>The point cloud is a photogrammetry scan of our setup. The replayed pairs come from the performance log of the BruQner premiere, 4 September 2024.</p>
+  </div>
+</footer>
+
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.js" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const q = new URLSearchParams(location.search);
+const forceSettled = q.has('settled');     // review aid: skip the coalescing
+let forceStop = q.has('stop') ? Number(q.get('stop')) : null; // review aid: camera stop
+if (q.has('solo')) { // review aid: show one section alone, at its camera stop
+  document.querySelectorAll('[data-stop]').forEach(el => {
+    if (el.id === q.get('solo')) forceStop = Number(el.dataset.stop); else el.style.display = 'none';
+  });
+  document.querySelector('footer').style.display = 'none';
+}
+const root = document.documentElement;
+
+/* ------------------------------------------------------------------
+   Geometry of the board, in point-cloud coordinates.
+   x: -1 (left) .. 1 (right), y: -1 (front, detectors) .. 1 (back),
+   z: height above the board. Traced from the top-down scan and the
+   paper's labelled beam-path figure.
+------------------------------------------------------------------ */
+const px = (u, v, z = -0.09) => new THREE.Vector3(u / 450 - 1, 1 - v / 450, z);
+const CRYSTAL = px(498, 337, 0.07);
+const PUMP = [px(690, 330, 0.07), px(600, 336, 0.07), CRYSTAL];
+const ALICE = {
+  // down to a mirror, across, down through the half-wave plate to a mirror, back up to the PBS
+  common: [CRYSTAL, px(468, 584), px(366, 591), px(366, 726), px(297, 647)],
+  plus: [px(297, 647), px(239, 568)],
+  minus: [px(297, 647), px(239, 684)],
+};
+const BOB = {
+  common: [CRYSTAL, px(598, 591), px(610, 726), px(685, 644)],
+  plus: [px(685, 644), px(737, 579)],
+  minus: [px(685, 644), px(737, 673)],
+};
+const DET = {
+  aPlus: ALICE.plus[1], aMinus: ALICE.minus[1],
+  bPlus: BOB.plus[1], bMinus: BOB.minus[1],
+};
+
+/* camera stops, one per section. Text always sits in the left column; the
+   view offset (fraction of screen width) pushes the target into the right
+   ~55%. shade = how far the cloud is dimmed behind the text column,
+   gain = overall brightness while a text section is being read. */
+const STOPS = [
+  { pos: [-0.35, -2.2, 1.45], tgt: [-0.62, -0.02, -0.14], off: 0.0, shade: 0.5, gain: 1.0 },  // hero
+  { pos: [0.72, -0.95, 1.1], tgt: [0.12, 0.2, -0.05], off: 0.2, shade: 0.93, gain: 0.8 },    // source
+  { pos: [0.3, -1.4, 1.3], tgt: [0.08, 0.02, -0.1], off: 0.2, shade: 0.93, gain: 0.8 },      // crystal
+  { pos: [0.0, -1.95, 1.3], tgt: [0.0, -0.3, -0.15], off: 0.2, shade: 0.93, gain: 0.8 },     // Alice & Bob
+  { pos: [0.05, -1.8, 0.5], tgt: [0.0, -0.42, -0.15], off: 0.2, shade: 0.93, gain: 0.8 },    // detectors
+  { pos: [0.0, -0.5, 2.75], tgt: [0.0, 0.02, -0.2], off: 0.2, shade: 0.93, gain: 0.85 },     // record
+];
+
+/* ------------------------------------------------------------------
+   Replay of real premiere data
+------------------------------------------------------------------ */
+const OUT = [[1, 1], [1, -1], [-1, 1], [-1, -1]]; // TT, TR, RT, RR
+const COL = {
+  alice: new THREE.Color('#ff7d7d'), bob: new THREE.Color('#8f8fff'),
+  yellow: new THREE.Color('#ffffb3'), violet: new THREE.Color('#ffb3ff'),
+};
+
+function decode(json) {
+  const ev = [];
+  for (let i = 0; i < json.events.length; i++) {
+    const v = parseInt(json.events[i], 16);
+    const [A, B] = OUT[v & 3];
+    ev.push({ a: (v >> 3) + 1, b: ((v >> 2) & 1) + 1, A, B, dt: json.dt[i] });
+  }
+  return ev;
+}
+
+/* Bell value from running correlations; takes the CHSH combination with the
+   largest magnitude, since the sign convention depends on the angle choice. */
+class Bell {
+  constructor() { this.n = 0; this.c = [[0, 0], [0, 0]]; this.s = [[0, 0], [0, 0]]; }
+  add(e) { this.n++; this.c[e.a - 1][e.b - 1]++; this.s[e.a - 1][e.b - 1] += e.A * e.B; }
+  get S() {
+    const E = [0, 1].flatMap(i => [0, 1].map(j => (this.c[i][j] ? this.s[i][j] / this.c[i][j] : 0)));
+    const sum = E.reduce((p, q) => p + q, 0);
+    return Math.max(...E.map(x => Math.abs(sum - 2 * x)));
+  }
+}
+
+/* BruQner colour rule: same setting -> red/blue pair, different -> yellow/violet.
+   Alice's colour follows her outcome; Bob shares it when the outcomes agree. */
+function colours(e) {
+  const group = e.a === e.b ? [COL.alice, COL.bob] : [COL.yellow, COL.violet];
+  const ca = e.A === 1 ? group[0] : group[1];
+  const cb = e.A === e.B ? ca : (ca === group[0] ? group[1] : group[0]);
+  return [ca, cb];
+}
+
+const pairN = document.getElementById('pairN');
+const pairT = document.getElementById('pairT');
+const bellS = document.getElementById('bellS');
+const bellN = document.getElementById('bellN');
+const bellFill = document.getElementById('bellFill');
+const bellBox = document.querySelector('.bell');
+const bell = new Bell();
+
+function showReadout(i, clock) {
+  pairN.textContent = String(i + 1);
+  pairT.textContent = clock.toTimeString().slice(0, 8);
+  bellS.textContent = bell.S.toFixed(2);
+  bellN.textContent = bell.n.toLocaleString('en');
+  bellFill.style.width = Math.min(100, (bell.S / 3) * 100) + '%';
+  bellBox.classList.toggle('few', bell.n < 150);
+}
+
+/* ------------------------------------------------------------------
+   WebGL
+------------------------------------------------------------------ */
+const canvas = document.getElementById('scene');
+let gl = null;
+try { gl = canvas.getContext('webgl2', { antialias: false, alpha: false }); } catch (e) { gl = null; }
+if (!gl) root.classList.add('no-webgl');
+
+let onEvent = () => {};
+
+async function start() {
+  const json = await fetch('../assets/bruqner_premiere_2024-09-04.json').then(r => r.json());
+  const events = decode(json);
+  const t0 = new Date(json.start.slice(0, 23));
+
+  if (reduced || !gl) {
+    // No animation: show the whole excerpt's result at once.
+    let clock = t0.getTime();
+    events.forEach(e => { bell.add(e); clock += e.dt; });
+    showReadout(events.length - 1, new Date(clock));
+    if (reduced) root.classList.add('reduced');
+    if (!gl) return;
+  }
+
+  // replay loop, at the real pace (very short gaps are stretched a little)
+  let i = 0, clock = t0.getTime();
+  const tick = () => {
+    const e = events[i];
+    clock += e.dt;
+    bell.add(e);
+    showReadout(i, new Date(clock));
+    onEvent(e);
+    i = (i + 1) % events.length;
+    if (i === 0) { clock = t0.getTime(); }
+    setTimeout(tick, Math.max(140, events[i].dt));
+  };
+  if (!reduced) setTimeout(tick, 1600);
+}
+
+if (gl) initScene().then(start); else start();
+
+async function initScene() {
+  const renderer = new THREE.WebGLRenderer({ canvas, context: gl, antialias: false });
+  renderer.setPixelRatio(Math.min(2, devicePixelRatio));
+  renderer.setClearColor(0x000000, 1);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(42, 1, 0.01, 50);
+  camera.up.set(0, 0, 1);
+
+  /* --- the scan --- */
+  const buf = await fetch('../assets/setup-pointcloud.bin').then(r => r.arrayBuffer());
+  const n = new Uint32Array(buf, 0, 1)[0];
+  const pos = new Float32Array(buf, 4, n * 3);
+  const rgb = new Uint8Array(buf, 4 + n * 12, n * 3);
+
+  const start = new Float32Array(n * 3);
+  const delay = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    // unmeasured: a loose cloud around the board
+    const r = 1.1 + Math.random() * 1.2, th = Math.random() * Math.PI * 2, ph = Math.acos(2 * Math.random() - 1);
+    start[3 * i] = r * Math.sin(ph) * Math.cos(th);
+    start[3 * i + 1] = r * Math.sin(ph) * Math.sin(th);
+    start[3 * i + 2] = r * Math.cos(ph) * 0.6 + 0.3;
+    // settle outward from the crystal
+    const dx = pos[3 * i] - CRYSTAL.x, dy = pos[3 * i + 1] - CRYSTAL.y;
+    delay[i] = Math.min(1, Math.hypot(dx, dy) / 1.9) * 0.55 + Math.random() * 0.25;
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('aStart', new THREE.BufferAttribute(start, 3));
+  geo.setAttribute('aDelay', new THREE.BufferAttribute(delay, 1));
+  geo.setAttribute('color', new THREE.BufferAttribute(rgb, 3, true));
+
+  const flashUniforms = () => ({ value: new THREE.Vector4(0, 0, 0, 0) }); // xy, radius, intensity
+  // screen-space shading shared by cloud and beams: the text column stays dark
+  const shade = {
+    uRes: { value: new THREE.Vector2(1, 1) },
+    uEdge: { value: 0.6 },   // screen x (0..1) where the cloud reaches full brightness
+    uShade: { value: 0.5 },  // how much darker the text side is
+    uGain: { value: 1.0 },   // overall brightness
+  };
+  const SHADE_GLSL = /* glsl */`
+      uniform vec2 uRes;
+      uniform float uEdge, uShade, uGain;
+      vec3 shadeSide(vec3 c) {
+        float side = smoothstep(uEdge - 0.2, uEdge + 0.04, gl_FragCoord.x / uRes.x);
+        float l = dot(c, vec3(0.299, 0.587, 0.114));
+        return mix(vec3(l), c, 0.2 + 0.8 * side) * uGain * mix(1.0 - uShade, 1.0, side);
+      }`;
+  const uniforms = {
+    uTime: { value: 0 },
+    uSettle: { value: reduced ? 1 : 0 },
+    uSize: { value: 4.6 },
+    uPR: { value: renderer.getPixelRatio() },
+    uFlashA: flashUniforms(), uFlashB: flashUniforms(),
+    uColA: { value: new THREE.Color() }, uColB: { value: new THREE.Color() },
+    ...shade,
+  };
+
+  const cloud = new THREE.Points(geo, new THREE.ShaderMaterial({
+    uniforms,
+    vertexColors: true,
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    vertexShader: /* glsl */`
+      attribute vec3 aStart;
+      attribute float aDelay;
+      uniform float uTime, uSettle, uSize, uPR;
+      uniform vec4 uFlashA, uFlashB;
+      uniform vec3 uColA, uColB;
+      varying vec3 vColor;
+      varying float vAlpha;
+
+      float hash(float p) { return fract(sin(p * 91.3458) * 47453.5453); }
+
+      void main() {
+        float k = clamp(uSettle * 1.8 - aDelay, 0.0, 1.0);
+        float e = k * k * (3.0 - 2.0 * k);
+        vec3 p = mix(aStart, position, e);
+        float id = float(gl_VertexID);
+        // while unmeasured, every point trembles
+        p += (1.0 - e) * 0.03 * vec3(sin(uTime * 1.3 + id), cos(uTime * 1.1 + id * 1.7), sin(uTime * 0.9 + id * 0.3));
+
+        // saturate the scan so the components glow against the board
+        vec3 c = color;
+        float l = dot(c, vec3(0.299, 0.587, 0.114));
+        c = max(mix(vec3(l), c, 2.1), 0.0) * 1.9;
+        c = mix(vec3(0.55, 0.5, 0.9) * 0.25, c, e); // unmeasured points are faintly violet
+
+        vec2 dA = position.xy - uFlashA.xy;
+        vec2 dB = position.xy - uFlashB.xy;
+        float gA = uFlashA.w * exp(-dot(dA, dA) / uFlashA.z) * e;
+        float gB = uFlashB.w * exp(-dot(dB, dB) / uFlashB.z) * e;
+        c += uColA * gA * 2.4 + uColB * gB * 2.4;
+        vColor = c;
+        vAlpha = 0.62;
+
+        vec4 mv = modelViewMatrix * vec4(p, 1.0);
+        gl_Position = projectionMatrix * mv;
+        gl_PointSize = clamp(uSize * uPR * (1.0 + (gA + gB) * 1.4) / -mv.z, 1.0, 9.0 * uPR);
+      }`,
+    fragmentShader: /* glsl */`
+      varying vec3 vColor;
+      varying float vAlpha;
+      ${SHADE_GLSL}
+      void main() {
+        float d = length(gl_PointCoord - 0.5);
+        float a = smoothstep(0.5, 0.05, d) * vAlpha;
+        gl_FragColor = vec4(shadeSide(vColor), a);
+      }`,
+  }));
+  scene.add(cloud);
+
+  /* --- the beams, as dense glowing points so they read as light --- */
+  function sample(path, arm, branch, t0, t1, out) {
+    const lens = []; let total = 0;
+    for (let i = 1; i < path.length; i++) { const l = path[i].distanceTo(path[i - 1]); lens.push(l); total += l; }
+    const count = Math.ceil(total * 900);
+    for (let s = 0; s <= count; s++) {
+      let d = (s / count) * total, i = 0;
+      while (i < lens.length - 1 && d > lens[i]) { d -= lens[i]; i++; }
+      const p = path[i].clone().lerp(path[i + 1], Math.min(1, d / lens[i]));
+      out.pos.push(p.x, p.y, p.z);
+      out.t.push(t0 + (t1 - t0) * (s / count));
+      out.arm.push(arm); out.branch.push(branch);
+    }
+  }
+  const B = { pos: [], t: [], arm: [], branch: [] };
+  sample(PUMP, 2, 0, 0, 1, B);
+  sample(ALICE.common, 0, 0, 0, 0.8, B);
+  sample(ALICE.plus, 0, 1, 0.8, 1, B);
+  sample(ALICE.minus, 0, -1, 0.8, 1, B);
+  sample(BOB.common, 1, 0, 0, 0.8, B);
+  sample(BOB.plus, 1, 1, 0.8, 1, B);
+  sample(BOB.minus, 1, -1, 0.8, 1, B);
+
+  const bgeo = new THREE.BufferGeometry();
+  bgeo.setAttribute('position', new THREE.Float32BufferAttribute(B.pos, 3));
+  bgeo.setAttribute('aT', new THREE.Float32BufferAttribute(B.t, 1));
+  bgeo.setAttribute('aArm', new THREE.Float32BufferAttribute(B.arm, 1));
+  bgeo.setAttribute('aBranch', new THREE.Float32BufferAttribute(B.branch, 1));
+  const bu = {
+    uTime: { value: 0 }, uSettle: uniforms.uSettle, uPR: uniforms.uPR,
+    uPulse: { value: new THREE.Vector4(-1, -1, 1, 1) }, // aliceT, bobT, aliceOut, bobOut
+    ...shade,
+  };
+  const beams = new THREE.Points(bgeo, new THREE.ShaderMaterial({
+    uniforms: bu, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    vertexShader: /* glsl */`
+      attribute float aT, aArm, aBranch;
+      uniform float uTime, uSettle, uPR;
+      uniform vec4 uPulse;
+      varying vec3 vColor;
+      varying float vA;
+      void main() {
+        vec3 violet = vec3(0.54, 0.36, 1.0);
+        vec3 red = vec3(1.0, 0.42, 0.40);
+        vec3 blue = vec3(0.52, 0.56, 1.0);
+        vec3 c = aArm < 0.5 ? red : (aArm < 1.5 ? blue : violet);
+        float base = aArm > 1.5 ? 0.8 + 0.1 * sin(uTime * 7.0) : 0.42;
+        if (aBranch != 0.0) base *= 0.45;
+        float t = aArm < 0.5 ? uPulse.x : uPulse.y;
+        float out_ = aArm < 0.5 ? uPulse.z : uPulse.w;
+        float onPath = (aBranch == 0.0 || aBranch == out_) ? 1.0 : 0.0;
+        float pulse = aArm > 1.5 || t < 0.0 ? 0.0 : onPath * exp(-pow(aT - t, 2.0) / 0.0004);
+        float appear = smoothstep(0.55, 0.95, uSettle); // beams light once the board has settled
+        vA = (base + pulse * 0.55) * appear;
+        vColor = c;
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        gl_Position = projectionMatrix * mv;
+        gl_PointSize = clamp((5.0 + pulse * 3.0) * uPR / -mv.z, 1.5, 10.0 * uPR);
+      }`,
+    fragmentShader: /* glsl */`
+      varying vec3 vColor;
+      varying float vA;
+      ${SHADE_GLSL}
+      void main() {
+        float d = length(gl_PointCoord - 0.5);
+        float a = smoothstep(0.5, 0.0, d) * vA;
+        gl_FragColor = vec4(shadeSide(vColor), a);
+      }`,
+  }));
+  scene.add(beams);
+
+  /* --- events: a pair leaves the crystal, runs down both arms, clicks --- */
+  const pulses = { a: null, b: null };
+  const TRAVEL = 230; // ms from crystal to detector (on stage it is nanoseconds)
+  function fire(key, p) {
+    p.fired = true;
+    const det = key === 'a' ? (p.out === 1 ? DET.aPlus : DET.aMinus) : (p.out === 1 ? DET.bPlus : DET.bMinus);
+    (key === 'a' ? uniforms.uFlashA : uniforms.uFlashB).value.set(det.x, det.y, 0.0035, 1.0);
+    (key === 'a' ? uniforms.uColA : uniforms.uColB).value.copy(p.col);
+  }
+  onEvent = (e) => {
+    const [ca, cb] = colours(e);
+    const now = performance.now();
+    // a pair that has not arrived yet still clicks before the next one leaves
+    for (const key of ['a', 'b']) if (pulses[key] && !pulses[key].fired) fire(key, pulses[key]);
+    pulses.a = { t0: now, out: e.A, col: ca, fired: false };
+    pulses.b = { t0: now, out: e.B, col: cb, fired: false };
+  };
+
+  /* --- scroll-driven camera along the beam --- */
+  const sections = [...document.querySelectorAll('[data-stop]')];
+  const navLinks = [...document.querySelectorAll('.top nav a, .rail a')];
+  const railV = document.getElementById('railV');
+  const railA = document.getElementById('railA');
+  const railB = document.getElementById('railB');
+
+  function scrollStop() {
+    const mid = scrollY + innerHeight * 0.5;
+    const centres = sections.map(s => s.offsetTop + Math.min(s.offsetHeight, innerHeight * 1.2) * 0.5);
+    if (mid <= centres[0]) return 0;
+    for (let i = 0; i < centres.length - 1; i++) {
+      if (mid < centres[i + 1]) return i + (mid - centres[i]) / (centres[i + 1] - centres[i]);
+    }
+    return centres.length - 1;
+  }
+
+  const P = STOPS.map(s => new THREE.Vector3(...s.pos));
+  const T = STOPS.map(s => new THREE.Vector3(...s.tgt));
+  let narrow = false, camOff = 0;
+  const camPos = P[0].clone(), camTgt = T[0].clone();
+  const wantPos = new THREE.Vector3(), wantTgt = new THREE.Vector3();
+  let mouseX = 0, mouseY = 0;
+  addEventListener('pointermove', (ev) => {
+    mouseX = ev.clientX / innerWidth - 0.5; mouseY = ev.clientY / innerHeight - 0.5;
+  }, { passive: true });
+
+  function updateRail(s) {
+    // 0..1 along the rail: violet until the crystal (stop 1-2), then both arms
+    const f = Math.min(1, Math.max(0, (s - 1) / 4));
+    const y = f * 100;
+    railV.setAttribute('y2', String(Math.min(y, 25)));
+    const ab = Math.max(25, y);
+    railA.setAttribute('y2', String(ab)); railB.setAttribute('y2', String(ab));
+    const cur = Math.round(s);
+    const ids = ['top', 'source', 'bell', 'pieces', 'shows', 'record'];
+    navLinks.forEach(a => a.setAttribute('aria-current', a.getAttribute('href') === '#' + ids[cur] ? 'true' : 'false'));
+  }
+
+  function resize() {
+    const w = innerWidth, h = innerHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    // narrow screens: pull back so the board fits
+    camera.fov = w < 700 ? 58 : 42;
+    // narrow screens: centre the board in the upper half of the hero
+    narrow = w < 700;
+    if (narrow) { P[0].set(0, -2.7, 2.2); T[0].set(0, -0.62, -0.1); }
+    else { P[0].set(...STOPS[0].pos); T[0].set(...STOPS[0].tgt); }
+    renderer.getDrawingBufferSize(shade.uRes.value);
+    camera.updateProjectionMatrix();
+  }
+  addEventListener('resize', resize); resize();
+
+  const born = performance.now();
+  let last = born;
+  function frame(now) {
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    const t = (now - born) / 1000;
+    uniforms.uTime.value = t; bu.uTime.value = t;
+    if (!reduced) uniforms.uSettle.value = forceSettled ? 1 : Math.min(1, t / 4.2);
+
+    // camera
+    const s = forceStop !== null ? forceStop : (reduced ? 0 : scrollStop());
+    const i = Math.min(P.length - 2, Math.floor(s)), f = s - i;
+    const ef = f * f * (3 - 2 * f);
+    wantPos.copy(P[i]).lerp(P[i + 1], ef);
+    wantTgt.copy(T[i]).lerp(T[i + 1], ef);
+    wantPos.x += mouseX * 0.12; wantPos.z += -mouseY * 0.08;
+    const k = reduced ? 1 : 1 - Math.pow(0.02, dt);
+    camPos.lerp(wantPos, k); camTgt.lerp(wantTgt, k);
+    camera.position.copy(camPos); camera.lookAt(camTgt);
+    const lerp = (key) => STOPS[i][key] + (STOPS[i + 1][key] - STOPS[i][key]) * ef;
+    const off = narrow ? 0 : lerp('off');
+    camOff += (off - camOff) * k;
+    camera.setViewOffset(innerWidth, innerHeight, -camOff * innerWidth, 0, innerWidth, innerHeight);
+    // narrow screens: text spans the full width, so dim everywhere instead of by side
+    shade.uEdge.value = narrow ? 2.0 : 0.6;
+    shade.uShade.value = narrow ? (s < 0.5 ? 0.45 : 0.72) : lerp('shade');
+    shade.uGain.value = lerp('gain');
+    updateRail(s);
+
+    // pulses and detector flashes
+    const fa = uniforms.uFlashA.value, fb = uniforms.uFlashB.value;
+    fa.w *= Math.pow(0.08, dt); fb.w *= Math.pow(0.08, dt);
+    const pv = bu.uPulse.value;
+    for (const [key, idx] of [['a', 0], ['b', 1]]) {
+      const p = pulses[key];
+      if (!p) { if (idx === 0) pv.x = -1; else pv.y = -1; continue; }
+      const u = (now - p.t0) / TRAVEL;
+      if (idx === 0) { pv.x = Math.min(u, 1.2); pv.z = p.out; } else { pv.y = Math.min(u, 1.2); pv.w = p.out; }
+      if (u >= 1 && !p.fired) fire(key, p);
+      if (u > 1.25) pulses[key] = null;
+    }
+
+    renderer.render(scene, camera);
+    if (!reduced) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  if (reduced) addEventListener('resize', () => requestAnimationFrame(frame));
+}
+</script>
+</body>
+</html>

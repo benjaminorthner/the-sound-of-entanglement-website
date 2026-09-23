@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design round 1</title>
+<style>
+  :root { --bg: #000; --fg: #e9e6f2; --dim: #8a8794; --rule: #262430; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.55 system-ui, sans-serif; }
+  main { max-width: 64rem; margin: 0 auto; padding: 4rem 1rem 6rem; }
+  h1 { font-weight: 400; font-size: 2rem; margin: 0 0 .5rem; }
+  p.lede { color: var(--dim); max-width: 60ch; margin: 0 0 3rem; }
+  ol { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+  li { border-bottom: 1px solid var(--rule); padding: 1.5rem 0; display: grid; grid-template-columns: 12rem 1fr; gap: 1rem 2rem; }
+  li a { color: var(--fg); font-size: 1.35rem; text-decoration: none; }
+  li a:hover, li a:focus-visible { text-decoration: underline; text-underline-offset: 4px; }
+  li p { margin: 0; color: var(--dim); max-width: 62ch; }
+  @media (max-width: 640px) { li { grid-template-columns: 1fr; gap: .25rem; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Design round 1: four directions</h1>
+  <p class="lede">Each is a landing page built from real content, real photos and real measurement data replayed from actual shows. Compare ideas, not polish. The rationale for each is in <code>design/DIRECTIONS.md</code>.</p>
+  <ol>
+    <li><a href="coincidence/">A · Coincidence</a><p>The page is the experiment running: pairs of rings for each photon pair measured at the premiere, with a running Bell value on a scale from 0 to 2√2. The title's letters are undecided until the first pair collapses them.</p></li>
+    <li><a href="nave/">B · Nave</a><p>The cathedral premiere as the emotional core: light cones in haze (WebGL), a serif title, and the pieces listed like a concert programme, with full-bleed photographs between passages.</p></li>
+    <li><a href="rooms/">C · Rooms</a><p>Strictly white hairlines on black, as in the 8 Rooms visuals. A terrain grows from the Ball-night clicks, and the navigation is the 3×3 room map, walked by the actual quantum random walk.</p></li>
+    <li><a href="apparatus/">D · Apparatus</a><p>A 3D scan of the real breadboard (160 000 points) that settles from noise into the apparatus. Scrolling follows the laser from the source to the crystal to Alice and Bob to the detectors.</p></li>
+  </ol>
+</main>
+</body>
+</html>

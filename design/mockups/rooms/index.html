@@ -1,0 +1,904 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Sound of Entanglement</title>
+<meta name="description" content="Pairs of entangled photons conduct a live audiovisual performance.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #000000;
+    --fg: #ffffff;
+    --grey: #8a8a8a;
+    --rule: #2a2a2a;
+    --alice: #ff7d7d;
+    --bob: #8f8fff;
+
+    --step--1: 0.8125rem;
+    --step-0: 1.0625rem;
+    --step-1: 1.375rem;
+    --step-2: 1.875rem;
+    --step-3: 2.5rem;
+    --display: clamp(2.6rem, 6.4vw, 6.25rem);
+
+    --gutter: clamp(1rem, 3vw, 2.5rem);
+    --measure: 62ch;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html { background: var(--bg); color: var(--fg); -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    font-family: "Archivo", system-ui, sans-serif;
+    font-size: var(--step-0);
+    font-weight: 360;
+    font-stretch: 100%;
+    line-height: 1.6;
+    font-feature-settings: "kern";
+  }
+
+  a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+  a:hover { text-decoration-color: var(--grey); }
+  :focus-visible { outline: 1px solid var(--fg); outline-offset: 3px; }
+
+  .expanded { font-stretch: 125%; }
+
+  /* ---------- header ---------- */
+  .site-head {
+    position: absolute; inset: 0 0 auto 0; z-index: 3;
+    display: flex; justify-content: flex-end; align-items: baseline;
+    padding: 1.1rem var(--gutter);
+    font-size: var(--step--1);
+    color: var(--grey);
+  }
+  .site-head a { color: var(--fg); text-decoration: none; font-stretch: 125%; font-weight: 400; letter-spacing: 0.01em; }
+  .site-head a.lang { color: var(--grey); font-stretch: 100%; }
+
+  /* ---------- hero ---------- */
+  .hero[hidden] { display: none; }
+  .hero {
+    position: relative;
+    min-height: 100svh;
+    display: flex; flex-direction: column;
+    border-bottom: 1px solid var(--rule);
+    overflow: hidden;
+  }
+  .terrain {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    display: block;
+  }
+  .hero-top {
+    position: relative; z-index: 2;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 2rem var(--gutter);
+    align-items: start;
+    padding: 4.5rem var(--gutter) 0;
+  }
+  .hero h1 {
+    margin: 0;
+    font-size: var(--display);
+    font-weight: 200;
+    font-stretch: 125%;
+    line-height: 0.98;
+    letter-spacing: -0.01em;
+    max-width: 11ch;
+  }
+  .tagline {
+    margin: 1.4rem 0 0;
+    max-width: 34ch;
+    font-size: var(--step-1);
+    font-weight: 300;
+    line-height: 1.35;
+  }
+  .readout {
+    margin: 1.6rem 0 0;
+    font-size: var(--step--1);
+    line-height: 1.55;
+    color: var(--grey);
+    font-variant-numeric: tabular-nums;
+    max-width: 52ch;
+  }
+  .readout > span { display: block; }
+  .readout .now { color: var(--fg); }
+  .readout .a { color: var(--alice); }
+  .readout .b { color: var(--bob); }
+  .readout button {
+    margin-top: 0.6rem;
+    font: inherit; color: var(--fg);
+    background: none; border: 1px solid var(--rule);
+    padding: 0.15rem 0.7rem;
+    cursor: pointer;
+  }
+  .readout button:hover { border-color: var(--grey); }
+
+  /* ---------- room map (navigation) ---------- */
+  .rooms {
+    width: clamp(16rem, 24vw, 21rem);
+  }
+  .rooms-grid {
+    position: relative;
+    aspect-ratio: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    background: rgba(0, 0, 0, 0.72);
+  }
+  .rooms-grid a {
+    position: relative; z-index: 1;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 0.45rem 0.55rem;
+    font-size: var(--step--1);
+    line-height: 1.2;
+    text-decoration: none;
+    color: var(--grey);
+    transition: color 0.6s ease;
+  }
+  .rooms-grid a .n { font-variant-numeric: tabular-nums; font-size: 0.72rem; }
+  .rooms-grid a:hover, .rooms-grid a.is-here { color: var(--fg); }
+  .rooms-grid a:focus-visible { outline-offset: -4px; }
+  .rooms-grid canvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .rooms-status {
+    margin: 0.6rem 0 0;
+    font-size: var(--step--1);
+    line-height: 1.45;
+    color: var(--grey);
+    min-height: 2.9em;
+  }
+
+  /* ---------- sections ---------- */
+  main > section:not(.hero) {
+    border-bottom: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    padding: clamp(3rem, 8vw, 6.5rem) var(--gutter);
+  }
+  .sec-title {
+    grid-column: 1 / span 4;
+    margin: 0 0 2rem;
+    font-size: var(--step-2);
+    font-weight: 250;
+    font-stretch: 125%;
+    line-height: 1.1;
+  }
+  .sec-body { grid-column: 5 / span 7; }
+  .sec-body p { margin: 0 0 1.1em; max-width: var(--measure); }
+  .sec-body p.lede { font-size: var(--step-1); font-weight: 300; line-height: 1.4; max-width: 40ch; }
+
+  /* pieces */
+  .pieces { grid-column: 1 / -1; margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--rule); }
+  .piece {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    padding: 2.2rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .piece h3 {
+    grid-column: 1 / span 4;
+    margin: 0;
+    font-size: var(--step-3);
+    font-weight: 200;
+    font-stretch: 125%;
+    line-height: 1.05;
+  }
+  .piece h3 a { text-decoration: none; }
+  .piece h3 a:hover { text-decoration: underline; text-decoration-color: var(--grey); }
+  .piece .meta { display: block; margin-top: 0.7rem; font-size: var(--step--1); font-weight: 360; font-stretch: 100%; color: var(--grey); line-height: 1.45; }
+  .piece .desc { grid-column: 5 / span 7; }
+  .piece .desc p { margin: 0 0 0.9em; max-width: var(--measure); }
+  .piece .how { color: var(--grey); }
+
+  .photo-band { margin: 0; border-bottom: 1px solid var(--rule); }
+  .photo-band img { display: block; width: 100%; height: clamp(16rem, 48vw, 40rem); object-fit: cover; filter: grayscale(1) contrast(1.08); }
+  .photo-band figcaption { padding: 0.8rem var(--gutter); font-size: var(--step--1); color: var(--grey); }
+
+  /* next show */
+  .next { grid-column: 5 / span 8; }
+  .next time {
+    display: block;
+    font-size: clamp(2.2rem, 5.6vw, 4.75rem);
+    font-weight: 200;
+    font-stretch: 125%;
+    line-height: 1;
+  }
+  .next .where { margin: 1.1rem 0 0.2rem; font-size: var(--step-1); font-weight: 300; }
+  .next .what { margin: 0; color: var(--grey); }
+
+  /* past shows */
+  .shows { grid-column: 1 / -1; width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  .shows caption { text-align: left; }
+  .shows th, .shows td { text-align: left; vertical-align: top; padding: 0.95rem 1rem 0.95rem 0; border-top: 1px solid var(--rule); font-weight: 360; }
+  .shows thead th { border-top: 0; padding-top: 0; font-size: var(--step--1); color: var(--grey); }
+  .shows td.date { white-space: nowrap; color: var(--grey); }
+  .shows td.piece-name { font-stretch: 112%; }
+  .shows td.s { text-align: right; padding-right: 0; color: var(--grey); }
+  .shows thead th.s { text-align: right; padding-right: 0; }
+  .shows tr:last-child td { border-bottom: 1px solid var(--rule); }
+  .shows a { text-decoration: none; }
+  .shows a:hover { text-decoration: underline; text-decoration-color: var(--grey); }
+  .shows-note { grid-column: 1 / -1; margin: 1rem 0 0; font-size: var(--step--1); color: var(--grey); max-width: var(--measure); }
+
+  /* paper + film */
+  .pair { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--rule); }
+  .pair article { padding: 2rem 0 0; }
+  .pair article + article { border-left: 1px solid var(--rule); padding-left: var(--gutter); }
+  .pair article:first-child { padding-right: var(--gutter); }
+  .pair h3 { margin: 0 0 0.3rem; font-size: var(--step-1); font-weight: 300; font-stretch: 118%; line-height: 1.25; }
+  .pair p { margin: 0 0 0.8rem; max-width: 48ch; }
+  .pair .meta { color: var(--grey); font-size: var(--step--1); }
+
+  /* footer */
+  footer {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    padding: 2.5rem var(--gutter) 3rem;
+    font-size: var(--step--1);
+    color: var(--grey);
+  }
+  footer .name { grid-column: 1 / span 4; color: var(--fg); font-stretch: 125%; font-weight: 300; font-size: var(--step-0); }
+  footer .support { grid-column: 5 / span 5; margin: 0; }
+  footer .contact { grid-column: 10 / span 3; margin: 0; text-align: right; }
+
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 860px) {
+    .hero-top { grid-template-columns: minmax(0, 1fr); padding-top: 3.5rem; }
+    .rooms { width: min(100%, 18rem); }
+    .hero { min-height: auto; }
+    .hero::after { content: ""; display: block; height: 52svh; }
+    .sec-title, .sec-body, .next, .piece h3, .piece .desc { grid-column: 1 / -1; }
+    .piece h3 { margin-bottom: 1rem; }
+    .pair { grid-template-columns: 1fr; }
+    .pair article + article { border-left: 0; border-top: 1px solid var(--rule); padding-left: 0; margin-top: 2rem; }
+    footer .name, footer .support, footer .contact { grid-column: 1 / -1; text-align: left; margin-bottom: 0.8rem; }
+  }
+  @media (max-width: 620px) {
+    .shows thead { display: none; }
+    .shows, .shows tbody, .shows tr, .shows td { display: block; width: 100%; }
+    .shows tr { border-top: 1px solid var(--rule); padding: 0.9rem 0; }
+    .shows td { border: 0; padding: 0; }
+    .shows tr:last-child td { border-bottom: 0; }
+    .shows tr:last-child { border-bottom: 1px solid var(--rule); }
+    .shows td.s { text-align: left; }
+    .shows td.s::before { content: "Bell value "; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-head">
+  <a class="lang" href="#" lang="de">Deutsch</a>
+</header>
+
+<main id="top">
+  <section class="hero" aria-labelledby="title">
+    <canvas class="terrain" aria-hidden="true"></canvas>
+
+    <div class="hero-top">
+      <div class="hero-text">
+        <h1 id="title">The Sound of Entanglement</h1>
+        <p class="tagline">Pairs of entangled photons conduct a live audiovisual performance.</p>
+        <p class="readout" id="readout">
+          <span>The lines below are a replay of <em>8 Rooms</em> at the Vienna Ball of Sciences, City Hall, 25 January 2025. Each ridge is one photon pair, measured that night.</span>
+          <span class="now" id="now">Waiting for the first measurement</span>
+          <span id="bell">Bell value so far: not enough pairs yet. Classical limit: 2.</span>
+          <button type="button" id="pause">Pause</button>
+        </p>
+      </div>
+
+      <nav class="rooms" aria-label="Rooms">
+        <div class="rooms-grid" id="rooms">
+          <canvas aria-hidden="true"></canvas>
+          <a href="#about" data-room="0"><span class="n">1</span> About</a>
+          <a href="#physics" data-room="1"><span class="n">2</span> Physics</a>
+          <a href="#pieces" data-room="2"><span class="n">3</span> Pieces</a>
+          <a href="#shows" data-room="3"><span class="n">4</span> Shows</a>
+          <a href="#listen" data-room="4"><span class="n">5</span> Listen</a>
+          <a href="#paper" data-room="5"><span class="n">6</span> Papers</a>
+          <a href="#press" data-room="6"><span class="n">7</span> Press</a>
+          <a href="#team" data-room="7"><span class="n">8</span> Team</a>
+          <a href="#contact" data-room="8"><span class="n">9</span> Contact</a>
+        </div>
+        <p class="rooms-status" id="rooms-status">The site is a map of nine rooms. The same measurements walk through it the way the music of <em>8 Rooms</em> does.</p>
+      </nav>
+    </div>
+  </section>
+
+  <section id="about" aria-labelledby="about-title">
+    <h2 class="sec-title" id="about-title">About</h2>
+    <div class="sec-body">
+      <p class="lede">Two photons are created together in a crystal, sent to two stations thirty centimetres apart, and measured. Each result on its own is pure chance. Together, the results are correlated more strongly than any classical system allows.</p>
+      <p>The Sound of Entanglement puts that experiment on stage and lets it conduct. A laser, a non-linear crystal, mirrors, wave plates and four single-photon detectors sit on a breadboard next to the musicians. About twice a second the experiment measures one entangled pair: a setting and an outcome at each of the two stations, called Alice and Bob. Those four numbers go straight to the composition software and to the visuals.</p>
+      <p>No two performances can be the same, and no human conductor or classical computer could produce the correlations you hear. We measure them live, in the room, and every performance reports its own Bell value: above 2 means the music was conducted by entanglement.</p>
+      <p id="physics"><a href="#physics">How the experiment works</a></p>
+    </div>
+  </section>
+
+  <section id="pieces" aria-labelledby="pieces-title">
+    <h2 class="sec-title" id="pieces-title">Pieces</h2>
+    <ol class="pieces" role="list">
+      <li class="piece">
+        <h3><a href="#bruqner">BruQner</a><span class="meta">2024. For two cathedral organs, after Anton Bruckner's <i>Perger Präludium</i>.</span></h3>
+        <div class="desc">
+          <p>Written for the Mariendom in Linz, one of the few churches with two organs that can play together. For every measurement the experiment chooses one of four precomposed motifs for each organist. The two players sat thirty metres apart and read their next bar from a tablet.</p>
+          <p class="how">In the middle of the piece the experiment is switched to classical correlations, and the motifs stop falling into the polyrhythms that entanglement favours.</p>
+        </div>
+      </li>
+      <li class="piece">
+        <h3><a href="#8-rooms">8 Rooms</a><span class="meta">2025. For synthesizer, electric bass and drums.</span></h3>
+        <div class="desc">
+          <p>The motors that turn the wave plates click at every measurement, and those clicks are the metronome. Each result sets off an echo pattern, one for Alice and one for Bob. Together the results steer a quantum random walk through eight rooms, each with its own sound. When the walk reaches a wall, a door opens into the next room.</p>
+          <p class="how">The map at the top of this page is that walk, running on the real measurements from the Ball night.</p>
+        </div>
+      </li>
+      <li class="piece">
+        <h3><a href="#indeterminate-apparatus">Indeterminate Apparatus</a><span class="meta">2025. For synthesizers, electric bass and drums.</span></h3>
+        <div class="desc">
+          <p>The Bell value sets the tempo. At the start it is all noise and the beat cannot settle. As correlations accumulate, the value steadies near 2.5 and the band locks in at 90 beats per minute.</p>
+          <p class="how">In the middle section the experiment is made classical. The value cannot pass 2, and the music slows to 70.</p>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <figure class="photo-band">
+    <img src="../assets/img/jhu-landscape.jpg" alt="A dark concert hall. On a large screen above the stage, white lines form a mountainous landscape. Below, the musicians and the glowing glass case of the experiment." loading="lazy" width="2400" height="1600">
+    <figcaption><i>8 Rooms</i> at the Science Diplomacy Summit, Johns Hopkins University, Washington DC, 14 April 2025. Photo: Kaveh Sardari.</figcaption>
+  </figure>
+
+  <section id="shows" aria-labelledby="next-title">
+    <h2 class="sec-title" id="next-title">Next show</h2>
+    <div class="next">
+      <time datetime="2026-10-16">16 October 2026</time>
+      <p class="where">University of Innsbruck</p>
+      <p class="what">Dies Academicus and MIP Alumni Day. Details to be announced.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="past-title">
+    <h2 class="sec-title" id="past-title">Past shows</h2>
+    <table class="shows">
+      <caption class="sr-only">Past performances, newest first, with the Bell value the experiment measured</caption>
+      <thead>
+        <tr><th scope="col">Date</th><th scope="col">Where</th><th scope="col">Event</th><th scope="col">Piece</th><th scope="col" class="s">Bell value</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="date">19 Nov 2025</td><td><a href="#">Johannes Kepler University, Linz</a></td><td>Zirkus des Wissens</td><td class="piece-name">Indeterminate Apparatus</td><td class="s">2.51</td></tr>
+        <tr><td class="date">3 Oct 2025</td><td><a href="#">Belvedere 21, Vienna</a></td><td>CIVA Festival</td><td class="piece-name">Indeterminate Apparatus, premiere</td><td class="s">2.41</td></tr>
+        <tr><td class="date">26 Aug 2025</td><td><a href="#">Congress Centrum Alpbach</a></td><td>European Forum Alpbach</td><td class="piece-name">8 Rooms</td><td class="s">2.29</td></tr>
+        <tr><td class="date">3 Jun 2025</td><td><a href="#">Stiftskirche Millstatt</a></td><td>Tech Forum Millstatt</td><td class="piece-name">8 Rooms</td><td class="s">2.32</td></tr>
+        <tr><td class="date">14 Apr 2025</td><td><a href="#">Johns Hopkins University, Washington DC</a></td><td>Science Diplomacy Summit</td><td class="piece-name">8 Rooms</td><td class="s">2.19</td></tr>
+        <tr><td class="date">Apr–Oct 2025</td><td>EXPO 2025, Osaka</td><td>Austrian Pavilion, <i>composing the future</i></td><td class="piece-name">Film</td><td class="s"></td></tr>
+        <tr><td class="date">25 Jan 2025</td><td><a href="#">City Hall, Vienna</a></td><td>Vienna Ball of Sciences</td><td class="piece-name">8 Rooms, premiere</td><td class="s">2.62</td></tr>
+        <tr><td class="date">6 Sep 2024</td><td><a href="#">Mariendom, Linz</a></td><td>antonbruckner2024</td><td class="piece-name">BruQner</td><td class="s">2.43</td></tr>
+        <tr><td class="date">4 Sep 2024</td><td><a href="#">Mariendom, Linz</a></td><td>Ars Electronica Festival, opening</td><td class="piece-name">BruQner, premiere</td><td class="s">2.34</td></tr>
+      </tbody>
+    </table>
+    <p class="shows-note">Bell values are taken from the experiment's own logs for the quantum sections of each performance. Anything above 2 cannot be produced by classical correlations.</p>
+  </section>
+
+  <section id="paper" aria-labelledby="paper-title">
+    <h2 class="sec-title" id="paper-title">Paper and film</h2>
+    <div class="pair">
+      <article>
+        <h3>The Sound of Entanglement</h3>
+        <p class="meta">de Dios Rodríguez, Haslinger, Kofler, Kueng, Orthner, Ploier, Ringbauer, Wenger. arXiv:2509.08892, 2025.</p>
+        <p>How a Bell test becomes a conductor: the setup, the mapping from measurements to music, and the first two pieces.</p>
+        <p><a href="https://arxiv.org/abs/2509.08892">Read the paper on arXiv</a></p>
+      </article>
+      <article id="listen">
+        <h3>BruQner – The Sound of Entanglement</h3>
+        <p class="meta">Documentary, 19 minutes. weitblickfilm, 2025.</p>
+        <p>The team of artists and scientists in the days before the premiere in the Mariendom.</p>
+        <p><a href="https://www.youtube.com/watch?v=_mIf_OFN1YI">Watch the film on YouTube</a></p>
+      </article>
+    </div>
+  </section>
+</main>
+
+<footer id="contact">
+  <span class="name">The Sound of Entanglement</span>
+  <p class="support" id="team">With the support of TU Wien, Johannes Kepler University Linz, the University of Innsbruck and the FWF cluster of excellence quantA.</p>
+  <p class="contact" id="press"><a href="#contact">Contact and bookings</a></p>
+</footer>
+
+<script>
+// ---------------------------------------------------------------- logic ----
+// Pure functions, no DOM. Tested with node (see design/mockups/rooms notes).
+
+const OUTCOMES = [[1, 1], [1, -1], [-1, 1], [-1, -1]]; // TT, TR, RT, RR
+
+function decodeEvents(data) {
+  const m = /T(\d\d):(\d\d):(\d\d)(?:\.(\d{1,3}))?/.exec(data.start);
+  let clock = m ? ((+m[1] * 60 + +m[2]) * 60 + +m[3]) * 1000 + (m[4] ? +m[4].padEnd(3, '0') : 0) : 0;
+  const out = [];
+  for (let i = 0; i < data.events.length; i++) {
+    const v = parseInt(data.events[i], 16);
+    const [A, B] = OUTCOMES[v & 3];
+    const dt = data.dt ? data.dt[i] : 528;
+    clock += dt;
+    out.push({ i, a: (v >> 3) + 1, b: ((v >> 2) & 1) + 1, A, B, dt, clock });
+  }
+  return out;
+}
+
+function formatClock(ms) {
+  const s = Math.floor(ms / 1000) % 86400;
+  const pad = (n) => String(n).padStart(2, '0');
+  return pad(Math.floor(s / 3600)) + ':' + pad(Math.floor(s / 60) % 60) + ':' + pad(s % 60);
+}
+
+class BellStats {
+  constructor() { this.reset(); }
+  reset() { this.n = 0; this.c = [[0, 0], [0, 0]]; this.s = [[0, 0], [0, 0]]; }
+  add(ev) { this.n++; this.c[ev.a - 1][ev.b - 1]++; this.s[ev.a - 1][ev.b - 1] += ev.A * ev.B; }
+  E(a, b) { const c = this.c[a][b]; return c ? this.s[a][b] / c : 0; }
+  get S() { return Math.abs(this.E(0, 0) + this.E(0, 1) + this.E(1, 0) - this.E(1, 1)); }
+}
+
+// The 8 Rooms walk (paper, supplementary material):
+//   x += A·δ(a,a1) + B·δ(b,b1),   y += A·δ(a,a2) + B·δ(b,b2)
+// Rooms are a 3×3 map with periodic walls. Room index 8 (room 9) is the
+// exit: its doors stay shut until the finale, when every door leads there.
+const HALF = 5;             // interior is −5..5 in both axes
+const FINALE_AFTER = 14;    // doors passed before all doors lead to room 9
+const EXIT = 8;
+
+function walkStep(state, ev) {
+  const dx = (ev.a === 1 ? ev.A : 0) + (ev.b === 1 ? ev.B : 0);
+  const dy = (ev.a === 2 ? ev.A : 0) + (ev.b === 2 ? ev.B : 0);
+  const nx = state.x + dx, ny = state.y + dy;
+  const ox = Math.abs(nx) - HALF, oy = Math.abs(ny) - HALF;
+  const res = { dx, dy, door: null, locked: null };
+  if (ox <= 0 && oy <= 0) { state.x = nx; state.y = ny; return res; }
+
+  const horizontal = ox >= oy;
+  const dir = horizontal ? Math.sign(nx) : Math.sign(ny);
+  const col = state.room % 3, row = Math.floor(state.room / 3);
+  let target;
+  if (horizontal) target = row * 3 + ((col + dir + 3) % 3);
+  else target = ((row - dir + 3) % 3) * 3 + col;   // y up, rows go down
+  const along = horizontal ? Math.max(-HALF, Math.min(HALF, ny)) : Math.max(-HALF, Math.min(HALF, nx));
+  const wall = { room: state.room, horizontal, dir, along };
+
+  if (state.finale) target = EXIT;
+  if (target === EXIT && !state.finale) {
+    // The door to room 9 is locked: stay against the wall.
+    state.x = Math.max(-HALF, Math.min(HALF, nx));
+    state.y = Math.max(-HALF, Math.min(HALF, ny));
+    res.locked = wall;
+    return res;
+  }
+  res.door = { ...wall, to: target };
+  state.room = target; state.x = 0; state.y = 0; state.doors++;
+  if (state.doors >= FINALE_AFTER) state.finale = true;
+  return res;
+}
+
+function newWalk() { return { room: 0, x: 0, y: 0, doors: 0, finale: false }; }
+
+// Echo patterns: each side has four (setting × outcome). Setting picks the
+// frequency band, outcome picks the rhythm of the echoes.
+const ECHOES = {
+  1: { taps: [0, 132, 264, 396], gain: [1, 0.62, 0.38, 0.22] },
+  [-1]: { taps: [0, 198, 396], gain: [1, 0.5, 0.25] },
+};
+const BANDS = { alice: [0.26, 0.6], bob: [0.34, 0.68] };
+// ---------------------------------------------------------------- /logic ---
+
+(() => {
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const hero = document.querySelector('.hero');
+  const heroTop = document.querySelector('.hero-top');
+  const canvas = document.querySelector('.terrain');
+  const ctx = canvas.getContext('2d');
+  const nowEl = document.getElementById('now');
+  const bellEl = document.getElementById('bell');
+  const pauseBtn = document.getElementById('pause');
+  const roomsEl = document.getElementById('rooms');
+  const roomLinks = [...roomsEl.querySelectorAll('a')];
+  const mapCanvas = roomsEl.querySelector('canvas');
+  const mctx = mapCanvas.getContext('2d');
+  const statusEl = document.getElementById('rooms-status');
+  const ROOM_NAMES = roomLinks.map((a) => a.textContent.replace(/^\s*\d+\s*/, '').trim());
+
+  // ---------------- terrain ----------------
+  const N = 112;              // samples per station
+  const ROWS = 58;            // ridgelines kept in history
+  const ROW_EVERY = 0.075;    // seconds between ridgelines
+  const DECAY = 7.5;          // 1/s, transient decay
+
+  const T = {
+    alice: new Float32Array(N), bob: new Float32Array(N),
+    histA: new Float32Array(N), histB: new Float32Array(N),
+    rows: [], acc: 0, taps: [], events: 0, time: 0,
+  };
+
+  // Nine camera settings, one per room, like the eight rooms of the piece
+  // each seen from a different angle.
+  const CAMS = [
+    { depth: 4.0, spread: 0.40, skew: 0.00, amp: 0.40, lift: 0.00 },
+    { depth: 6.5, spread: 0.52, skew: 0.18, amp: 0.32, lift: 0.10 },
+    { depth: 2.6, spread: 0.34, skew: -0.22, amp: 0.46, lift: 0.00 },
+    { depth: 5.0, spread: 0.58, skew: -0.08, amp: 0.50, lift: 0.06 },
+    { depth: 3.2, spread: 0.46, skew: 0.30, amp: 0.38, lift: 0.02 },
+    { depth: 7.5, spread: 0.60, skew: 0.00, amp: 0.30, lift: 0.14 },
+    { depth: 3.8, spread: 0.36, skew: 0.10, amp: 0.52, lift: 0.00 },
+    { depth: 5.8, spread: 0.50, skew: -0.30, amp: 0.36, lift: 0.08 },
+    { depth: 9.0, spread: 0.44, skew: 0.00, amp: 0.16, lift: 0.20 },
+  ];
+  const cam = { ...CAMS[0] };
+  let camTarget = CAMS[0];
+
+  function smoothNoise(i, t, seed) {
+    const s = Math.sin(i * 0.37 + seed) * 0.5 + Math.sin(i * 0.113 + t * 0.7 + seed * 2.1) * 0.35 + Math.sin(i * 0.9 + t * 1.9) * 0.15;
+    return 0.5 + 0.5 * s;
+  }
+
+  function scheduleClick(side, setting, outcome) {
+    const pat = ECHOES[outcome];
+    const center = BANDS[side][setting - 1];
+    const jitter = (Math.random() - 0.5) * 0.02;
+    pat.taps.forEach((ms, k) => {
+      T.taps.push({ side, at: T.time + ms / 1000, center: center + jitter, gain: pat.gain[k] * (0.85 + Math.random() * 0.3) });
+    });
+  }
+
+  function fireTap(tap) {
+    const arr = tap.side === 'alice' ? T.alice : T.bob;
+    const hist = tap.side === 'alice' ? T.histA : T.histB;
+    // a small comb of partials, like the spectrum of a mechanical click
+    const partials = [[1, 1], [1.45, 0.55], [2.05, 0.3]];
+    for (const [mult, g] of partials) {
+      const c = tap.center * mult * N;
+      if (c >= N - 2) continue;
+      const w = 0.9 + 0.7 * mult;
+      const lo = Math.max(0, Math.floor(c - 4 * w)), hi = Math.min(N - 1, Math.ceil(c + 4 * w));
+      for (let j = lo; j <= hi; j++) {
+        const v = tap.gain * g * Math.exp(-((j - c) ** 2) / (2 * w * w));
+        arr[j] += v;
+        hist[j] += v * 0.08;
+      }
+    }
+  }
+
+  function stepTerrain(dt) {
+    T.time += dt;
+    for (let k = T.taps.length - 1; k >= 0; k--) {
+      if (T.taps[k].at <= T.time) { fireTap(T.taps[k]); T.taps.splice(k, 1); }
+    }
+    const f = Math.exp(-dt * DECAY);
+    for (let j = 0; j < N; j++) { T.alice[j] *= f; T.bob[j] *= f; }
+    T.acc += dt;
+    while (T.acc >= ROW_EVERY) { T.acc -= ROW_EVERY; pushRow(); }
+    for (const k in cam) cam[k] += (camTarget[k] - cam[k]) * Math.min(1, dt * 0.9);
+  }
+
+  function pushRow() {
+    const growth = Math.min(1, T.events / 260);
+    let maxA = 1e-6, maxB = 1e-6;
+    for (let j = 0; j < N; j++) { maxA = Math.max(maxA, T.histA[j]); maxB = Math.max(maxB, T.histB[j]); }
+    const a = new Float32Array(N), b = new Float32Array(N);
+    for (let j = 0; j < N; j++) {
+      const n = 0.025 * smoothNoise(j, T.time, 1.3);
+      // spectra of real clicks are rough: jitter grows with the signal
+      const ra = 1 + (Math.random() - 0.5) * 0.7, rb = 1 + (Math.random() - 0.5) * 0.7;
+      a[j] = n + (T.alice[j] * 0.8 + growth * 0.5 * (T.histA[j] / maxA)) * ra;
+      b[j] = n + (T.bob[j] * 0.8 + growth * 0.5 * (T.histB[j] / maxB)) * rb;
+    }
+    T.rows.push([a, b]);
+    if (T.rows.length > ROWS) T.rows.shift();
+  }
+
+  let W = 0, H = 0, DPR = 1, horizon = 0;
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    const r = hero.getBoundingClientRect();
+    W = Math.round(r.width * DPR); H = Math.round(r.height * DPR);
+    canvas.width = W; canvas.height = H;
+    const topBottom = heroTop.getBoundingClientRect().bottom - r.top;
+    horizon = Math.min(H * 0.72, (topBottom + 24) * DPR);
+    const g = roomsEl.getBoundingClientRect();
+    mapCanvas.width = Math.round(g.width * DPR); mapCanvas.height = Math.round(g.height * DPR);
+  }
+
+  const WINDOW = new Float32Array(N);
+  for (let j = 0; j < N; j++) WINDOW[j] = Math.pow(Math.sin(Math.PI * j / (N - 1)), 0.7);
+
+  function drawTerrain() {
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, W, H);
+    const ground = H - 6 * DPR;
+    const hz = horizon + cam.lift * (ground - horizon) * 0.5;
+    const pMin = 1 / (1 + cam.depth);
+    const frac = T.acc / ROW_EVERY;
+    const rows = T.rows;
+    ctx.lineWidth = Math.max(1, DPR * 0.8);
+    ctx.lineJoin = 'round';
+    const gap = W * 0.018;
+    for (let i = 0; i < rows.length; i++) {
+      const age = rows.length - 1 - i + frac;
+      const z = age / ROWS;
+      if (z > 1) continue;
+      const p = 1 / (1 + z * cam.depth);
+      const t01 = (p - pMin) / (1 - pMin);
+      const yBase = hz + (ground - hz) * t01;
+      const halfW = W * Math.min(0.49, cam.spread * (W < H ? 1.35 : 1)) * (0.35 + 0.65 * t01);
+      const cx = W * 0.5 + cam.skew * W * (1 - t01) * 0.5;
+      const amp = cam.amp * (H - hz) * (0.25 + 0.75 * t01);
+      const alpha = Math.pow(1 - z, 1.3) * 0.95;
+      const [a, b] = rows[i];
+      const isNewest = i === rows.length - 1;
+      drawHalf(a, cx - halfW, cx - gap * t01, yBase, amp, alpha, isNewest ? 'alice' : null);
+      drawHalf(b, cx + gap * t01, cx + halfW, yBase, amp, alpha, isNewest ? 'bob' : null);
+    }
+  }
+
+  function drawHalf(vals, x0, x1, yBase, amp, alpha, tint) {
+    ctx.beginPath();
+    for (let j = 0; j < N; j++) {
+      const x = x0 + (x1 - x0) * (j / (N - 1));
+      const y = yBase - vals[j] * WINDOW[j] * amp;
+      if (j === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    const line = new Path2D();
+    // occlusion: fill black beneath the ridge so nearer ridges hide farther ones
+    ctx.lineTo(x1, H); ctx.lineTo(x0, H); ctx.closePath();
+    ctx.fillStyle = '#000';
+    ctx.fill();
+    for (let j = 0; j < N; j++) {
+      const x = x0 + (x1 - x0) * (j / (N - 1));
+      const y = yBase - vals[j] * WINDOW[j] * amp;
+      if (j === 0) line.moveTo(x, y); else line.lineTo(x, y);
+    }
+    ctx.strokeStyle = `rgba(255,255,255,${alpha.toFixed(3)})`;
+    ctx.stroke(line);
+    if (tint) {
+      ctx.strokeStyle = tint === 'alice' ? 'rgba(255,125,125,0.22)' : 'rgba(143,143,255,0.26)';
+      ctx.stroke(line);
+    }
+  }
+
+  // ---------------- room map ----------------
+  const walk = newWalk();
+  const trail = [];
+  const flashes = [];
+  let lastStep = null;
+  let hold = 0;
+
+  function cellPoint(room, x, y) {
+    const cs = mapCanvas.width / 3;
+    const col = room % 3, row = Math.floor(room / 3);
+    return [col * cs + ((x + HALF + 1) / (2 * HALF + 2)) * cs, row * cs + ((HALF + 1 - y) / (2 * HALF + 2)) * cs];
+  }
+
+  function wallSegment(w) {
+    const cs = mapCanvas.width / 3;
+    const col = w.room % 3, row = Math.floor(w.room / 3);
+    const t = (w.along + HALF + 1) / (2 * HALF + 2);
+    const len = cs * 0.22;
+    if (w.horizontal) {
+      const x = (col + (w.dir > 0 ? 1 : 0)) * cs;
+      const y = row * cs + (1 - t) * cs;
+      return [x, y - len / 2, x, y + len / 2];
+    }
+    const y = (row + (w.dir > 0 ? 0 : 1)) * cs;
+    const x = col * cs + t * cs;
+    return [x - len / 2, y, x + len / 2, y];
+  }
+
+  function drawMap(now) {
+    const w = mapCanvas.width, h = mapCanvas.height, cs = w / 3;
+    mctx.clearRect(0, 0, w, h);
+    mctx.lineWidth = Math.max(1, DPR * 0.8);
+    // walls
+    mctx.strokeStyle = '#3a3a3a';
+    mctx.beginPath();
+    for (let k = 0; k <= 3; k++) {
+      const p = Math.round(k * cs) + (k === 3 ? -0.5 : 0.5);
+      mctx.moveTo(p, 0); mctx.lineTo(p, h);
+      mctx.moveTo(0, p); mctx.lineTo(w, p);
+    }
+    mctx.stroke();
+    // room 9 stays shut until the finale: a second, inset wall
+    if (!walk.finale) {
+      const [ex, ey] = [2 * cs, 2 * cs];
+      mctx.strokeStyle = '#2a2a2a';
+      mctx.strokeRect(ex + 4 * DPR, ey + 4 * DPR, cs - 8 * DPR, cs - 8 * DPR);
+    }
+    // current room outline
+    const col = walk.room % 3, row = Math.floor(walk.room / 3);
+    mctx.strokeStyle = 'rgba(255,255,255,0.55)';
+    mctx.strokeRect(col * cs + 0.5, row * cs + 0.5, cs - 1, cs - 1);
+    // door flashes
+    for (let k = flashes.length - 1; k >= 0; k--) {
+      const fl = flashes[k];
+      const life = (now - fl.t) / 1400;
+      if (life >= 1) { flashes.splice(k, 1); continue; }
+      const [x0, y0, x1, y1] = wallSegment(fl.wall);
+      mctx.strokeStyle = fl.locked ? `rgba(138,138,138,${1 - life})` : `rgba(255,255,255,${1 - life})`;
+      mctx.lineWidth = Math.max(2, DPR * 2);
+      mctx.beginPath(); mctx.moveTo(x0, y0); mctx.lineTo(x1, y1); mctx.stroke();
+      mctx.lineWidth = Math.max(1, DPR * 0.8);
+    }
+    // trail
+    if (trail.length > 1) {
+      mctx.beginPath();
+      trail.forEach(([x, y], k) => {
+        const [px, py] = cellPoint(walk.room, x, y);
+        if (k === 0) mctx.moveTo(px, py); else mctx.lineTo(px, py);
+      });
+      mctx.strokeStyle = 'rgba(255,255,255,0.28)';
+      mctx.stroke();
+    }
+    // last step split into Alice's and Bob's contributions
+    if (lastStep && trail.length > 1) {
+      const [x, y] = trail[trail.length - 2];
+      const [px, py] = cellPoint(walk.room, x, y);
+      const unit = cs / (2 * HALF + 2);
+      const ax = lastStep.a === 1 ? lastStep.A : 0, ay = lastStep.a === 2 ? lastStep.A : 0;
+      const bx = lastStep.b === 1 ? lastStep.B : 0, by = lastStep.b === 2 ? lastStep.B : 0;
+      mctx.strokeStyle = 'rgba(255,125,125,0.7)';
+      mctx.beginPath(); mctx.moveTo(px, py); mctx.lineTo(px + ax * unit, py - ay * unit); mctx.stroke();
+      mctx.strokeStyle = 'rgba(143,143,255,0.8)';
+      mctx.beginPath(); mctx.moveTo(px + ax * unit, py - ay * unit); mctx.lineTo(px + (ax + bx) * unit, py - (ay + by) * unit); mctx.stroke();
+    }
+    // walker
+    const [wx, wy] = cellPoint(walk.room, walk.x, walk.y);
+    mctx.fillStyle = '#fff';
+    mctx.beginPath(); mctx.arc(wx, wy, 2.4 * DPR, 0, Math.PI * 2); mctx.fill();
+  }
+
+  function setHere(room) {
+    roomLinks.forEach((a, k) => a.classList.toggle('is-here', k === room));
+    camTarget = CAMS[room];
+  }
+
+  function updateStatus() {
+    const r = walk.room;
+    let s = `In room ${r + 1}, ${ROOM_NAMES[r]}.`;
+    if (r === EXIT) s += ' The walk has reached the exit and will start again in room 1.';
+    else if (walk.finale) s += ' All doors now lead to room 9.';
+    else s += ` ${walk.doors} ${walk.doors === 1 ? 'door' : 'doors'} passed. Room 9 opens after ${FINALE_AFTER}.`;
+    statusEl.textContent = s;
+  }
+
+  // ---------------- replay ----------------
+  const stats = new BellStats();
+  let events = [];
+  let cursor = 0;
+  let untilNext = 0;
+  let paused = false;
+
+  function applyEvent(ev, now) {
+    T.events++;
+    stats.add(ev);
+    scheduleClick('alice', ev.a, ev.A);
+    scheduleClick('bob', ev.b, ev.B);
+
+    if (hold <= 0) {
+      const prevRoom = walk.room;
+      const res = walkStep(walk, ev);
+      lastStep = ev;
+      if (res.door) {
+        flashes.push({ wall: res.door, t: now });
+        trail.length = 0;
+        setHere(walk.room);
+        if (walk.room === EXIT) hold = 6;
+      } else if (res.locked) {
+        flashes.push({ wall: res.locked, t: now, locked: true });
+      }
+      if (walk.room === prevRoom) trail.push([walk.x, walk.y]);
+      else trail.push([0, 0]);
+      if (trail.length > 36) trail.shift();
+      updateStatus();
+    }
+
+    const sign = (v) => (v > 0 ? '+1' : '−1');
+    nowEl.innerHTML = `${formatClock(ev.clock)}, pair ${ev.i + 1} of ${events.length}. ` +
+      `<span class="a">Alice: setting ${ev.a}, ${sign(ev.A)}.</span> ` +
+      `<span class="b">Bob: setting ${ev.b}, ${sign(ev.B)}.</span>`;
+    bellEl.textContent = stats.n < 60
+      ? 'Bell value so far: not enough pairs yet. Classical limit: 2.'
+      : `Bell value so far: ${stats.S.toFixed(2)}. Classical limit: 2.`;
+  }
+
+  function restartWalk() {
+    Object.assign(walk, newWalk());
+    trail.length = 0; trail.push([0, 0]);
+    setHere(0);
+    updateStatus();
+  }
+
+  let last = 0;
+  function frame(ts) {
+    const now = ts;
+    const dt = last ? Math.min(0.1, (ts - last) / 1000) : 0;
+    last = ts;
+    if (!paused) {
+      untilNext -= dt * 1000;
+      while (events.length && untilNext <= 0) {
+        const ev = events[cursor];
+        applyEvent(ev, now);
+        cursor++;
+        if (cursor >= events.length) { cursor = 0; stats.reset(); T.events = 0; T.histA.fill(0); T.histB.fill(0); }
+        untilNext += events[cursor].dt || 528;
+      }
+      if (hold > 0) { hold -= dt; if (hold <= 0) restartWalk(); }
+      stepTerrain(dt);
+    }
+    drawTerrain();
+    drawMap(now);
+    if (!reduce) requestAnimationFrame(frame);
+  }
+
+  function fastForward(count) {
+    // Run pairs off-screen at their real cadence, without drawing.
+    const n = Math.min(count, events.length - 1);
+    for (let k = 0; k < n; k++) {
+      applyEvent(events[k], -1e9);
+      for (let s = 0; s < 7; s++) stepTerrain((events[k + 1].dt || 528) / 7000);
+    }
+    cursor = n;
+    untilNext = events[cursor].dt || 528;
+  }
+
+  function staticFrame() {
+    // Reduced motion: run the first 180 pairs off-screen and show one frame.
+    fastForward(180);
+    drawTerrain();
+    drawMap(0);
+  }
+
+  pauseBtn.addEventListener('click', () => {
+    paused = !paused;
+    pauseBtn.textContent = paused ? 'Play' : 'Pause';
+  });
+  if (reduce) pauseBtn.hidden = true;
+
+  window.addEventListener('resize', () => { resize(); if (reduce) { drawTerrain(); drawMap(0); } });
+
+  resize();
+  setHere(0);
+  trail.push([0, 0]);
+  for (let k = 0; k < 8; k++) pushRow();
+
+  fetch('../assets/8rooms_wissenschaftsball_2025-01-25.json')
+    .then((r) => r.json())
+    .then((data) => {
+      events = decodeEvents(data);
+      untilNext = 900;
+      // ?at=300 starts the replay 300 pairs in (useful for reviewing the terrain)
+      const params = new URLSearchParams(location.search);
+      const at = parseInt(params.get('at') || '0', 10);
+      // ?sections hides the hero so the rest of the page can be screenshotted
+      if (params.has('sections')) hero.hidden = true;
+      if (reduce) staticFrame();
+      else {
+        if (at > 0) { fastForward(at); drawTerrain(); drawMap(0); }
+        requestAnimationFrame(frame);
+      }
+    })
+    .catch(() => {
+      nowEl.textContent = 'The measurement data could not be loaded.';
+      drawTerrain(); drawMap(0);
+    });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,822 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Sound of Entanglement</title>
+<meta name="description" content="Pairs of entangled photons conduct a live audiovisual performance.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Figtree:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #000000;
+    --text: #e9e7f0;
+    --haze: #c9ccd6;
+    --dim: #8d8b99;
+    --rule: #25232c;
+    --violet: #7a5cff;
+    --alice: #ff7d7d;
+    --bob: #8f8fff;
+    --photon: #ffffb3;
+    --serif: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
+    --sans: "Figtree", system-ui, sans-serif;
+    --gutter: clamp(1.25rem, 5vw, 5rem);
+    --measure: 60ch;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--black); color: var(--text); -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 1.0625rem;
+    line-height: 1.62;
+    font-feature-settings: "tnum" 0;
+  }
+  a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.22em; text-decoration-color: color-mix(in srgb, var(--haze) 45%, transparent); }
+  a:hover { text-decoration-color: var(--haze); }
+  :focus-visible { outline: 2px solid var(--violet); outline-offset: 4px; border-radius: 2px; }
+  img { display: block; max-width: 100%; }
+
+  /* ---------- top bar ---------- */
+  .bar {
+    position: absolute; inset: 0 0 auto 0; z-index: 3;
+    display: flex; justify-content: space-between; align-items: baseline; gap: 1.5rem;
+    padding: 1.4rem var(--gutter);
+  }
+  .bar .home { font-family: var(--serif); font-style: italic; font-size: 1.2rem; text-decoration: none; }
+  .bar nav ul { list-style: none; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.35rem 1.6rem; margin: 0; padding: 0; font-size: 0.9rem; }
+  .bar nav a { text-decoration: none; color: var(--haze); }
+  .bar nav a:hover { color: var(--text); }
+
+  /* ---------- hero ---------- */
+  .hero {
+    position: relative;
+    min-height: 100svh;
+    display: grid;
+    align-content: end;
+    padding: 0 var(--gutter) clamp(2rem, 6vh, 4rem);
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .hero canvas {
+    position: absolute; inset: 0; width: 100%; height: 100%; z-index: -2;
+    image-rendering: auto;
+  }
+  .hero .fallback {
+    position: absolute; inset: 0; z-index: -3;
+    background: #000 url("../assets/img/purple-cone.jpg") center 40% / cover no-repeat;
+    opacity: 0;
+  }
+  .no-gl .hero .fallback { opacity: 0.85; }
+  .no-gl .hero canvas { display: none; }
+  .hero::after {
+    content: ""; position: absolute; inset: auto 0 0 0; height: 45%; z-index: -1;
+    background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.75) 70%, #000);
+    pointer-events: none;
+  }
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: clamp(3.4rem, 10.5vw, 10.5rem);
+    line-height: 0.86;
+    letter-spacing: -0.015em;
+    margin: 0 0 0.3em -0.04em;
+    max-width: 11ch;
+  }
+  .hero .lede {
+    margin: 0;
+    max-width: 34ch;
+    font-size: clamp(1.05rem, 1.6vw, 1.3rem);
+    line-height: 1.45;
+    color: var(--haze);
+  }
+  .hero-foot {
+    display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 1.5rem 3rem;
+  }
+  .replay {
+    margin: 0;
+    max-width: 44ch;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: var(--dim);
+    font-variant-numeric: tabular-nums;
+  }
+  .replay b { font-weight: 500; color: var(--haze); }
+
+  /* ---------- text sections ---------- */
+  section { padding: clamp(5rem, 16vh, 11rem) var(--gutter); }
+  h2 {
+    font-family: var(--serif); font-weight: 300;
+    font-size: clamp(2.5rem, 5.4vw, 4.6rem);
+    line-height: 1; letter-spacing: -0.01em;
+    margin: 0 0 0.6em;
+  }
+  .intro p { max-width: var(--measure); margin: 0 0 1.1em; }
+  .intro .opening {
+    font-family: var(--serif); font-weight: 300;
+    font-size: clamp(1.7rem, 3.2vw, 2.55rem);
+    line-height: 1.22;
+    max-width: 30ch;
+    margin-bottom: 1.4em;
+  }
+  .intro .fact { color: var(--haze); }
+  .more { display: inline-block; margin-top: 0.6em; }
+
+  /* ---------- photo interludes ---------- */
+  figure.plate { margin: 0; }
+  figure.plate img { width: 100%; height: min(88vh, 62vw); object-fit: cover; }
+  figure.plate figcaption {
+    padding: 0.9rem var(--gutter) 0;
+    max-width: calc(var(--measure) + 2 * var(--gutter));
+    font-size: 0.82rem; line-height: 1.5; color: var(--dim);
+  }
+  figure.plate figcaption span { color: var(--haze); }
+
+  /* ---------- programme ---------- */
+  .programme ol { list-style: none; margin: 0; padding: 0; max-width: 58rem; }
+  .programme li { padding: 2.2rem 0 2.4rem; border-top: 1px solid var(--rule); }
+  .programme li:last-child { border-bottom: 1px solid var(--rule); }
+  .prog-head { display: flex; align-items: baseline; gap: 1rem; }
+  .prog-head h3 {
+    font-family: var(--serif); font-style: italic; font-weight: 300;
+    font-size: clamp(2rem, 4vw, 3.1rem); line-height: 1; margin: 0;
+  }
+  .leader { flex: 1; border-bottom: 1px dotted #4a4855; transform: translateY(-0.35em); min-width: 2rem; }
+  .year { font-family: var(--serif); font-size: 1.5rem; color: var(--haze); font-variant-numeric: lining-nums; }
+  .instr { margin: 0.7rem 0 0.9rem; color: var(--haze); font-size: 1rem; }
+  .note { margin: 0; max-width: 56ch; color: var(--dim); }
+  .credits { margin: 1.8rem 0 0; max-width: 58ch; font-size: 0.9rem; color: var(--dim); }
+
+  /* ---------- next show ---------- */
+  .next { display: grid; gap: 0.2rem; }
+  .next .date {
+    font-family: var(--serif); font-weight: 300;
+    font-size: clamp(3rem, 8vw, 7.5rem); line-height: 0.95; margin: 0 0 0.25em -0.03em;
+  }
+  .next p { margin: 0; max-width: 46ch; }
+  .next .where { font-size: 1.25rem; }
+  .next .tba { color: var(--dim); margin-top: 0.4rem; }
+
+  /* ---------- past shows ---------- */
+  .past ol { list-style: none; margin: 0; padding: 0; max-width: 66rem; }
+  .past li {
+    display: grid;
+    grid-template-columns: 9.5rem 1fr auto;
+    gap: 0.3rem 2rem;
+    padding: 1.05rem 0;
+    border-top: 1px solid var(--rule);
+    align-items: baseline;
+  }
+  .past li:last-child { border-bottom: 1px solid var(--rule); }
+  .past time { color: var(--haze); font-variant-numeric: tabular-nums; }
+  .past .venue { color: var(--text); }
+  .past .venue small { display: block; color: var(--dim); font-size: 0.9rem; }
+  .past .piece { font-family: var(--serif); font-style: italic; font-size: 1.25rem; color: var(--haze); text-align: right; white-space: nowrap; }
+  .past .piece em { font-style: normal; font-family: var(--sans); font-size: 0.8rem; color: var(--dim); margin-left: 0.4rem; }
+  .past .aside { margin: 1.6rem 0 0; color: var(--dim); max-width: 60ch; font-size: 0.95rem; }
+
+  /* ---------- read & watch ---------- */
+  .media { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3rem clamp(2rem, 6vw, 6rem); max-width: 66rem; }
+  .media h3 { font-family: var(--serif); font-weight: 300; font-style: italic; font-size: clamp(1.7rem, 2.8vw, 2.3rem); line-height: 1.1; margin: 0.4rem 0 0.6rem; }
+  .media .kind { margin: 0; color: var(--dim); font-size: 0.9rem; }
+  .media p { margin: 0 0 0.8rem; max-width: 44ch; }
+
+  /* ---------- footer ---------- */
+  footer {
+    padding: 4rem var(--gutter) 3rem;
+    border-top: 1px solid var(--rule);
+    display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2rem;
+    font-size: 0.88rem; color: var(--dim);
+  }
+  footer p { margin: 0; max-width: 52ch; }
+  footer .team { max-width: 60ch; }
+
+  @media (max-width: 720px) {
+    .bar { flex-direction: column; gap: 0.6rem; }
+    .bar nav ul { justify-content: flex-start; gap: 0.3rem 1.1rem; }
+    .past li { grid-template-columns: 1fr; gap: 0.15rem; }
+    .past .piece { text-align: left; }
+    .media { grid-template-columns: 1fr; }
+    figure.plate img { height: 70vh; }
+    .year { font-size: 1.25rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { scroll-behavior: auto !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero" id="top">
+  <div class="fallback" aria-hidden="true"></div>
+  <canvas id="nave" aria-hidden="true"></canvas>
+
+  <div class="bar">
+    <a class="home" href="#top">The Sound of Entanglement</a>
+    <nav aria-label="Main">
+      <ul>
+        <li><a href="#about">About</a></li>
+        <li><a href="#programme">Pieces</a></li>
+        <li><a href="#shows">Shows</a></li>
+        <li><a href="#read">Publications</a></li>
+        <li><a href="#physics">Physics</a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <h1>The Sound of Entanglement</h1>
+  <div class="hero-foot">
+    <p class="lede">Pairs of entangled photons conduct a live audiovisual performance.</p>
+    <p class="replay" id="replay">Loading the measurements from the premiere&hellip;</p>
+  </div>
+</header>
+
+<main>
+  <section class="intro" id="about">
+    <p class="opening">A laser, a crystal, mirrors and four single-photon detectors: a Bell experiment from a quantum optics lab, set up on stage.</p>
+    <p>Inside it, pairs of entangled photons are created and measured. One photon of each pair goes to a station called Alice, the other to a station called Bob. Each result is random, and nothing causes it. Yet Alice's and Bob's results agree in a way no classical system can reproduce.</p>
+    <p>The experiment sends every result, live, to the musicians and to the projectors. It takes the place of the conductor. Because the results are genuinely random, no two performances can sound or look the same.</p>
+    <p class="fact">At the premiere, the correlations reached a Bell value of about 2.45. Any classical explanation stops at 2.</p>
+    <a class="more" id="physics" href="#physics">How the experiment works</a>
+  </section>
+
+  <figure class="plate">
+    <img src="../assets/img/inverted-cone.jpg" alt="A cone of light projected into haze descends from the cathedral vault onto the glowing glass case of the experiment, surrounded by a dark audience." loading="lazy" width="2657" height="1772">
+    <figcaption><span>BruQner in the Mariendom Linz, 4 September 2024.</span> Photo &copy; Land O&Ouml; / Andreas Krenn</figcaption>
+  </figure>
+
+  <section class="programme" id="programme">
+    <h2>Programme</h2>
+    <ol>
+      <li>
+        <div class="prog-head"><h3>BruQner</h3><span class="leader" aria-hidden="true"></span><span class="year">2024</span></div>
+        <p class="instr">for two cathedral organs, entangled photons and light, after Anton Bruckner's <i>Perger Pr&auml;ludium</i></p>
+        <p class="note">For each measured pair, the experiment picks one of four motifs for each organ. The two organists, thirty metres apart, read them from screens a bar ahead and play them together.</p>
+      </li>
+      <li>
+        <div class="prog-head"><h3>8 Rooms</h3><span class="leader" aria-hidden="true"></span><span class="year">2025</span></div>
+        <p class="instr">for synthesizer, electric bass, drums, two clicking wave plates and entangled photons</p>
+        <p class="note">The motors that turn the wave plates click with every measurement, and those clicks are the metronome. A quantum random walk moves the band through eight rooms, each with its own sound, until every door leads to the ninth.</p>
+      </li>
+      <li>
+        <div class="prog-head"><h3>Indeterminate Apparatus</h3><span class="leader" aria-hidden="true"></span><span class="year">2025</span></div>
+        <p class="instr">for synthesizers, VoQoder, electric bass, drums and entangled photons</p>
+        <p class="note">The Bell value sets the tempo. It starts loose and noisy, then steadies as correlations add up. In the classical middle section it cannot pass 2, and the music slows.</p>
+      </li>
+    </ol>
+    <p class="credits">Music by Clemens Wenger; <i>8 Rooms</i> with Manu Mayr and Judith Schwarz. Visuals by Enar de Dios Rodr&iacute;guez. Experiment by Benjamin Orthner.</p>
+  </section>
+
+  <figure class="plate">
+    <img src="../assets/img/pump-crystal.jpg" alt="Close-up of a violet laser beam entering a small crystal on a dark optical table." loading="lazy" width="2400" height="1350">
+    <figcaption><span>The source.</span> A 405&nbsp;nm laser meets a nonlinear crystal. Very rarely, one of its photons splits into an entangled pair at 810&nbsp;nm, invisible to the eye. Film still &copy; weitblickfilm</figcaption>
+  </figure>
+
+  <section class="next" id="shows" aria-labelledby="next-h">
+    <h2 id="next-h">Next</h2>
+    <p class="date"><time datetime="2026-10-16">16 October 2026</time></p>
+    <p class="where">University of Innsbruck</p>
+    <p>Dies Academicus and MIP Alumni Day</p>
+    <p class="tba">Programme and times to follow.</p>
+  </section>
+
+  <section class="past" aria-labelledby="past-h">
+    <h2 id="past-h">Past performances</h2>
+    <ol reversed>
+      <li><time datetime="2025-11-19">19 Nov 2025</time><span class="venue">Zirkus des Wissens<small>Johannes Kepler University, Linz</small></span><span class="piece">Indeterminate Apparatus</span></li>
+      <li><time datetime="2025-10-03">3 Oct 2025</time><span class="venue">CIVA Festival<small>Belvedere 21, Vienna</small></span><span class="piece">Indeterminate Apparatus<em>premiere</em></span></li>
+      <li><time datetime="2025-08-26">26 Aug 2025</time><span class="venue">European Forum Alpbach<small>Congress Centrum Alpbach</small></span><span class="piece">8 Rooms</span></li>
+      <li><time datetime="2025-06-03">3 Jun 2025</time><span class="venue">Tech Forum Millstatt<small>Stiftskirche Millstatt</small></span><span class="piece">8 Rooms</span></li>
+      <li><time datetime="2025-04-14">14 Apr 2025</time><span class="venue">Science Diplomacy Summit<small>Johns Hopkins University, Washington DC</small></span><span class="piece">8 Rooms</span></li>
+      <li><time datetime="2025-01-25">25 Jan 2025</time><span class="venue">Vienna Ball of Sciences<small>Vienna City Hall</small></span><span class="piece">8 Rooms<em>premiere</em></span></li>
+      <li><time datetime="2024-09-06">6 Sep 2024</time><span class="venue">antonbruckner2024<small>Mariendom Linz</small></span><span class="piece">BruQner</span></li>
+      <li><time datetime="2024-09-04">4 Sep 2024</time><span class="venue">Opening of Ars Electronica Festival<small>Mariendom Linz</small></span><span class="piece">BruQner<em>premiere</em></span></li>
+    </ol>
+    <p class="aside">From April to October 2025 a film about the project was shown in the Austrian Pavilion at EXPO 2025 in Osaka.</p>
+  </section>
+
+  <figure class="plate">
+    <img src="../assets/img/v-cone-altar.jpg" alt="Two beams of light fan out in a V above the altar of the empty, dark cathedral." loading="lazy" width="2400" height="1600">
+    <figcaption><span>Visual test in the empty cathedral, July 2024.</span> Photo: Benjamin Orthner (credit to be confirmed)</figcaption>
+  </figure>
+
+  <section class="read" id="read" aria-labelledby="read-h">
+    <h2 id="read-h">Read and watch</h2>
+    <div class="media">
+      <div>
+        <p class="kind">Paper, arXiv:2509.08892, 2025</p>
+        <h3>The Sound of Entanglement</h3>
+        <p>How the Bell setup works, why its correlations cannot come from any classical source, and how <i>BruQner</i> and <i>8 Rooms</i> turn them into music.</p>
+        <a href="https://arxiv.org/abs/2509.08892">Read on arXiv</a>
+      </div>
+      <div>
+        <p class="kind">Documentary, weitblickfilm, 2025, 19 minutes</p>
+        <h3>BruQner &ndash; The Sound of Entanglement</h3>
+        <p>The team of artists and scientists in the days before the premiere in the Mariendom Linz.</p>
+        <a href="https://www.youtube.com/watch?v=_mIf_OFN1YI">Watch on YouTube</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p class="team">Clemens Wenger, Enar de Dios Rodr&iacute;guez, Benjamin Orthner, Philipp Haslinger, Johannes Kofler, Richard K&uuml;ng, Martin Ringbauer, Alexander Ploier. With Manu Mayr and Judith Schwarz.</p>
+  <p>TU Wien, Johannes Kepler University Linz, University of Innsbruck, Anton Bruckner University Linz. <a href="#top">Contact</a></p>
+</footer>
+
+<script>
+(() => {
+  const root = document.documentElement;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const canvas = document.getElementById('nave');
+  const hero = document.querySelector('.hero');
+  const replayEl = document.getElementById('replay');
+
+  // ------------------------------------------------------------------
+  // Measurement stream: replay the premiere, or simulate if unavailable
+  // ------------------------------------------------------------------
+  const PAIRS = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
+  const COL = { red: [1, 0.49, 0.49], blue: [0.56, 0.56, 1], yel: [1, 1, 0.7], vio: [1, 0.7, 1] };
+
+  // BruQner colour rule: same setting -> red/blue pair, different -> yellow/violet.
+  // Alice's colour follows her outcome; Bob shares it when the outcomes agree.
+  function coloursFor(e) {
+    const g = e.a === e.b ? [COL.red, COL.blue] : [COL.yel, COL.vio];
+    const ca = e.A === 1 ? g[0] : g[1];
+    const cb = e.A === e.B ? ca : (ca === g[0] ? g[1] : g[0]);
+    return [ca, cb];
+  }
+
+  const sums = [[0, 0], [0, 0]], counts = [[0, 0], [0, 0]];
+  function bellValue() {
+    const E = (i, j) => (counts[i][j] ? sums[i][j] / counts[i][j] : 0);
+    const e = [E(0, 0), E(0, 1), E(1, 0), E(1, 1)];
+    let best = 0;
+    for (let k = 0; k < 4; k++) {
+      let s = 0;
+      for (let m = 0; m < 4; m++) s += m === k ? -e[m] : e[m];
+      best = Math.max(best, Math.abs(s));
+    }
+    return best;
+  }
+  function resetStats() { for (const r of [sums, counts]) { r[0][0] = r[0][1] = r[1][0] = r[1][1] = 0; } }
+
+  let events = null, source = 'replay', startSec = 0, clockMs = 0, idx = 0, measured = 0;
+
+  function decode(d) {
+    const out = [];
+    for (let i = 0; i < d.events.length; i++) {
+      const v = parseInt(d.events[i], 16);
+      const [A, B] = PAIRS[v & 3];
+      out.push({ a: (v >> 3) + 1, b: ((v >> 2) & 1) + 1, A, B, dt: d.dt[i] || 0 });
+    }
+    return out;
+  }
+
+  // Quantum sampler with the premiere's statistics, used only if the log can't be loaded.
+  function simulate() {
+    const V = 0.866, alice = [0, 45], bob = [22.5, -22.5];
+    const a = Math.random() < 0.5 ? 1 : 2, b = Math.random() < 0.5 ? 1 : 2;
+    const E = V * Math.cos(2 * (alice[a - 1] - bob[b - 1]) * Math.PI / 180);
+    const A = Math.random() < 0.5 ? 1 : -1;
+    const B = Math.random() < (1 + E) / 2 ? A : -A;
+    return { a, b, A, B, dt: 280 + Math.random() * 160 };
+  }
+
+  function fmtClock(sec) {
+    const s = Math.floor(sec) % 86400;
+    const p = (n) => String(n).padStart(2, '0');
+    return `${p(Math.floor(s / 3600))}:${p(Math.floor(s / 60) % 60)}:${p(s % 60)}`;
+  }
+
+  function caption(e) {
+    const S = bellValue();
+    const sText = measured < 40 ? 'still settling' : S.toFixed(2);
+    if (source === 'replay') {
+      replayEl.innerHTML =
+        `Replaying the premiere: pair <b>${(idx).toLocaleString('en')}</b> of 2,000, measured in the Mariendom Linz on 4 September 2024 at <b>${fmtClock(startSec + clockMs / 1000)}</b>. ` +
+        `Bell value so far: <b>${sText}</b>. Classical physics stops at 2.`;
+    } else {
+      replayEl.innerHTML =
+        `Simulated pair <b>${measured.toLocaleString('en')}</b>, drawn from the statistics measured at the premiere. ` +
+        `Bell value so far: <b>${sText}</b>. Classical physics stops at 2.`;
+    }
+  }
+
+  const listeners = [];
+  function emit(e) {
+    counts[e.a - 1][e.b - 1] += 1;
+    sums[e.a - 1][e.b - 1] += e.A * e.B;
+    measured += 1;
+    caption(e);
+    for (const fn of listeners) fn(e);
+  }
+
+  function nextEvent() {
+    let e;
+    if (source === 'replay') {
+      if (idx >= events.length) { idx = 0; clockMs = 0; measured = 0; resetStats(); }
+      e = events[idx++];
+      clockMs += e.dt;
+    } else {
+      e = simulate();
+    }
+    emit(e);
+    const wait = source === 'replay' ? (events[idx % events.length].dt || 300) : e.dt;
+    setTimeout(nextEvent, Math.max(60, wait));
+  }
+
+  function startStream() {
+    fetch('../assets/bruqner_premiere_2024-09-04.json')
+      .then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then((d) => {
+        events = decode(d);
+        const m = /T(\d+):(\d+):([\d.]+)/.exec(d.start);
+        startSec = m ? (+m[1]) * 3600 + (+m[2]) * 60 + parseFloat(m[3]) : 0;
+        nextEvent();
+      })
+      .catch(() => { source = 'sim'; nextEvent(); });
+  }
+
+  if (reduce) {
+    root.classList.add('no-gl');
+    replayEl.textContent = 'Light cones in the haze of the Mariendom Linz, 4 September 2024. Photo © Land OÖ / Andreas Krenn';
+    return;
+  }
+  startStream();
+
+  // ------------------------------------------------------------------
+  // WebGL2: two light cones in haze, meeting in a ring
+  // ------------------------------------------------------------------
+  const gl = canvas.getContext('webgl2', { antialias: false, alpha: false, depth: false, powerPreference: 'high-performance' });
+  if (!gl) { root.classList.add('no-gl'); return; }
+
+  const VERT = `#version 300 es
+  out vec2 vUv;
+  void main() {
+    vec2 p = vec2(float((gl_VertexID << 1) & 2), float(gl_VertexID & 2));
+    vUv = p;
+    gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0);
+  }`;
+
+  const SCENE = `#version 300 es
+  precision highp float;
+  precision highp sampler3D;
+  in vec2 vUv;
+  out vec4 outColor;
+
+  uniform vec2 uRes;
+  uniform float uTime;
+  uniform vec2 uTilt;
+  uniform float uOpen;
+  uniform float uPortrait;
+  uniform sampler3D uNoise;
+  uniform sampler2D uPrev;
+  uniform float uBlend;
+
+  #define NE 6
+  uniform float uEvT[NE];
+  uniform float uEvPhi[NE];
+  uniform vec3 uEvA[NE];
+  uniform vec3 uEvB[NE];
+
+  const float PI = 3.14159265;
+  const float TAU = 6.2831853;
+  const float L = 3.1;          // cone length
+  const float SPEED = 2.3;      // pulse speed along the cone
+  const float FOCAL = 1.05;
+  const vec3 RED = vec3(1.0, 0.49, 0.49);
+  const vec3 BLUE = vec3(0.56, 0.56, 1.0);
+  const vec3 YEL = vec3(1.0, 1.0, 0.7);
+  const vec3 HAZE = vec3(0.86, 0.87, 0.96);
+  const vec3 VIOLET = vec3(0.48, 0.36, 1.0);
+
+  vec3 ro, fw, rt, up;
+
+  float n3(vec3 p) { return texture(uNoise, p).r; }
+
+  float smoke(vec3 p) {
+    vec3 q = p * 0.09 + vec3(uTime * 0.004, -uTime * 0.0025, uTime * 0.003);
+    float n = n3(q) * 0.55 + n3(q * 2.3 + 0.37) * 0.3 + n3(q * 5.1 + 0.71) * 0.15;
+    return n;
+  }
+
+  // Basis perpendicular to the cone axis
+  void basis(vec3 d, out vec3 b1, out vec3 b2) {
+    b1 = normalize(cross(d, vec3(0.0, 0.0, 1.0)));
+    b2 = cross(d, b1);
+  }
+
+  // Light scattered from the cone's surface where the ray crosses it.
+  // Brightens where the surface is seen edge-on, as in haze.
+  vec3 coneLight(vec3 rd, vec3 d, float tanT, vec3 tint, int side, out float tFirst) {
+    tFirst = 1e9;
+    float c2 = 1.0 / (1.0 + tanT * tanT);          // cos^2 of half-angle
+    vec3 v = ro;                                    // apex at origin
+    float rdd = dot(rd, d), vdd = dot(v, d);
+    float a = rdd * rdd - c2;
+    float b = 2.0 * (rdd * vdd - c2 * dot(rd, v));
+    float c = vdd * vdd - c2 * dot(v, v);
+    float disc = b * b - 4.0 * a * c;
+    vec3 acc = vec3(0.0);
+    if (disc < 0.0) return acc;
+    float sq = sqrt(disc);
+    vec3 b1, b2; basis(d, b1, b2);
+    for (int k = 0; k < 2; k++) {
+      float t = (-b + (k == 0 ? -sq : sq)) / (2.0 * a);
+      if (t <= 0.0) continue;
+      vec3 q = ro + rd * t;
+      float h = dot(q, d);
+      if (h <= 0.0 || h > L * 1.04) continue;
+      tFirst = min(tFirst, t);
+      vec3 n = normalize(h * d - c2 * q);
+      float edge = min(1.0 / (abs(dot(n, rd)) + 0.07), 9.0);
+      float phi = atan(dot(q, b2), dot(q, b1));
+      // radial streaks: slow along the cone, varied around it
+      float streak = n3(vec3(cos(phi) * 0.9 + 0.3, sin(phi) * 0.9 + 0.5, h * 0.035 - uTime * 0.006));
+      streak = 0.35 + 1.3 * smoothstep(0.3, 0.8, streak);
+      float haze = 0.25 + 1.5 * smoothstep(0.32, 0.78, smoke(q + d * 0.0));
+      float along = 0.2 + 1.5 * exp(-h * 1.2);
+      float fade = 1.0 - smoothstep(L * 0.9, L * 1.04, h);
+      float rim = exp(-pow((L - h) / 0.035, 2.0)) * 1.3 * haze;
+      float I = (haze * streak * along * fade * 1.7 + rim * 1.5) * edge * 0.04;
+      acc += mix(HAZE, tint, 0.3) * I * (1.0 + 0.35 * uOpen);
+
+      // measured pairs: a front travelling out from the crystal
+      for (int i = 0; i < NE; i++) {
+        float age = uTime - uEvT[i];
+        if (age < 0.0 || age > L / SPEED + 0.1) continue;
+        float front = age * SPEED;
+        float bnd = (h - front) / 0.07;
+        vec3 ec = side == 0 ? uEvA[i] : uEvB[i];
+        acc += ec * exp(-bnd * bnd) * edge * 0.11 * (0.5 + haze) * fade;
+      }
+    }
+    return acc;
+  }
+
+  vec2 project(vec3 P) {
+    vec3 v = P - ro;
+    float z = dot(v, fw);
+    return vec2(dot(v, rt), dot(v, up)) * FOCAL / max(z, 0.01);
+  }
+
+  void main() {
+    vec2 uv = (gl_FragCoord.xy * 2.0 - uRes) / min(uRes.x, uRes.y);
+    if (uPortrait > 0.5) { uv = vec2(uv.y, -uv.x) * 1.08; uv.x -= 0.45; }
+    else { uv.y -= 0.2; }
+
+    // camera slightly above and in front, strong perspective like the gallery view
+    float yaw = 0.18 * sin(uTime * 0.05) + 0.16 * uTilt.x;
+    float pitch = 0.42 + 0.08 * uTilt.y;
+    float dist = 4.0;
+    ro = vec3(sin(yaw) * cos(pitch), sin(pitch), -cos(yaw) * cos(pitch)) * dist;
+    fw = normalize(-ro);
+    rt = normalize(cross(vec3(0.0, 1.0, 0.0), fw));
+    up = cross(fw, rt);
+    vec3 rd = normalize(fw * FOCAL + uv.x * rt + uv.y * up);
+
+    // the crystal tilt opens or closes the cones (phase matching)
+    float tanT = tan(0.46 + 0.05 * uTilt.x + 0.03 * uOpen);
+    vec3 dA = normalize(vec3(-1.0, 0.05 * uTilt.y, 0.0));
+    vec3 dB = normalize(vec3(1.0, -0.05 * uTilt.y, 0.0));
+
+    float tA, tB;
+    vec3 col = coneLight(rd, dA, tanT, RED, 0, tA);
+    col += coneLight(rd, dB, tanT, BLUE, 1, tB);
+
+    // haze lit around the crystal, and the violet pump glow
+    float tc = max(dot(-ro, rd), 0.0);
+    float dmin = length(ro + rd * tc);
+    float amb = smoke(ro + rd * tc);
+    col += HAZE * exp(-dmin * 1.6) * (0.05 + 0.22 * smoothstep(0.35, 0.8, amb));
+    col += VIOLET * 0.0035 / (dmin * dmin + 0.0025);
+    col += vec3(1.0) * 0.0009 / (dmin * dmin + 0.0006);
+
+    // pair births at the crystal and detections on the rims
+    vec3 b1A, b2A, b1B, b2B;
+    basis(dA, b1A, b2A); basis(dB, b1B, b2B);
+    float rimR = L * tanT;
+    float px = 2.0 / min(uRes.x, uRes.y);
+    for (int i = 0; i < NE; i++) {
+      float age = uTime - uEvT[i];
+      if (age < 0.0 || age > 4.0) continue;
+      float birth = exp(-age * 6.0);
+      vec2 s0 = project(vec3(0.0)) - uv;
+      col += YEL * birth * (0.0016 / (dot(s0, s0) + 0.0004));
+      float arr = L / SPEED;
+      if (age > arr) {
+        float fl = exp(-(age - arr) * 1.4);
+        float ph = uEvPhi[i];
+        vec3 pa = dA * L + rimR * (b1A * cos(ph) + b2A * sin(ph));
+        vec3 pb = dB * L + rimR * (b1B * cos(ph + PI) + b2B * sin(ph + PI));
+        vec2 sa = project(pa) - uv, sb = project(pb) - uv;
+        float ka = dot(sa, sa), kb = dot(sb, sb);
+        float r0 = 3.5 * px;
+        col += YEL * fl * (exp(-ka / (r0 * r0)) * 1.4 + 0.0009 / (ka + 0.0012));
+        col += YEL * fl * (exp(-kb / (r0 * r0)) * 1.4 + 0.0009 / (kb + 0.0012));
+        col += uEvA[i] * fl * 0.0025 / (ka + 0.004);
+        col += uEvB[i] * fl * 0.0025 / (kb + 0.004);
+      }
+    }
+
+    col = 1.0 - exp(-col * 1.1);
+    vec3 prev = texture(uPrev, vUv).rgb;
+    outColor = vec4(mix(prev, col, uBlend), 1.0);
+  }`;
+
+  const DISPLAY = `#version 300 es
+  precision highp float;
+  in vec2 vUv;
+  out vec4 outColor;
+  uniform sampler2D uTex;
+  uniform float uTime;
+  uniform vec2 uRes;
+  float hash12(vec2 p) {
+    vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+    p3 += dot(p3, p3.yzx + 33.33);
+    return fract((p3.x + p3.y) * p3.z);
+  }
+  void main() {
+    vec3 c = texture(uTex, vUv).rgb;
+    vec2 q = vUv - 0.5;
+    c *= 1.0 - 0.55 * dot(q, q) * 1.6;
+    float g = hash12(gl_FragCoord.xy + fract(uTime) * 311.0) - 0.5;
+    c += g * 0.018;
+    outColor = vec4(max(c, 0.0), 1.0);
+  }`;
+
+  function compile(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+      console.error(gl.getShaderInfoLog(s));
+      return null;
+    }
+    return s;
+  }
+  function program(vs, fs) {
+    const v = compile(gl.VERTEX_SHADER, vs), f = compile(gl.FRAGMENT_SHADER, fs);
+    if (!v || !f) return null;
+    const p = gl.createProgram();
+    gl.attachShader(p, v); gl.attachShader(p, f); gl.linkProgram(p);
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) { console.error(gl.getProgramInfoLog(p)); return null; }
+    return p;
+  }
+
+  const scene = program(VERT, SCENE);
+  const display = program(VERT, DISPLAY);
+  if (!scene || !display) { root.classList.add('no-gl'); return; }
+
+  const U = {};
+  for (const n of ['uRes', 'uTime', 'uTilt', 'uOpen', 'uPortrait', 'uNoise', 'uPrev', 'uBlend', 'uEvT', 'uEvPhi', 'uEvA', 'uEvB']) {
+    U[n] = gl.getUniformLocation(scene, n);
+  }
+  const UD = { uTex: gl.getUniformLocation(display, 'uTex'), uTime: gl.getUniformLocation(display, 'uTime'), uRes: gl.getUniformLocation(display, 'uRes') };
+
+  const vao = gl.createVertexArray();
+
+  // 64^3 value-noise volume; trilinear filtering does the interpolation
+  const N = 64;
+  const noiseData = new Uint8Array(N * N * N);
+  for (let i = 0; i < noiseData.length; i++) noiseData[i] = (Math.random() * 256) | 0;
+  const noiseTex = gl.createTexture();
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_3D, noiseTex);
+  gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+  gl.texImage3D(gl.TEXTURE_3D, 0, gl.R8, N, N, N, 0, gl.RED, gl.UNSIGNED_BYTE, noiseData);
+  gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+  gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+  gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_R, gl.REPEAT);
+
+  // Ping-pong targets for temporal smoothing of the raymarch noise
+  let targets = [], w = 0, h = 0, scale = 0.8, cur = 0, freshFrames = 0;
+  function makeTarget(width, height) {
+    const tex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    const fb = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+    gl.clearColor(0, 0, 0, 1); gl.clear(gl.COLOR_BUFFER_BIT);
+    return { tex, fb };
+  }
+  function resize() {
+    const rect = hero.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    // Haze is soft: render the volume at reduced resolution and let the display pass upscale.
+    const maxW = 1920;
+    let rw = Math.max(2, Math.round(rect.width * dpr * scale));
+    let rh = Math.max(2, Math.round(rect.height * dpr * scale));
+    if (rw > maxW) { rh = Math.round(rh * maxW / rw); rw = maxW; }
+    canvas.width = Math.round(rect.width * Math.min(dpr, 1.5));
+    canvas.height = Math.round(rect.height * Math.min(dpr, 1.5));
+    if (rw === w && rh === h) return;
+    w = rw; h = rh;
+    for (const t of targets) { gl.deleteTexture(t.tex); gl.deleteFramebuffer(t.fb); }
+    targets = [makeTarget(w, h), makeTarget(w, h)];
+    freshFrames = 0;
+  }
+  new ResizeObserver(resize).observe(hero);
+  resize();
+
+  // Pointer tilts the crystal; on touch devices it drifts slowly on its own
+  const tilt = { x: 0, y: 0, tx: 0, ty: 0 };
+  let lastPointer = -1e9;
+  window.addEventListener('pointermove', (ev) => {
+    tilt.tx = (ev.clientX / innerWidth) * 2 - 1;
+    tilt.ty = -((ev.clientY / innerHeight) * 2 - 1);
+    lastPointer = performance.now();
+  }, { passive: true });
+
+  // Event ring buffer for the shader
+  const NE = 6;
+  const evT = new Float32Array(NE).fill(-100);
+  const evPhi = new Float32Array(NE);
+  const evA = new Float32Array(NE * 3);
+  const evB = new Float32Array(NE * 3);
+  let evHead = 0, open = 0;
+  const t0 = performance.now();
+  const now = () => (performance.now() - t0) / 1000;
+
+  listeners.push((e) => {
+    const [ca, cb] = coloursFor(e);
+    const i = evHead; evHead = (evHead + 1) % NE;
+    evT[i] = now();
+    evPhi[i] = Math.random() * Math.PI * 2;
+    evA.set(ca, i * 3); evB.set(cb, i * 3);
+    open = Math.min(1.5, open + (e.A === e.B ? 0.6 : -0.4));
+  });
+
+  let visible = true;
+  new IntersectionObserver(([en]) => { visible = en.isIntersecting; }, { threshold: 0 }).observe(hero);
+
+  let frameAvg = 16, frames = 0, lastFrame = performance.now();
+  function frame() {
+    requestAnimationFrame(frame);
+    const nowMs = performance.now();
+    const fdt = nowMs - lastFrame; lastFrame = nowMs;
+    if (!visible || document.hidden) return;
+
+    // adaptive quality: shrink the volume buffer if frames are slow
+    frameAvg = frameAvg * 0.95 + fdt * 0.05;
+    if (++frames > 90 && frameAvg > 24 && scale > 0.45) { scale *= 0.85; frames = 0; resize(); }
+
+    const t = now();
+    if (nowMs - lastPointer > 4000) {
+      tilt.tx = 0.45 * Math.sin(t * 0.11);
+      tilt.ty = 0.35 * Math.sin(t * 0.07 + 1.3);
+    }
+    tilt.x += (tilt.tx - tilt.x) * 0.035;
+    tilt.y += (tilt.ty - tilt.y) * 0.035;
+    open *= 0.985;
+
+    const src = targets[cur], dst = targets[1 - cur];
+    gl.bindVertexArray(vao);
+
+    // pass 1: volume into dst, blended with the previous frame
+    gl.bindFramebuffer(gl.FRAMEBUFFER, dst.fb);
+    gl.viewport(0, 0, w, h);
+    gl.useProgram(scene);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_3D, noiseTex);
+    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, src.tex);
+    gl.uniform1i(U.uNoise, 0);
+    gl.uniform1i(U.uPrev, 1);
+    gl.uniform2f(U.uRes, w, h);
+    gl.uniform1f(U.uTime, t);
+    gl.uniform2f(U.uTilt, tilt.x, tilt.y);
+    gl.uniform1f(U.uOpen, open);
+    gl.uniform1f(U.uPortrait, h > w * 1.05 ? 1 : 0);
+    gl.uniform1f(U.uBlend, freshFrames < 2 ? 1.0 : 0.7);
+    gl.uniform1fv(U.uEvT, evT);
+    gl.uniform1fv(U.uEvPhi, evPhi);
+    gl.uniform3fv(U.uEvA, evA);
+    gl.uniform3fv(U.uEvB, evB);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    freshFrames++;
+
+    // pass 2: upscale to the canvas with vignette and grain
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.useProgram(display);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, dst.tex);
+    gl.uniform1i(UD.uTex, 0);
+    gl.uniform1f(UD.uTime, t);
+    gl.uniform2f(UD.uRes, canvas.width, canvas.height);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+    cur = 1 - cur;
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

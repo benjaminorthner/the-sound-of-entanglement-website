@@ -1,0 +1,777 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Sound of Entanglement</title>
+<link rel="icon" href="data:,">
+<meta name="description" content="Pairs of entangled photons conduct a live audiovisual performance.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,100..900&family=Hanken+Grotesk:ital,wght@0,300..700;1,300..700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ground: #000000;
+    --ink: #e9e6f2;
+    --dim: #8b8896;
+    --rule: #2b2a31;
+    --alice: #ff7d7d;
+    --bob: #8f8fff;
+    --yellow: #ffffb3;
+    --violet: #ffb3ff;
+    --pump: #7a5cff;
+    --gutter: clamp(20px, 5vw, 64px);
+    --title-bottom: clamp(128px, 20vh, 200px);
+    --display: "Anybody", system-ui, sans-serif;
+    --text: "Hanken Grotesk", system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html { background: var(--ground); color: var(--ink); -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    font-family: var(--text);
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    font-weight: 400;
+    background: var(--ground);
+  }
+  a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+  a:hover { text-decoration-color: var(--dim); }
+  :focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; border-radius: 2px; }
+  .alice { color: var(--alice); }
+  .bob { color: var(--bob); }
+  .visually-hidden {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap;
+  }
+
+  /* ---------- navigation ---------- */
+  .nav {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 3;
+    display: flex; justify-content: flex-end;
+    padding: 22px var(--gutter);
+  }
+  .nav ul { display: flex; gap: clamp(14px, 2.4vw, 32px); margin: 0; padding: 0; list-style: none; }
+  .nav a { text-decoration: none; font-size: 0.9375rem; color: var(--dim); }
+  .nav a:hover { color: var(--ink); }
+
+  /* ---------- hero ---------- */
+  .hero {
+    position: relative;
+    height: 100vh; height: 100svh; min-height: 560px;
+    overflow: hidden;
+  }
+  .hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+  .replay {
+    position: absolute; z-index: 2;
+    top: 20px; left: var(--gutter);
+    max-width: 30rem;
+    margin: 0;
+    font-size: 0.875rem; line-height: 1.5; color: var(--dim);
+  }
+  .replay strong { font-weight: 500; color: var(--ink); }
+  .replay .count { font-variant-numeric: tabular-nums; }
+  .replay button {
+    margin-top: 6px;
+    font: inherit; color: var(--dim);
+    background: none; border: 0; padding: 0;
+    text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em;
+    cursor: pointer;
+  }
+  .replay button:hover { color: var(--ink); }
+
+  .title {
+    position: absolute; z-index: 2;
+    left: 0; right: 0; bottom: var(--title-bottom);
+    margin: 0;
+    display: grid; grid-template-columns: 1fr 1fr; column-gap: 0.32em;
+    padding: 0 var(--gutter);
+    font-family: var(--display);
+    font-weight: 300;
+    font-size: clamp(1.3rem, 3.6vw, 3.25rem);
+    line-height: 1;
+    letter-spacing: 0.005em;
+    white-space: nowrap;
+  }
+  .title .half { display: block; }
+  .title .half:first-child { text-align: right; }
+  .title .ch {
+    display: inline-block;
+    font-variation-settings: "wdth" 100;
+    white-space: pre;
+  }
+  .title .ch.collapsed { transition: font-variation-settings 0.45s cubic-bezier(.2,.7,.2,1); }
+
+  .bell {
+    position: absolute; z-index: 2;
+    left: var(--gutter); right: var(--gutter); bottom: clamp(20px, 5vh, 44px);
+  }
+  .track {
+    position: relative; height: 26px;
+    margin-top: 2.6rem;
+  }
+  .track::before { /* the hairline itself */
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    border-top: 1px solid #55525e;
+  }
+  .band {
+    position: absolute; top: calc(50% - 3px); height: 6px;
+    background: rgba(233, 230, 242, 0.16);
+  }
+  .mark {
+    position: absolute; top: calc(50% - 9px); width: 1px; height: 18px;
+    background: var(--ink);
+  }
+  .tick {
+    position: absolute; top: calc(50% - 6px); width: 1px; height: 12px;
+    background: #55525e;
+  }
+  .tick > span {
+    position: absolute; bottom: 16px; left: 0;
+    transform: translateX(-50%);
+    font-size: 0.8125rem; line-height: 1.35; color: var(--dim); white-space: nowrap;
+    text-align: center;
+  }
+  .tick.zero > span { transform: none; text-align: left; }
+  .tick.qm > span { transform: translateX(-100%); text-align: right; }
+  .tick .note { display: block; }
+  .readout {
+    margin: 10px 0 0;
+    font-size: 0.875rem; color: var(--dim);
+    font-variant-numeric: tabular-nums;
+    display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem;
+  }
+  .readout .s { color: var(--ink); }
+
+  /* ---------- page ---------- */
+  main > section { padding: clamp(5rem, 12vw, 9rem) var(--gutter) 0; }
+  .col { max-width: 62ch; }
+  h2 {
+    font-family: var(--display);
+    font-weight: 300;
+    font-variation-settings: "wdth" 90;
+    font-size: clamp(1.9rem, 4vw, 2.9rem);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    margin: 0 0 1.75rem;
+  }
+  p { margin: 0 0 1.1em; }
+  .lede { font-size: clamp(1.15rem, 1.8vw, 1.375rem); line-height: 1.5; font-weight: 300; }
+
+  figure { margin: clamp(4rem, 9vw, 7rem) calc(var(--gutter) * -1) 0; }
+  figure img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; }
+  figcaption {
+    padding: 10px var(--gutter) 0;
+    font-size: 0.8125rem; color: var(--dim);
+    max-width: 90ch;
+  }
+
+  /* pieces: every piece is split along the same axis as the hero */
+  .pieces-intro { margin-bottom: clamp(3rem, 7vw, 5rem); }
+  .piece { padding: clamp(2.5rem, 6vw, 4.5rem) 0; border-top: 1px solid var(--rule); }
+  .piece:last-child { border-bottom: 1px solid var(--rule); }
+  .piece h3 {
+    font-family: var(--display);
+    font-weight: 200;
+    font-variation-settings: "wdth" 62;
+    font-size: clamp(3rem, 9vw, 7rem);
+    line-height: 0.92;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .piece .meta { margin: 0.9rem 0 2.25rem; color: var(--dim); max-width: 62ch; }
+  .pair {
+    display: grid; grid-template-columns: 1fr 1fr; column-gap: clamp(1.5rem, 4vw, 4rem);
+  }
+  .side { padding-top: 0.9rem; margin: 0; }
+  .side.a { border-top: 1px solid var(--alice); }
+  .side.b { border-top: 1px solid var(--bob); }
+  .together {
+    margin: 1.75rem 0 0;
+    padding-top: 0.9rem;
+    border-top: 1px solid #8b8896;
+    max-width: calc(50% + 62ch / 2);
+  }
+  .piece .more { display: inline-block; margin-top: 0.75rem; font-size: 0.9375rem; }
+  .piece figure { margin: 2.5rem 0 0; }
+  .piece figcaption { padding: 10px 0 0; }
+
+  /* next show */
+  .next .date {
+    font-family: var(--display);
+    font-weight: 300;
+    font-variation-settings: "wdth" 75;
+    font-size: clamp(2.6rem, 8vw, 6rem);
+    line-height: 1;
+    margin: 0 0 1.25rem;
+  }
+
+  /* past shows */
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  th {
+    text-align: left; font-weight: 400; color: var(--dim); font-size: 0.875rem;
+    padding: 0 1rem 0.75rem 0; border-bottom: 1px solid var(--rule);
+  }
+  td { padding: 1rem 1rem 1rem 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  td.date { white-space: nowrap; color: var(--dim); width: 9.5rem; }
+  td .where { display: block; }
+  td .event { display: block; color: var(--dim); font-size: 0.9375rem; }
+  td.bell-cell { width: 11rem; white-space: nowrap; color: var(--dim); font-size: 0.9375rem; }
+  td.bell-cell svg { vertical-align: middle; margin-right: 0.6rem; }
+  .table-note { margin-top: 1.25rem; font-size: 0.875rem; color: var(--dim); }
+
+  /* publications */
+  .pubs { list-style: none; margin: 0; padding: 0; display: grid; gap: 2.25rem; }
+  .pubs .kind { display: block; color: var(--dim); font-size: 0.875rem; }
+  .pubs .t { font-size: 1.25rem; font-weight: 400; }
+  .pubs .by { display: block; color: var(--dim); }
+
+  footer {
+    margin-top: clamp(6rem, 14vw, 11rem);
+    padding: 2.5rem var(--gutter) 3rem;
+    border-top: 1px solid var(--rule);
+    font-size: 0.875rem; color: var(--dim);
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem;
+  }
+  footer p { margin: 0 0 0.6em; }
+  footer strong { color: var(--ink); font-weight: 500; }
+
+  @media (max-width: 760px) {
+    .pair { grid-template-columns: 1fr; row-gap: 1.5rem; }
+    .together { max-width: none; }
+    footer { grid-template-columns: 1fr; }
+    td.bell-cell { width: auto; }
+    .nav { justify-content: flex-start; padding-top: 16px; }
+    .replay { top: 52px; }
+    .hero { --title-bottom: 196px; }
+    .title { grid-template-columns: 1fr; row-gap: 0.12em; font-size: 10.5vw; text-align: center; }
+    .title .half:first-child { text-align: center; }
+    thead { display: none; }
+    tr { display: grid; grid-template-columns: 1fr auto; padding: 0.9rem 0; border-bottom: 1px solid var(--rule); }
+    td { border: 0; padding: 0; }
+    td.date { grid-column: 1 / -1; width: auto; font-size: 0.875rem; }
+    td:nth-child(2) { grid-column: 1 / -1; }
+    td.piece-cell { grid-column: 1; font-size: 0.9375rem; color: var(--dim); }
+    td.bell-cell { grid-column: 2; align-self: end; }
+  }
+  @media (max-width: 520px) {
+    .tick.qm .note { display: none; }
+  }
+  @media (max-width: 420px) {
+    .tick > span { font-size: 0.75rem; }
+    .tick.qm .note { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav" aria-label="Main">
+  <ul>
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#pieces">Pieces</a></li>
+    <li><a href="#shows">Shows</a></li>
+    <li><a href="#publications">Publications</a></li>
+  </ul>
+</nav>
+
+<header class="hero" id="top">
+  <canvas id="stage" aria-hidden="true"></canvas>
+
+  <p class="replay" id="replay">
+    <span id="replay-text">Photon pairs measured at the premiere in Linz Cathedral, 4 September 2024, replayed at the pace they arrived.</span><br>
+    <span class="count" id="replay-count">Waiting for the first pair</span><br>
+    <button type="button" id="pause" aria-pressed="false">Pause</button>
+  </p>
+
+  <h1 class="title" aria-label="The Sound of Entanglement">
+    <span class="half" id="half-a" aria-hidden="true">The Sound of</span>
+    <span class="half" id="half-b" aria-hidden="true">Entanglement</span>
+  </h1>
+
+  <div class="bell" id="bell">
+    <div class="track" aria-hidden="true">
+      <span class="band" id="band"></span>
+      <span class="tick zero" style="left:0"><span>0</span></span>
+      <span class="tick two" style="left:66.667%"><span><span class="note">classical limit</span>2</span></span>
+      <span class="tick qm" style="left:94.281%"><span><span class="note">quantum limit</span>2√2</span></span>
+      <span class="mark" id="mark" style="left:0"></span>
+    </div>
+    <p class="readout" aria-live="off">
+      <span class="s" id="s-value">Bell value S: no pairs yet</span>
+      <span id="s-status"></span>
+    </p>
+  </div>
+</header>
+
+<main>
+  <section id="how">
+    <div class="col">
+      <h2>What you are looking at</h2>
+      <p class="lede">Each pair of rings above is one pair of photons, measured during the premiere of <em>BruQner</em> in Linz Cathedral. The left ring is Alice's result, the right ring is Bob's.</p>
+      <p>A violet laser shines into a thin crystal. Very rarely, one of its photons splits into two infrared ones, entangled in their polarisation. One photon travels to Alice, the other to Bob, and each of them measures it along one of two directions, chosen at random every time. The answer is always +1 or −1, and on its own every answer is random.</p>
+      <p>Put side by side, the answers agree and disagree more strongly than anything obeying classical physics could arrange. The Bell value <i>S</i> measures that strength: any classical mechanism stays at or below 2, entangled photons can reach 2√2. The number under the rings is that value, computed from the pairs you have seen so far.</p>
+      <p>Red and blue rings mean Alice and Bob happened to choose the same setting; yellow and violet mean they chose different ones. The same colour on both sides means the same result.</p>
+      <p>In a performance this stream goes to the musicians and to the visuals as it happens. The experiment is the conductor, and no human conductor or classical computer can give the same instructions.</p>
+    </div>
+    <figure>
+      <img src="../assets/img/haze-over-case.jpg" alt="The glowing glass case of the experiment in the dark nave of Linz Cathedral, with a projection of light and haze hanging above the audience." width="2400" height="1600" loading="lazy">
+      <figcaption>The experiment in the nave of the Mariendom, Linz, at the premiere on 4 September 2024. Photo: Florian Voggeneder / Ars Electronica.</figcaption>
+    </figure>
+  </section>
+
+  <section id="pieces">
+    <div class="col pieces-intro">
+      <h2>Three pieces</h2>
+      <p>Every piece receives the same kind of data, one result for Alice and one for Bob, a few times a second. What differs is what the results are allowed to decide.</p>
+    </div>
+
+    <article class="piece">
+      <h3>BruQner</h3>
+      <p class="meta">2024, for two cathedral organs and entangled photons, after Anton Bruckner's <i>Perger Präludium</i>. Composed by Clemens Wenger.</p>
+      <div class="pair">
+        <p class="side a"><strong class="alice">Alice</strong> is the Rudigier organ at the back of the nave, played by Gerhard Raab. Each of her results picks one of four motifs for him to play.</p>
+        <p class="side b"><strong class="bob">Bob</strong> is the choir organ at the front, thirty metres away, played by Wolfgang Kreuzhuber, with four motifs of his own.</p>
+      </div>
+      <p class="together">The motifs reach both organists on tablets one bar ahead, and are written so that entangled results mostly land on polyrhythms. In the middle of the piece we switch the experiment to classical correlations, and you can hear the difference.</p>
+      <a class="more" href="#">About <i>BruQner</i></a>
+    </article>
+
+    <article class="piece">
+      <h3>8 Rooms</h3>
+      <p class="meta">2025, for synthesizer, electric bass, drums and the clicking of the experiment. By Clemens Wenger, Manu Mayr and Judith Schwarz.</p>
+      <div class="pair">
+        <p class="side a"><strong class="alice">Alice</strong> is the click on the left. Every time her wave plate turns to a new setting, a contact microphone picks it up, and her result chooses one of four echo patterns for it.</p>
+        <p class="side b"><strong class="bob">Bob</strong> is the click on the right, with four echo patterns of his own. The clicks come about every half second, so they are also the metronome.</p>
+      </div>
+      <p class="together">Together the results move a walker across a room: setting 1 moves it sideways, setting 2 up or down. When it reaches a wall, the band goes through that door into another room, each with its own sound. After about nineteen minutes every door leads to the ninth room, where the piece ends.</p>
+      <a class="more" href="#">About <i>8 Rooms</i></a>
+      <figure>
+        <img src="../assets/img/jhu-landscape.jpg" alt="A dark concert hall; above the musicians and the experiment, a large screen shows white line landscapes on black." width="2400" height="1600" loading="lazy">
+        <figcaption><i>8 Rooms</i> at the Science Diplomacy Summit, Johns Hopkins University, Washington DC, 14 April 2025. Photo: Kaveh Sardari.</figcaption>
+      </figure>
+    </article>
+
+    <article class="piece">
+      <h3>Indeterminate Apparatus</h3>
+      <p class="meta">2025, for synthesizers, electric bass, drums and entangled photons. Composed by Clemens Wenger.</p>
+      <div class="pair">
+        <p class="side a"><strong class="alice">Alice</strong> is the left hand on the VoQoder, a keyboard split in two. Her results change the sound of the first synthesizer.</p>
+        <p class="side b"><strong class="bob">Bob</strong> is the right hand and the second synthesizer. A vocoder only sounds while both hands play, the way a coincidence needs both photons.</p>
+      </div>
+      <p class="together">The running Bell value sets the tempo. It starts noisy, then settles: around 90 bpm while the photons are entangled, around 70 when we turn the experiment to classical correlations, and 110 once they are entangled again.</p>
+      <a class="more" href="#">About <i>Indeterminate Apparatus</i></a>
+    </article>
+  </section>
+
+  <section id="shows" class="next">
+    <h2 class="visually-hidden">Next show</h2>
+    <p class="date">16 October 2026</p>
+    <div class="col">
+      <p class="lede">University of Innsbruck, at the Dies Academicus and the MIP alumni day.</p>
+      <p style="color:var(--dim)">Programme and times to follow.</p>
+    </div>
+  </section>
+
+  <section id="past" aria-labelledby="past-h">
+    <h2 id="past-h">Past shows</h2>
+    <table>
+      <thead>
+        <tr><th scope="col">Date</th><th scope="col">Where</th><th scope="col">Piece</th><th scope="col">Bell value that night</th></tr>
+      </thead>
+      <tbody id="past-rows"></tbody>
+    </table>
+    <p class="table-note">The line marks the classical limit of 2. Values are from our performance logs, over the quantum sections of each show.</p>
+  </section>
+
+  <section id="publications">
+    <h2>Read and watch</h2>
+    <ul class="pubs">
+      <li>
+        <span class="kind">Paper, 2025</span>
+        <a class="t" href="https://arxiv.org/abs/2509.08892">The Sound of Entanglement</a>
+        <span class="by">E. de Dios Rodríguez, P. Haslinger, J. Kofler, R. Kueng, B. Orthner, A. Ploier, M. Ringbauer, C. Wenger. arXiv:2509.08892</span>
+      </li>
+      <li>
+        <span class="kind">Documentary, 2025, 19 minutes</span>
+        <a class="t" href="https://www.youtube.com/watch?v=_mIf_OFN1YI">BruQner – The Sound of Entanglement</a>
+        <span class="by">The team in the days before the premiere. Directed by Deniz Lindenberg, weitblickfilm.</span>
+      </li>
+      <li>
+        <span class="kind">Recording, 2025, 12 minutes</span>
+        <a class="t" href="https://www.youtube.com/watch?v=Smz7cGPBODw">8 Rooms, live at the Vienna Ball of Sciences</a>
+      </li>
+    </ul>
+  </section>
+</main>
+
+<footer>
+  <div>
+    <p><strong>The Sound of Entanglement</strong></p>
+    <p>Clemens Wenger, Enar de Dios Rodríguez, Benjamin Orthner, Philipp Haslinger, Johannes Kofler, Richard Küng, Alexander Ploier, Martin Ringbauer. Live with Manu Mayr and Judith Schwarz.</p>
+  </div>
+  <div>
+    <p>Supported by Johannes Kepler University Linz, TU Wien, the University of Innsbruck, the FWF cluster of excellence quantA, VCQ, SFB BeyondC and the City of Vienna. Premiered with OÖ KulturEXPO Anton Bruckner 2024 and Ars Electronica.</p>
+  </div>
+  <div>
+    <p>Bookings and questions: <a href="mailto:clemenswenger@mac.com">clemenswenger@mac.com</a></p>
+  </div>
+</footer>
+
+<script>
+(() => {
+  'use strict';
+
+  const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const DATA_URL = '../assets/bruqner_premiere_2024-09-04.json';
+  const OUTCOMES = [[1, 1], [1, -1], [-1, 1], [-1, -1]]; // TT, TR, RT, RR
+  // BruQner 2024 pair colours
+  const RED = [255, 125, 125], BLUE = [143, 143, 255], YELLOW = [255, 255, 179], VIOLET = [255, 179, 255];
+  const PUMP = [122, 92, 255];
+  const LIFE = 5.3;          // seconds a ring lives, as in the cathedral
+  const START_DELAY = 1.4;   // seconds of "superposition" before the first pair
+
+  /* ---------- past shows ---------- */
+  const PAST = [
+    ['19 Nov 2025', 'Zirkus des Wissens, JKU Linz', 'Johannes Kepler University', 'Indeterminate Apparatus', 2.51],
+    ['3 Oct 2025', 'CIVA Festival, Belvedere 21, Vienna', 'Premiere', 'Indeterminate Apparatus', 2.41],
+    ['26 Aug 2025', 'European Forum Alpbach', 'Congress Centrum Alpbach', '8 Rooms', 2.29],
+    ['3 Jun 2025', 'Tech Forum Millstatt', 'Stiftskirche Millstatt', '8 Rooms', 2.32],
+    ['14 Apr 2025', 'Science Diplomacy Summit, Washington DC', 'Johns Hopkins University', '8 Rooms', 2.19],
+    ['Apr to Oct 2025', 'EXPO 2025, Osaka', 'Film in the Austrian Pavilion, “composing the future”', 'Video', null],
+    ['25 Jan 2025', 'Vienna Ball of Sciences, City Hall', 'Premiere, six sets through the night', '8 Rooms', 2.62],
+    ['6 Sep 2024', 'Mariendom, Linz', 'Second performance, in German', 'BruQner', null],
+    ['4 Sep 2024', 'Mariendom, Linz', 'Premiere, opening of Ars Electronica and antonbruckner2024', 'BruQner', 2.34],
+  ];
+  const miniScale = (s) => {
+    // 0..3 on 88px; tick at 2, dot at s
+    const x = (v) => 2 + (v / 3) * 84;
+    return `<svg width="90" height="14" viewBox="0 0 90 14" aria-hidden="true">
+      <line x1="2" y1="7" x2="86" y2="7" stroke="#55525e" stroke-width="1"/>
+      <line x1="${x(2)}" y1="2" x2="${x(2)}" y2="12" stroke="#8b8896" stroke-width="1"/>
+      <circle cx="${x(s)}" cy="7" r="2.6" fill="#e9e6f2"/></svg>`;
+  };
+  document.getElementById('past-rows').innerHTML = PAST.map(([d, where, ev, piece, s]) => `
+    <tr>
+      <td class="date">${d}</td>
+      <td><span class="where">${where}</span><span class="event">${ev}</span></td>
+      <td class="piece-cell"><i>${piece}</i></td>
+      <td class="bell-cell">${s == null ? '' : miniScale(s) + 'S = ' + s.toFixed(2)}</td>
+    </tr>`).join('');
+
+  /* ---------- statistics ---------- */
+  class Tally {
+    constructor() { this.n = [[0, 0], [0, 0]]; this.sum = [[0, 0], [0, 0]]; this.total = 0; }
+    add(a, b, A, B) { this.n[a][b]++; this.sum[a][b] += A * B; this.total++; }
+    E(a, b) { return this.n[a][b] ? this.sum[a][b] / this.n[a][b] : 0; }
+    get S() { return Math.abs(this.E(0, 0) + this.E(0, 1) + this.E(1, 0) - this.E(1, 1)); }
+    get sigma() {
+      let v = 0;
+      for (const a of [0, 1]) for (const b of [0, 1]) {
+        const n = this.n[a][b];
+        v += n ? (1 - this.E(a, b) ** 2) / n : 1;
+      }
+      return Math.sqrt(v);
+    }
+  }
+
+  /* ---------- simulator (same statistics, port of src/lib/bell.ts) ---------- */
+  const rand = () => {
+    const b = new Uint32Array(1);
+    crypto.getRandomValues(b);
+    return b[0] / 4294967296;
+  };
+  const ALICE_DEG = [0, 45], BOB_DEG = [22.5, -22.5];
+  const VISIBILITY = 0.785; // matches the premiere excerpt, S ≈ 2.22
+  function simulate() {
+    const a = rand() < 0.5 ? 0 : 1, b = rand() < 0.5 ? 0 : 1;
+    const E = VISIBILITY * Math.cos(2 * (ALICE_DEG[a] - BOB_DEG[b]) * Math.PI / 180);
+    const A = rand() < 0.5 ? 1 : -1;
+    const B = rand() < (1 + E) / 2 ? A : -A;
+    return { a, b, A, B };
+  }
+
+  /* ---------- title: superposition, then collapse ---------- */
+  const halves = [document.getElementById('half-a'), document.getElementById('half-b')];
+  const letters = halves.map((el) => {
+    const text = el.textContent;
+    el.textContent = '';
+    const out = [];
+    for (const c of text) {
+      if (c === ' ') { el.appendChild(document.createTextNode(' ')); continue; }
+      const s = document.createElement('span');
+      s.className = 'ch';
+      s.textContent = c;
+      el.appendChild(s);
+      out.push({ el: s, collapsed: false, w: 100, f: 0.35 + rand() * 0.5, p: rand() * Math.PI * 2 });
+    }
+    return out;
+  });
+  const setW = (l, w) => { l.w = w; l.el.style.fontVariationSettings = `"wdth" ${w.toFixed(1)}`; };
+  function driftTitle(t) {
+    for (const half of letters) for (const l of half) {
+      if (!l.collapsed) setW(l, 100 + 30 * Math.sin(t * l.f * 2 + l.p) * Math.sin(t * l.f * 0.7 + l.p * 1.7));
+    }
+  }
+  // Event i writes letter i of both halves: +1 wide, -1 narrow.
+  function collapseLetter(i, A, B) {
+    [[letters[0][i], A], [letters[1][i], B]].forEach(([l, r]) => {
+      if (!l || l.collapsed) return;
+      l.collapsed = true;
+      l.el.classList.add('collapsed');
+      setW(l, r > 0 ? 126 : 74);
+    });
+  }
+
+  /* ---------- canvas ---------- */
+  const hero = document.querySelector('.hero');
+  const canvas = document.getElementById('stage');
+  const ctx = canvas.getContext('2d');
+  let W = 0, H = 0, DPR = 1;
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    const r = hero.getBoundingClientRect();
+    W = r.width; H = r.height;
+    canvas.width = Math.round(W * DPR);
+    canvas.height = Math.round(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    measure();
+    if (REDUCED || paused) draw();
+  }
+  const $replay = document.getElementById('replay');
+  const $title = document.querySelector('.title');
+  let GEO = null;
+  function measure() {
+    const top = $replay.offsetTop + $replay.offsetHeight + 28;
+    const bottom = $title.offsetTop - 28;
+    const cy = (top + bottom) / 2;
+    const half = Math.max((bottom - top) / 2, 40);
+    const narrow = W < 700;
+    const off = Math.min(W * (narrow ? 0.24 : 0.2), H * 0.45);
+    // rings grow to R, drift a little, and must stay clear of caption and title
+    GEO = { cx: W / 2, cy, off, R: Math.min(off * (narrow ? 0.8 : 0.95), half * 0.86), top };
+  }
+  const geometry = () => GEO || (measure(), GEO);
+
+  const rings = [];
+  let pump = 0; // flash of the source on each pair
+
+  function spawn(ev, now) {
+    const same = ev.a === ev.b;
+    const group = same ? [RED, BLUE] : [YELLOW, VIOLET];
+    const cA = ev.A > 0 ? group[0] : group[1];
+    const cB = ev.A === ev.B ? cA : (cA === group[0] ? group[1] : group[0]);
+    const drift = same ? 1 : -1; // apart when the settings match, together when they differ
+    rings.push({ side: -1, color: cA, born: now, drift, j: rand() * 0.06 - 0.03 });
+    rings.push({ side: 1, color: cB, born: now, drift, j: rand() * 0.06 - 0.03 });
+    pump = 1;
+  }
+
+  function draw(now = clock) {
+    ctx.clearRect(0, 0, W, H);
+    const { cx, cy, off, R } = geometry();
+    ctx.globalCompositeOperation = 'lighter';
+
+    // the source: a violet point between the two stations
+    const pr = 2 + pump * 3;
+    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, 26 + pump * 30);
+    g.addColorStop(0, `rgba(${PUMP}, ${0.35 + pump * 0.4})`);
+    g.addColorStop(1, 'rgba(122, 92, 255, 0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(cx - 60, cy - 60, 120, 120);
+    ctx.fillStyle = `rgba(200, 185, 255, ${0.7 + pump * 0.3})`;
+    ctx.beginPath(); ctx.arc(cx, cy, pr, 0, Math.PI * 2); ctx.fill();
+
+    for (let i = rings.length - 1; i >= 0; i--) {
+      const r = rings[i];
+      const age = now - r.born;
+      if (age > LIFE) { rings.splice(i, 1); continue; }
+      if (age < 0) continue;
+      const k = age / LIFE;
+      const fadeIn = Math.min(age / 0.3, 1);
+      const fadeOut = Math.min((LIFE - age) / 1.8, 1);
+      const alpha = 0.85 * fadeIn * Math.pow(Math.max(fadeOut, 0), 1.4);
+      const rad = R * (0.3 + 0.7 * Math.pow(k, 0.65));
+      const x = cx + r.side * off + r.side * r.drift * age * W * 0.016;
+      const y = cy + r.j * rad * age * 0.12;
+
+      const fresh = Math.max(0, 1 - age / 0.5);
+      ctx.strokeStyle = `rgba(${r.color}, ${alpha})`;
+      ctx.lineWidth = 1.1 + fresh * 1.4;
+      ctx.shadowColor = `rgba(${r.color}, ${alpha * 0.9})`;
+      ctx.shadowBlur = 10;
+      ctx.beginPath(); ctx.arc(x, y, rad, 0, Math.PI * 2); ctx.stroke();
+    }
+    ctx.shadowBlur = 0;
+    ctx.globalCompositeOperation = 'destination-out';
+    const fade = ctx.createLinearGradient(0, 0, 0, GEO.top);
+    fade.addColorStop(0, 'rgba(0,0,0,0.9)');
+    fade.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = fade;
+    ctx.fillRect(0, 0, W, GEO.top);
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  /* ---------- readouts ---------- */
+  const $count = document.getElementById('replay-count');
+  const $text = document.getElementById('replay-text');
+  const $s = document.getElementById('s-value');
+  const $status = document.getElementById('s-status');
+  const $mark = document.getElementById('mark');
+  const $band = document.getElementById('band');
+  const pct = (v) => `${Math.max(0, Math.min(3, v)) / 3 * 100}%`;
+  let firstBeyond = null; // pair number when S first rose 2σ above 2
+
+  function formatClock(startIso, ms) {
+    const [, hh, mm, ss] = startIso.match(/T(\d\d):(\d\d):(\d\d)/).map(Number);
+    let t = hh * 3600 + mm * 60 + ss + Math.floor(ms / 1000);
+    const p = (n) => String(n).padStart(2, '0');
+    return `${p(Math.floor(t / 3600) % 24)}:${p(Math.floor(t / 60) % 60)}:${p(t % 60)}`;
+  }
+  const fmtDuration = (ms) => {
+    const s = Math.round(ms / 1000);
+    return s < 60 ? `${s} s` : `${Math.floor(s / 60)} min ${s % 60} s`;
+  };
+
+  function updateReadout(tally, elapsedMs) {
+    const n = tally.total;
+    if (!n) return;
+    const S = tally.S, sg = tally.sigma;
+    $mark.style.left = pct(S);
+    $band.style.left = pct(S - sg);
+    $band.style.width = `calc(${pct(S + sg)} - ${pct(S - sg)})`;
+    $s.textContent = `S = ${S.toFixed(2)} ± ${sg.toFixed(2)}, from ${n.toLocaleString('en')} pairs`;
+    const z = (S - 2) / sg;
+    if (z >= 2 && firstBeyond === null) firstBeyond = { n, t: elapsedMs };
+    if (n < 30) $status.textContent = 'Too few pairs to tell anything yet.';
+    else if (z >= 2) $status.textContent = 'More than two standard deviations above the classical limit.';
+    else if (firstBeyond) $status.textContent = `Back within two standard deviations of 2; it first rose clearly above it at pair ${firstBeyond.n}, after ${fmtDuration(firstBeyond.t)}.`;
+    else if (S > 2) $status.textContent = 'Above 2, but not yet by more than the uncertainty.';
+    else $status.textContent = 'Within the classical limit so far.';
+    if (firstBeyond && z >= 2) $status.textContent += ` First reached at pair ${firstBeyond.n}, after ${fmtDuration(firstBeyond.t)}.`;
+  }
+
+  /* ---------- replay engine ---------- */
+  let clock = 0;            // seconds of page time that are not paused
+  let paused = false;
+  let data = null, idx = 0, nextDue = START_DELAY, replayMs = 0, simulating = false;
+  // idx counts events handed out by nextEvent(); `shown` counts replayed pairs on screen
+  let shown = 0;
+  const tally = new Tally();
+
+  function nextEvent() {
+    if (data && idx < data.count) {
+      const v = parseInt(data.events[idx], 16);
+      const [A, B] = OUTCOMES[v & 3];
+      const ev = { a: v >> 3, b: (v >> 2) & 1, A, B, dt: data.dt[idx], sim: false };
+      idx++;
+      return ev;
+    }
+    const ev = simulate();
+    const pool = data && data.dt.length > 1 ? data.dt : [300, 300];
+    ev.dt = pool[1 + Math.floor(rand() * (pool.length - 1))] || 300;
+    ev.sim = true;
+    return ev;
+  }
+
+  function consume(ev, now) {
+    tally.add(ev.a, ev.b, ev.A, ev.B);
+    if (tally.total <= 12) collapseLetter(tally.total - 1, ev.A, ev.B);
+    spawn(ev, now);
+    if (ev.sim) {
+      if (!simulating) {
+        simulating = true;
+        $text.textContent = 'The recorded excerpt from the premiere has ended. The rings now come from a simulation with the same statistics.';
+      }
+      $count.textContent = `Simulated pair ${tally.total.toLocaleString('en')}`;
+    } else {
+      shown++;
+      $count.textContent = `Pair ${shown.toLocaleString('en')} of ${data.count.toLocaleString('en')}, measured at ${formatClock(data.start, replayMs)}`;
+    }
+    updateReadout(tally, replayMs);
+  }
+
+  let pending = null;
+  function step(now) {
+    if (!pending) pending = nextEvent();
+    let guard = 0;
+    while (now >= nextDue && guard++ < 20) {
+      if (tally.total > 0) replayMs += pending.dt;
+      consume(pending, nextDue);
+      pending = nextEvent();
+      nextDue += Math.max(pending.dt, 40) / 1000;
+    }
+  }
+
+  let last = null;
+  function frame(ts) {
+    if (last === null) last = ts;
+    const dt = Math.min((ts - last) / 1000, 0.1);
+    last = ts;
+    if (!paused) {
+      clock += dt;
+      pump = Math.max(0, pump - dt * 3.2);
+      if (tally.total < 12) driftTitle(clock);
+      if (data) step(clock);
+      draw(clock);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  const $pause = document.getElementById('pause');
+  $pause.addEventListener('click', () => {
+    paused = !paused;
+    $pause.textContent = paused ? 'Resume' : 'Pause';
+    $pause.setAttribute('aria-pressed', String(paused));
+  });
+
+  /* ---------- reduced motion: one still frame ---------- */
+  function stillFrame() {
+    $pause.hidden = true;
+    // collapse the title from the first twelve pairs, then freeze the scene at pair 24
+    let t = 0;
+    for (let i = 0; i < data.count; i++) {
+      const v = parseInt(data.events[i], 16);
+      const [A, B] = OUTCOMES[v & 3];
+      const ev = { a: v >> 3, b: (v >> 2) & 1, A, B };
+      tally.add(ev.a, ev.b, A, B);
+      if (i < 12) collapseLetter(i, A, B);
+      if (i > 0) t += data.dt[i] / 1000;
+      if (i < 24) spawn(ev, t);
+      if (i === 23) clock = t + 0.4;
+    }
+    pump = 0;
+    letters.flat().forEach((l) => l.el.classList.remove('collapsed'));
+    $text.textContent = 'A still frame from the premiere in Linz Cathedral, 4 September 2024. The Bell value below uses all 2 000 pairs of the excerpt.';
+    $count.textContent = '2 000 pairs measured from 23:00:10 onwards';
+    updateReadout(tally, 0);
+    const z = (tally.S - 2) / tally.sigma;
+    $status.textContent = z >= 2
+      ? `${z.toFixed(1)} standard deviations above the classical limit of 2.`
+      : 'Not clearly above the classical limit of 2 in this excerpt.';
+    draw(clock);
+  }
+
+  new ResizeObserver(resize).observe(hero);
+  resize();
+
+  fetch(DATA_URL)
+    .then((r) => r.json())
+    .then((d) => {
+      data = d;
+      if (REDUCED) stillFrame();
+    })
+    .catch(() => {
+      // no data file: go straight to the simulation and say so
+      data = { count: 0, events: '', dt: [300], start: 'T00:00:00' };
+      simulating = true; // the fallback text below replaces the "excerpt ended" note
+      $text.textContent = 'The recorded data could not be loaded. These rings come from a simulation with the statistics of the premiere.';
+      if (REDUCED) { for (let i = 0; i < 24; i++) { const e = simulate(); tally.add(e.a, e.b, e.A, e.B); collapseLetter(i, e.A, e.B); spawn(e, i * 0.3); } clock = 7.3; updateReadout(tally, 0); draw(clock); }
+    });
+
+  if (!REDUCED) requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
