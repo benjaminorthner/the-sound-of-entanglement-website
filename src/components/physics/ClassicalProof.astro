@@ -8,12 +8,14 @@ const pm = [1, -1] as const;
 const aSets = pm.flatMap((A1) => pm.map((A2) => [A1, A2] as const));
 const bSets = pm.flatMap((B1) => pm.map((B2) => [B1, B2] as const));
 const s = (x: number) => (x > 0 ? '+' : '−');
+import { getLang } from '../../i18n';
+const de = getLang(Astro) === 'de';
 ---
 <div class="proof">
   <table>
     <caption>
       A<sub>1</sub>(B<sub>1</sub> + B<sub>2</sub>) + A<sub>2</sub>(B<sub>1</sub> − B<sub>2</sub>)
-      for every possible set of hidden instructions
+      {de ? ' für jeden möglichen Satz verborgener Anweisungen' : ' for every possible set of hidden instructions'}
     </caption>
     <thead>
       <tr>

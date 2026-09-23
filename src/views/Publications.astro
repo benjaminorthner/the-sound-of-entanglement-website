@@ -5,9 +5,66 @@ import YouTube from '../components/YouTube.astro';
 import PaperPreview from '../components/publications/PaperPreview.astro';
 import { Image } from 'astro:assets';
 import figure3 from '../assets/paper/figure-3-bell-setup.jpg';
-import { formatDate, formatDateShort, year } from '../lib/format';
+import { formatDate, formatDateShort, formatDayMonth, year } from '../lib/format';
+import { getLang, localize, pick } from '../i18n';
 
 import docPoster from '../assets/photos/2024-bruqner-linz/haze-over-case.jpg';
+
+const lang = getLang(Astro);
+
+// German wording for the fields we write ourselves (outlets, roles, notes,
+// annotations to titles). Titles of papers, talks and articles stay as published.
+const de: Record<string, { title?: string; by?: string; note?: string }> = {
+  'dpg-2025': { by: 'Benjamin Orthner u. a., DPG-Frühjahrstagung, Regensburg' },
+  'doc-2025': { by: 'weitblickfilm, Regie: Deniz Lindenberg', note: '18 Min.' },
+  'trailer-2025': { title: 'BruQner – The Sound of Entanglement (Trailer)', note: '2 Min.' },
+  'ball-video-2025': { title: '8 Rooms, live am Wiener Ball der Wissenschaften 2025', by: 'Clemens Wenger; Film von Lisa Truttmann', note: '12 Min.' },
+  'promo-2024': { title: 'BruQner – The Sound of Entanglement (Promo-Video)', note: '2 Min.' },
+  'bruckneruni-2025': { by: 'Anton Bruckner Privatuniversität' },
+  'standard-blog-2025': { by: 'Der Standard, Blog von Richard Küng' },
+  'ball-blog-2025': { by: 'Wiener Ball der Wissenschaften' },
+  'uibk-2024': { by: 'Universität Innsbruck' },
+};
+
+const tx = {
+  title: { en: 'Papers and press', de: 'Publikationen und Presse' },
+  description: {
+    en: 'The paper, talks, films and press coverage of The Sound of Entanglement.',
+    de: 'Das Paper, Vorträge, Filme und Presseberichte zu The Sound of Entanglement.',
+  },
+  preprint: { en: 'Preprint', de: 'Preprint' },
+  ref: {
+    en: 'arXiv:2509.08892 [quant-ph], 13 pages, 12 figures. Not yet published in a journal.',
+    de: 'arXiv:2509.08892 [quant-ph], 13 Seiten, 12 Abbildungen. Noch nicht in einer Fachzeitschrift erschienen.',
+  },
+  fromAbstract: { en: 'From the abstract', de: 'Aus dem Abstract' },
+  readArxiv: { en: 'Read on arXiv', de: 'Auf arXiv lesen' },
+  pdf: { en: 'PDF, 7.7 MB', de: 'PDF, 7,7 MB' },
+  figAlt: {
+    en: "Photograph of the setup seen from above with the two beam paths drawn in: red to Alice's detectors, blue to Bob's, each passing a half-wave plate and a beam splitter, with outcomes labelled plus one and minus one.",
+    de: 'Foto des Aufbaus von oben mit den beiden eingezeichneten Strahlengängen: rot zu den Detektoren von Alice, blau zu denen von Bob, jeweils durch eine Halbwellenplatte und einen Strahlteiler; die Messergebnisse sind mit plus eins und minus eins beschriftet.',
+  },
+  figCaption: {
+    en: "Figure 3 of the paper: the Bell setup, with Alice's beam path in red and Bob's in blue.",
+    de: 'Abbildung 3 aus dem Paper: der Bell-Aufbau, der Strahlengang von Alice in Rot, der von Bob in Blau.',
+  },
+  film: { en: 'Film', de: 'Film' },
+  docText: {
+    en: 'A documentary following the team through the days before the premiere in the Mariendom Linz.',
+    de: 'Der Dokumentarfilm begleitet das Team durch die Tage vor der Uraufführung im Mariendom Linz.',
+  },
+  posterAlt: {
+    en: 'Clouds of projected light above the glowing experiment in the Mariendom.',
+    de: 'Wolken aus projiziertem Licht über dem leuchtenden Experiment im Mariendom.',
+  },
+  duration: { en: '18 min', de: '18 Min.' },
+  talks: { en: 'Talks', de: 'Vorträge' },
+  press: { en: 'Press', de: 'Presse' },
+};
+const t = (k: keyof typeof tx) => pick(lang, tx[k]);
+/** Title, byline and note of an item in the page language. */
+const f = (p: { id: string; data: { title: string; by: string; note?: string } }) =>
+  lang === 'de' ? { ...p.data, ...de[p.id] } : p.data;
 
 const all = (await getCollection('publications')).sort((a, b) => +b.data.date - +a.data.date);
 const of = (kind: string) => all.filter((p) => p.data.kind === kind);
@@ -30,9 +87,9 @@ const pressByYear = [...new Set(press.map((p) => year(p.data.date)))].map((y) =>
   items: press.filter((p) => year(p.data.date) === y),
 }));
 ---
-<Base title="Papers and press" description="The paper, talks, films and press coverage of The Sound of Entanglement.">
+<Base title={t('title')} description={t('description')}>
   <header class="wrap intro">
-    <h1>Papers and press</h1>
+    <h1>{t('title')}</h1>
   </header>
 
   {paper && (
@@ -41,11 +98,19 @@ const pressByYear = [...new Set(press.map((p) => year(p.data.date)))].map((y) =>
         <PaperPreview pdfUrl="https://arxiv.org/pdf/2509.08892" totalPages={13} />
       </div>
       <div class="paper-text">
-        <p class="kind ui dim">Preprint, {formatDate(paper.data.date)}</p>
+        <p class="kind ui dim">{t('preprint')}, {formatDate(paper.data.date, lang)}</p>
         <h2 id="paper-h"><a href={paper.data.url}>{paper.data.title}</a></h2>
         <p class="authors">{paper.data.by}</p>
-        <p class="ref ui dim">arXiv:2509.08892 [quant-ph], 13 pages, 12 figures. Not yet published in a journal.</p>
-        <blockquote class="abstract">
+        <p class="ref ui dim">{t('ref')}</p>
+        {lang === 'de' && (
+          <p class="summary">
+            Das Paper beschreibt eine Live-Performance, deren Musik und Visuals in Echtzeit von
+            Messungen an verschränkten Photonen in einem Bell-Test gesteuert werden. Die gemessenen
+            Korrelationen sind das zentrale kompositorische Element, und kein klassisches Gerät könnte
+            sie erzeugen. So wird jede Aufführung zu einem einmaligen, nicht wiederholbaren Erlebnis.
+          </p>
+        )}
+        <blockquote class="abstract" lang="en">
           <p>
             We present <em>The Sound of Entanglement</em>, a live musical performance driven by
             real-time measurements of entangled photons in a Bell test. By integrating the measured
@@ -53,11 +118,11 @@ const pressByYear = [...new Set(press.map((p) => year(p.data.date)))].map((y) =>
             experimental data, the performance offers a unique and unrepeatable audiovisual experience
             that relies on quantum correlations which cannot be produced by any classical device.
           </p>
-          <footer class="ui dim">From the abstract</footer>
+          <footer class="ui dim" lang={lang}>{t('fromAbstract')}</footer>
         </blockquote>
         <p class="actions ui">
-          <a class="primary" href={paper.data.url}>Read on arXiv</a>
-          <a href="https://arxiv.org/pdf/2509.08892">PDF, 7.7 MB</a>
+          <a class="primary" href={paper.data.url}>{t('readArxiv')}</a>
+          <a href="https://arxiv.org/pdf/2509.08892">{t('pdf')}</a>
         </p>
         <details class="bibtex">
           <summary class="ui">BibTeX</summary>
@@ -67,12 +132,12 @@ const pressByYear = [...new Set(press.map((p) => year(p.data.date)))].map((y) =>
         <figure class="clipping">
           <Image
             src={figure3}
-            alt="Photograph of the setup seen from above with the two beam paths drawn in: red to Alice's detectors, blue to Bob's, each passing a half-wave plate and a beam splitter, with outcomes labelled plus one and minus one."
+            alt={t('figAlt')}
             widths={[500, 800, 1010]}
             sizes="(min-width: 900px) 30vw, 88vw"
             format="webp"
           />
-          <figcaption class="ui dim">Figure 3 of the paper: the Bell setup, with Alice's beam path in red and Bob's in blue.</figcaption>
+          <figcaption class="ui dim">{t('figCaption')}</figcaption>
         </figure>
       </div>
     </section>
@@ -81,21 +146,21 @@ const pressByYear = [...new Set(press.map((p) => year(p.data.date)))].map((y) =>
   {doc && (
     <section class="wrap film" aria-labelledby="film-h">
       <div class="film-text">
-        <h2 id="film-h" class="section-title">Film</h2>
+        <h2 id="film-h" class="section-title">{t('film')}</h2>
         <h3>{doc.data.title.replace(' (documentary)', '')}</h3>
         <p class="dim">
-          A documentary following the team through the days before the premiere in the Mariendom Linz.{' '}
-          {doc.data.by}, {year(doc.data.date)}.
+          {t('docText')}{' '}
+          {f(doc).by}, {year(doc.data.date)}.
         </p>
       </div>
       <div class="film-video">
-        <YouTube id="_mIf_OFN1YI" title="BruQner – The Sound of Entanglement" poster={docPoster} posterAlt="Clouds of projected light above the glowing experiment in the Mariendom." duration="18 min" />
+        <YouTube id="_mIf_OFN1YI" title="BruQner – The Sound of Entanglement" poster={docPoster} posterAlt={t('posterAlt')} duration={t('duration')} />
       </div>
       <ul class="list more-films">
-        {films.map((f) => (
+        {films.map((v) => (
           <li>
-            <span class="date num">{formatDateShort(f.data.date)}</span>
-            <span class="what"><a href={f.data.url}>{f.data.title}</a><span class="by dim">{f.data.by}{f.data.note && `, ${f.data.note}`}</span></span>
+            <span class="date num">{formatDateShort(v.data.date, lang)}</span>
+            <span class="what"><a href={v.data.url}>{f(v).title}</a><span class="by dim">{f(v).by}{f(v).note && `, ${f(v).note}`}</span></span>
           </li>
         ))}
       </ul>
@@ -103,33 +168,37 @@ const pressByYear = [...new Set(press.map((p) => year(p.data.date)))].map((y) =>
   )}
 
   <section class="wrap block" aria-labelledby="talks-h">
-    <h2 id="talks-h" class="section-title">Talks</h2>
+    <h2 id="talks-h" class="section-title">{t('talks')}</h2>
     <ul class="list">
-      {talks.map((t) => (
+      {talks.map((k) => (
         <li>
-          <span class="date num">{formatDateShort(t.data.date)}</span>
+          <span class="date num">{formatDateShort(k.data.date, lang)}</span>
           <span class="what">
-            {t.data.url ? <a href={t.data.url}>{t.data.title}</a> : t.data.title}
-            <span class="by dim">{t.data.by}</span>
+            {k.data.url ? <a href={k.data.url} lang={k.data.language !== lang ? k.data.language : undefined}>{k.data.title}</a> : k.data.title}
+            <span class="by dim">{f(k).by}</span>
           </span>
         </li>
       ))}
     </ul>
-    <p class="note dim">Talks and lectures at festivals and conferences are also listed with the <a href="/shows/">shows</a>.</p>
+    <p class="note dim">
+      {lang === 'de'
+        ? <>Vorträge bei Festivals und Konferenzen finden sich außerdem bei den <a href={localize(lang, '/shows/')}>Auftritten</a>.</>
+        : <>Talks and lectures at festivals and conferences are also listed with the <a href="/shows/">shows</a>.</>}
+    </p>
   </section>
 
   <section class="wrap block" aria-labelledby="press-h">
-    <h2 id="press-h" class="section-title">Press</h2>
+    <h2 id="press-h" class="section-title">{t('press')}</h2>
     {pressByYear.map(({ y, items }) => (
       <div class="year-group">
         <h3 class="year num">{y}</h3>
         <ul class="list">
           {items.map((p) => (
             <li>
-              <span class="date num">{p.data.date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })}</span>
+              <span class="date num">{formatDayMonth(p.data.date, lang)}</span>
               <span class="what">
                 <a href={p.data.url} lang={p.data.language}>{p.data.title}</a>
-                <span class="by dim">{p.data.by}{p.data.language === 'de' && ', in German'}</span>
+                <span class="by dim">{f(p).by}{p.data.language !== lang && (lang === 'de' ? ', auf Englisch' : ', in German')}</span>
               </span>
             </li>
           ))}
@@ -158,6 +227,8 @@ const pressByYear = [...new Set(press.map((p) => year(p.data.date)))].map((y) =>
   .paper h2 a:hover { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.12em; }
   .authors { margin-top: 1.5rem; font-size: var(--step-1); line-height: 1.45; max-width: 44ch; }
   .ref { font-size: 0.875rem; }
+  .summary { margin-top: 2rem; font-size: 1.0625rem; }
+  .summary + .abstract { margin-top: 1.25rem; }
   .abstract {
     margin: 2rem 0 0;
     padding-left: 1.5rem;

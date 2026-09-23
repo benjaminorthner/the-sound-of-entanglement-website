@@ -4,7 +4,10 @@
  * logos in labelled groups, the tour hosts as a line of text.
  */
 import Logo from './Logo.astro';
-import { GROUPS, supportersByGroup } from './data';
+import { GROUPS, groupTitle, supporterText, supportersByGroup } from './data';
+import { getLang, localize } from '../../i18n';
+
+const lang = getLang(Astro);
 
 const by = await supportersByGroup();
 const logoGroups = GROUPS.filter((g) => ['funding', 'institutions', 'premiere'].includes(g.id));
@@ -12,18 +15,32 @@ const logoGroups = GROUPS.filter((g) => ['funding', 'institutions', 'premiere'].
 <section class="made-possible section" aria-labelledby="support-title">
   <div class="wrap grid">
     <div class="head">
-      <h2 id="support-title">Made possible by</h2>
-      <p class="dim">
-        The experiment was built at TU Wien with research funding, the music with composition grants, and the
-        premiere was commissioned for the Bruckner year 2024. Research institutions, funders and festivals have
-        carried the project since.
-      </p>
-      <p class="ui"><a href="/people/#support">Grants, roles and thanks</a></p>
+      {lang === 'de' ? (
+        <>
+          <h2 id="support-title">Möglich gemacht durch</h2>
+          <p class="dim">
+            Das Experiment entstand an der TU Wien mit Mitteln aus der Forschungsförderung, die Musik mit
+            Kompositionsstipendien, und die Uraufführung war ein Auftragswerk für das Brucknerjahr 2024. Seither
+            tragen Forschungseinrichtungen, Fördergeber und Festivals das Projekt.
+          </p>
+          <p class="ui"><a href={localize(lang, '/people/#support')}>Förderungen, Partner und Dank</a></p>
+        </>
+      ) : (
+        <>
+          <h2 id="support-title">Made possible by</h2>
+          <p class="dim">
+            The experiment was built at TU Wien with research funding, the music with composition grants, and the
+            premiere was commissioned for the Bruckner year 2024. Research institutions, funders and festivals have
+            carried the project since.
+          </p>
+          <p class="ui"><a href="/people/#support">Grants, roles and thanks</a></p>
+        </>
+      )}
     </div>
     <div class="groups">
       {logoGroups.map((g) => (
         <div class="group">
-          <h3 class="ui label">{g.title}</h3>
+          <h3 class="ui label">{groupTitle(g, lang)}</h3>
           <ul>
             {by[g.id].map((s) => (
               <li><Logo supporter={s} /></li>
@@ -32,8 +49,8 @@ const logoGroups = GROUPS.filter((g) => ['funding', 'institutions', 'premiere'].
         </div>
       ))}
       <div class="group hosts">
-        <h3 class="ui label">Hosts on tour</h3>
-        <p>{by.hosts.map((s) => s.data.name).join(', ')}.</p>
+        <h3 class="ui label">{groupTitle(GROUPS.find((g) => g.id === 'hosts')!, lang)}</h3>
+        <p>{by.hosts.map((s) => supporterText(s, lang).name).join(', ')}.</p>
       </div>
     </div>
   </div>

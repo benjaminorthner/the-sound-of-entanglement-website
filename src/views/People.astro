@@ -4,64 +4,132 @@ import Base from '../layouts/Base.astro';
 import Photo from '../components/Photo.astro';
 import Person from '../components/people/Person.astro';
 import SupportList from '../components/support/SupportList.astro';
+import { getLang, pick } from '../i18n';
+import { localized } from '../i18n/content';
 
 import teamOnStage from '../assets/photos/2025-alpbach/team-on-stage.jpg';
 import organConsole from '../assets/photos/2024-bruqner-linz/organist-console.jpg';
 
+const lang = getLang(Astro);
 const people = (await getCollection('people')).sort((a, b) => a.data.order - b.data.order);
 const team = people.filter((p) => p.data.group === 'team');
 const musicians = people.filter((p) => p.data.group === 'musicians');
 const organists = await Promise.all(
-  people.filter((p) => p.data.group === 'organists').map(async (p) => ({ p, Content: (await render(p)).Content })),
+  people.filter((p) => p.data.group === 'organists').map(async (p) => {
+    const { data, entry } = await localized('people', p, lang);
+    return { data, Content: (await render(entry)).Content };
+  }),
 );
 
-const contributions = [
-  { who: 'Philipp Haslinger, Johannes Kofler, Clemens Wenger', what: 'conceived the concept, with the help of Enar de Dios Rodríguez, Richard Küng and Martin Ringbauer' },
-  { who: 'Benjamin Orthner, Martin Ringbauer, Philipp Haslinger', what: 'designed the Bell experiment' },
-  { who: 'Benjamin Orthner', what: 'built it, under the supervision of Philipp Haslinger, and developed the live link between the experiment and the music and visuals' },
-  { who: 'Clemens Wenger', what: 'developed the artistic concept and designed the live performances' },
-  { who: 'Enar de Dios Rodríguez', what: 'created the artistic concept of the live visuals' },
-  { who: 'Alexander Ploier', what: 'coordinated the paper and produced the documentary' },
-];
+// Based on the author contributions of the paper (arXiv:2509.08892)
+const contributions = {
+  en: [
+    { who: 'Philipp Haslinger, Johannes Kofler, Clemens Wenger', what: 'conceived the concept, with the help of Enar de Dios Rodríguez, Richard Küng and Martin Ringbauer' },
+    { who: 'Benjamin Orthner, Martin Ringbauer, Philipp Haslinger', what: 'designed the Bell experiment' },
+    { who: 'Benjamin Orthner', what: 'built it under the supervision of Philipp Haslinger, wrote its control software, developed the live link to the music and programmed the live visuals' },
+    { who: 'Clemens Wenger', what: 'developed the artistic concept and designed the live performances' },
+    { who: 'Enar de Dios Rodríguez', what: 'created the artistic concept of the live visuals' },
+    { who: 'Alexander Ploier', what: 'coordinated the paper and produced the documentary' },
+  ],
+  de: [
+    { who: 'Philipp Haslinger, Johannes Kofler, Clemens Wenger', what: 'haben das Konzept entwickelt, unterstützt von Enar de Dios Rodríguez, Richard Küng und Martin Ringbauer' },
+    { who: 'Benjamin Orthner, Martin Ringbauer, Philipp Haslinger', what: 'haben das Bell-Experiment entworfen' },
+    { who: 'Benjamin Orthner', what: 'hat es unter der Betreuung von Philipp Haslinger aufgebaut, die Steuerungssoftware geschrieben, die Live-Verbindung zur Musik entwickelt und die Live-Visuals programmiert' },
+    { who: 'Clemens Wenger', what: 'hat das künstlerische Konzept entwickelt und die Live-Auftritte gestaltet' },
+    { who: 'Enar de Dios Rodríguez', what: 'hat das künstlerische Konzept der Live-Visuals geschaffen' },
+    { who: 'Alexander Ploier', what: 'hat das Paper koordiniert und den Dokumentarfilm produziert' },
+  ],
+};
 
-const credits = [
-  { what: 'Documentary BruQner – The Sound of Entanglement', who: 'weitblickfilm. Director Deniz Lindenberg, executive producer Alexander Ploier, cinematography Florian Lindenberg, on-location sound Michael Alexa, audio post-production Peter Priemer (Low fidelity)' },
-  { what: 'Perger Präludium, extended version at the end of BruQner', who: 'Franz Neuhofer' },
-  { what: '8 Rooms, live at the Vienna Ball of Sciences (film)', who: 'Film by Lisa Truttmann, live recording by Christian Hölzel, edited by Clemens Wenger' },
-];
+const credits = {
+  en: [
+    { what: 'Documentary BruQner – The Sound of Entanglement', who: 'weitblickfilm. Director Deniz Lindenberg, executive producer Alexander Ploier, cinematography Florian Lindenberg, on-location sound Michael Alexa, audio post-production Peter Priemer (Low fidelity)' },
+    { what: 'Perger Präludium, extended version at the end of BruQner', who: 'Franz Neuhofer' },
+    { what: '8 Rooms, live at the Vienna Ball of Sciences (film)', who: 'Film by Lisa Truttmann, live recording by Christian Hölzel, edited by Clemens Wenger' },
+    { what: 'This website', who: 'Benjamin Orthner' },
+  ],
+  de: [
+    { what: 'Dokumentarfilm BruQner – The Sound of Entanglement', who: 'weitblickfilm. Regie Deniz Lindenberg, ausführender Produzent Alexander Ploier, Kamera Florian Lindenberg, Originalton Michael Alexa, Tonpostproduktion Peter Priemer (Low fidelity)' },
+    { what: 'Perger Präludium, erweiterte Fassung am Schluss von BruQner', who: 'Franz Neuhofer' },
+    { what: '8 Rooms, live am Wiener Ball der Wissenschaften (Film)', who: 'Film von Lisa Truttmann, Live-Mitschnitt Christian Hölzel, Schnitt Clemens Wenger' },
+    { what: 'Diese Website', who: 'Benjamin Orthner' },
+  ],
+};
+
+const tx = {
+  title: { en: 'People', de: 'Team' },
+  description: {
+    en: 'The physicists, composer, visual artist and musicians behind The Sound of Entanglement.',
+    de: 'Die Physiker, der Komponist, die Künstlerin und die Musiker:innen hinter The Sound of Entanglement.',
+  },
+  lede: {
+    en: 'Experimental and theoretical physicists from Vienna, Linz and Innsbruck, a composer, a visual artist, a band, and two cathedral organists.',
+    de: 'Experimental- und Theoriephysiker aus Wien, Linz und Innsbruck, ein Komponist, eine bildende Künstlerin, eine Band und zwei Domorganisten.',
+  },
+  stageAlt: {
+    en: 'Seven members of the team stand arm in arm on stage in front of a screen showing their portraits.',
+    de: 'Sieben Mitglieder des Teams stehen Arm in Arm auf der Bühne, hinter ihnen eine Leinwand mit ihren Porträts.',
+  },
+  stageCaption: {
+    en: 'On stage after the performance at the European Forum Alpbach, 26 August 2025.',
+    de: 'Auf der Bühne nach dem Auftritt beim Europäischen Forum Alpbach, 26. August 2025.',
+  },
+  team: { en: 'The team', de: 'Das Kernteam' },
+  band: { en: 'The band', de: 'Die Band' },
+  bandNote: {
+    en: 'Since 2025 the pieces are played by a band: Clemens Wenger on keys, with Manu Mayr and Judith Schwarz. Together they are called The Uncertain Question.',
+    de: 'Seit 2025 spielt eine Band die Stücke: Clemens Wenger an den Tasten, dazu Manu Mayr und Judith Schwarz. Gemeinsam nennen sie sich The Uncertain Question.',
+  },
+  organAlt: {
+    en: 'An organist seen from behind at the lit console of a cathedral organ.',
+    de: 'Ein Organist von hinten am beleuchteten Spieltisch einer Domorgel.',
+  },
+  organCaption: { en: 'At the console during BruQner, Mariendom Linz.', de: 'Am Spieltisch bei BruQner, Mariendom Linz.' },
+  organists: { en: 'The organists', de: 'Die Organisten' },
+  who: { en: 'Who does what', de: 'Wer was macht' },
+  whoNote: {
+    en: 'Clemens Wenger and Benjamin Orthner run the project together.',
+    de: 'Clemens Wenger und Benjamin Orthner leiten das Projekt gemeinsam.',
+  },
+  source: {
+    en: 'Based on the author contributions of the paper, arXiv:2509.08892.',
+    de: 'Auf Grundlage der Autorenbeiträge im Paper, arXiv:2509.08892.',
+  },
+  also: { en: 'Also', de: 'Außerdem beteiligt' },
+  support: { en: 'Support and funding', de: 'Förderung und Unterstützung' },
+  supportIntro: {
+    en: 'The project depends on research institutions, funding bodies, festivals and hosts. These are the ones that made the experiment, the music and the performances possible, with the grants as they are credited in the paper.',
+    de: 'Ohne Forschungseinrichtungen, Fördergeber, Festivals und Gastgeber gäbe es dieses Projekt nicht. Hier stehen alle, die das Experiment, die Musik und die Auftritte möglich gemacht haben, die Förderungen so, wie sie im Paper angeführt sind.',
+  },
+};
+const s = (k: keyof typeof tx) => pick(lang, tx[k]);
 ---
-<Base title="People" description="The physicists, composer, visual artist and musicians behind The Sound of Entanglement.">
+<Base title={s('title')} description={s('description')}>
   <header class="wrap intro">
-    <h1>People</h1>
-    <p class="lede">
-      Experimental and theoretical physicists from Vienna, Linz and Innsbruck, a composer, a visual
-      artist, a band, and two cathedral organists.
-    </p>
+    <h1>{s('title')}</h1>
+    <p class="lede">{s('lede')}</p>
   </header>
 
   <Photo
     src={teamOnStage}
-    alt="Seven members of the team stand arm in arm on stage in front of a screen showing their portraits."
+    alt={s('stageAlt')}
     credit="© EFA / Luiza Puiu"
-    caption="On stage after the performance at the European Forum Alpbach, 26 August 2025."
+    caption={s('stageCaption')}
     bleed
     loading="eager"
     ratio="21 / 9"
   />
 
   <section class="wrap group" aria-labelledby="team-h">
-    <h2 id="team-h" class="group-title">The team</h2>
+    <h2 id="team-h" class="group-title">{s('team')}</h2>
     <div class="spread">
       {team.map((p) => <Person person={p} />)}
     </div>
   </section>
 
   <section class="wrap group" aria-labelledby="band-h">
-    <h2 id="band-h" class="group-title">The band</h2>
-    <p class="group-note">
-      Since 2025 the pieces are played by a band: Clemens Wenger on keys, with Manu Mayr and Judith
-      Schwarz. Together they are called The Uncertain Question.
-    </p>
+    <h2 id="band-h" class="group-title">{s('band')}</h2>
+    <p class="group-note">{s('bandNote')}</p>
     <div class="spread">
       {musicians.map((p) => <Person person={p} />)}
     </div>
@@ -71,22 +139,27 @@ const credits = [
     <div class="organ-photo">
       <Photo
         src={organConsole}
-        alt="An organist seen from behind at the lit console of a cathedral organ."
+        alt={s('organAlt')}
         credit="Florian Voggeneder / Ars Electronica"
-        caption="At the console during BruQner, Mariendom Linz."
+        caption={s('organCaption')}
         sizes="(min-width: 900px) 50vw, 100vw"
       />
     </div>
     <div class="organ-text">
-      <h2 id="organ-h" class="group-title">The organists</h2>
+      <h2 id="organ-h" class="group-title">{s('organists')}</h2>
       <p class="group-note">
-        <em>BruQner</em> was played on the two organs of the Mariendom in Linz, about thirty metres
-        apart, one for Alice and one for Bob.
+        {lang === 'de' ? (
+          <><em>BruQner</em> erklang auf den beiden Orgeln des Mariendoms in Linz, die rund dreißig Meter
+          voneinander entfernt stehen: eine für Alice, eine für Bob.</>
+        ) : (
+          <><em>BruQner</em> was played on the two organs of the Mariendom in Linz, about thirty metres
+          apart, one for Alice and one for Bob.</>
+        )}
       </p>
-      {organists.map(({ p, Content }) => (
+      {organists.map(({ data, Content }) => (
         <div class="organist">
-          <h3>{p.data.name}</h3>
-          <p class="role">{p.data.role}</p>
+          <h3>{data.name}</h3>
+          <p class="role">{data.role}</p>
           <div class="bio dim"><Content /></div>
         </div>
       ))}
@@ -94,20 +167,21 @@ const credits = [
   </section>
 
   <section class="wrap group who" aria-labelledby="who-h">
-    <h2 id="who-h" class="group-title">Who did what</h2>
+    <h2 id="who-h" class="group-title">{s('who')}</h2>
+    <p class="group-note">{s('whoNote')}</p>
     <dl>
-      {contributions.map((c) => (
+      {contributions[lang].map((c) => (
         <div class="row">
           <dt>{c.who}</dt>
           <dd>{c.what}</dd>
         </div>
       ))}
     </dl>
-    <p class="source dim ui">From the author contributions of the paper, arXiv:2509.08892.</p>
+    <p class="source dim ui">{s('source')}</p>
 
-    <h3 class="sub">Also</h3>
+    <h3 class="sub">{s('also')}</h3>
     <dl>
-      {credits.map((c) => (
+      {credits[lang].map((c) => (
         <div class="row">
           <dt>{c.what}</dt>
           <dd>{c.who}</dd>
@@ -117,12 +191,8 @@ const credits = [
   </section>
 
   <section class="wrap group" id="support" aria-labelledby="support-h">
-    <h2 id="support-h" class="group-title">Support and funding</h2>
-    <p class="support-intro dim">
-      The project depends on research institutions, funding bodies, festivals and hosts. These are the ones
-      that made the experiment, the music and the performances possible, with the grants as they are credited in
-      the paper.
-    </p>
+    <h2 id="support-h" class="group-title">{s('support')}</h2>
+    <p class="support-intro dim">{s('supportIntro')}</p>
     <SupportList />
   </section>
 </Base>

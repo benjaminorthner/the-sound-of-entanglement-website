@@ -5,18 +5,21 @@
  * running estimate and a band for its uncertainty. Driven from script via
  * setLiveBell() in ./liveBell.ts.
  */
+import { getLang } from '../../i18n';
+
 interface Props { id?: string }
 const { id } = Astro.props;
+const de = getLang(Astro) === 'de';
 const pos = (v: number) => `${(v / 3) * 100}%`;
 ---
 <div class="live-bell" data-live-bell id={id}>
   <div class="track" aria-hidden="true">
     <span class="band" data-lb-band></span>
-    <span class="mark" style={`left: ${pos(2)}`}><span class="ui">classical limit 2</span></span>
+    <span class="mark" style={`left: ${pos(2)}`}><span class="ui">{de ? 'klassische Grenze 2' : 'classical limit 2'}</span></span>
     <span class="mark q" style={`left: ${pos(2 * Math.SQRT2)}`}><span class="ui">2√2</span></span>
     <span class="dot" data-lb-dot></span>
   </div>
-  <p class="text ui num" data-lb-text aria-live="off">Waiting for the first pairs.</p>
+  <p class="text ui num" data-lb-text aria-live="off">{de ? 'Warten auf die ersten Paare.' : 'Waiting for the first pairs.'}</p>
 </div>
 
 <style>

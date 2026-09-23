@@ -1,20 +1,44 @@
 ---
 /** The half-wave-plate mount turning, as a muted loop; paused under reduced motion. */
+import { getLang, localize } from '../../i18n';
+
+const lang = getLang(Astro);
+const de = lang === 'de';
 ---
 <section class="physics section" aria-labelledby="physics-title">
   <div class="wrap grid">
     <div class="text">
-      <h2 id="physics-title">Every click is a measurement being chosen</h2>
-      <p>
-        Before each measurement, a small motor turns a half-wave plate on each side of the experiment to one of two
-        angles, picked at random. You can hear it on stage: a click for Alice and a click for Bob, about twice a
-        second. In <a href="/pieces/8-rooms/">8 Rooms</a> those clicks are the metronome.
-      </p>
-      <p>
-        Whether the photon behind the plate is then transmitted or reflected has no cause at all. That's the
-        randomness the music is built on, and the correlations between the two sides are what make it quantum.
-      </p>
-      <p class="ui more"><a href="/physics/">How the experiment works</a></p>
+      {de ? (
+        <>
+          <h2 id="physics-title">Jeder Klick wählt eine Messung</h2>
+          <p>
+            Vor jeder Messung dreht auf beiden Seiten des Experiments ein kleiner Motor eine Halbwellenplatte auf
+            einen von zwei Winkeln, zufällig ausgewählt. Auf der Bühne ist das zu hören: ein Klick für Alice, einer für
+            Bob, etwa zweimal pro Sekunde. In <a href={localize(lang, '/pieces/8-rooms/')}>8 Rooms</a> sind diese
+            Klicks das Metronom.
+          </p>
+          <p>
+            Ob das Photon hinter der Platte dann durchgelassen oder reflektiert wird, hat überhaupt keine Ursache.
+            Auf diesem Zufall baut die Musik auf; das Quantenhafte daran sind die Korrelationen zwischen den beiden
+            Seiten.
+          </p>
+          <p class="ui more"><a href={localize(lang, '/physics/')}>Wie das Experiment funktioniert</a></p>
+        </>
+      ) : (
+        <>
+          <h2 id="physics-title">Every click is a measurement being chosen</h2>
+          <p>
+            Before each measurement, a small motor turns a half-wave plate on each side of the experiment to one of two
+            angles, picked at random. You can hear it on stage: a click for Alice and a click for Bob, about twice a
+            second. In <a href="/pieces/8-rooms/">8 Rooms</a> those clicks are the metronome.
+          </p>
+          <p>
+            Whether the photon behind the plate is then transmitted or reflected has no cause at all. That's the
+            randomness the music is built on, and the correlations between the two sides are what make it quantum.
+          </p>
+          <p class="ui more"><a href="/physics/">How the experiment works</a></p>
+        </>
+      )}
     </div>
     <figure class="loop">
       <video
@@ -24,10 +48,16 @@
         playsinline
         autoplay
         preload="metadata"
-        aria-label="Close-up of the motorised rotation mount turning the half-wave plate."
+        aria-label={de
+          ? 'Nahaufnahme der motorisierten Drehhalterung, die die Halbwellenplatte dreht.'
+          : 'Close-up of the motorised rotation mount turning the half-wave plate.'}
         data-loop
       ></video>
-      <figcaption class="ui">A rotation mount choosing a measurement setting. Video: The Sound of Entanglement</figcaption>
+      <figcaption class="ui">
+        {de
+          ? 'Eine Drehhalterung wählt eine Messeinstellung. Video: The Sound of Entanglement'
+          : 'A rotation mount choosing a measurement setting. Video: The Sound of Entanglement'}
+      </figcaption>
     </figure>
   </div>
 </section>

@@ -3,13 +3,17 @@
  * The premiere night of BruQner as a photographic narrative, in the order
  * the evening happened: the cathedral fills, the lecture, the two organs,
  * the score, the experiment at the crossing, the light, afterwards.
- * Photos and captions: ./story.ts.
+ * Photos and captions: ./story.ts. German copy sits next to the English.
  */
 import Photo from '../../Photo.astro';
 import BellScale from '../../BellScale.astro';
-import { photos as p, sections } from './story';
+import { photos, sections, inLang } from './story';
+import { getLang, localize, num, pick } from '../../../i18n';
 
-const SHOW = '/shows/2024-09-04-bruqner-linz/';
+const lang = getLang(Astro);
+const de = lang === 'de';
+const p = Object.fromEntries(Object.entries(photos).map(([k, v]) => [k, inLang(lang, v)])) as Record<keyof typeof photos, ReturnType<typeof inLang>>;
+const SHOW = localize(lang, '/shows/2024-09-04-bruqner-linz/');
 const full = '100vw';
 const wide = '(min-width: 1000px) 58vw, 100vw';
 const narrow = '(min-width: 1000px) 34vw, 100vw';
@@ -18,15 +22,32 @@ const narrow = '(min-width: 1000px) 34vw, 100vw';
   <!-- The night -->
   <section class="wrap grid chapter night" aria-labelledby="ch-night">
     <div class="text">
-      <h2 id="ch-night">4 September 2024, 22:00</h2>
-      <p>
-        On Anton Bruckner’s 200th birthday, <em>BruQner</em> opened the Ars Electronica Festival in the
-        Mariendom in Linz, as part of the Upper Austrian KulturEXPO antonbruckner2024. Admission was free.
-      </p>
-      <p class="aside">
-        Bruckner and physics have met in Linz before: Ludwig Boltzmann, who founded statistical physics,
-        grew up in the city in the 1850s and took piano lessons from Anton Bruckner.
-      </p>
+      {de ? (
+        <>
+          <h2 id="ch-night">4. September 2024, 22 Uhr</h2>
+          <p>
+            Am 200. Geburtstag Anton Bruckners eröffnete <em>BruQner</em> im Linzer Mariendom das Ars Electronica
+            Festival, als Teil der OÖ KulturEXPO antonbruckner2024. Der Eintritt war frei.
+          </p>
+          <p class="aside">
+            Bruckner und die Physik sind einander in Linz nicht zum ersten Mal begegnet: Ludwig Boltzmann, der
+            Begründer der statistischen Physik, wuchs in den 1850er-Jahren hier auf und nahm Klavierunterricht
+            bei Anton Bruckner.
+          </p>
+        </>
+      ) : (
+        <>
+          <h2 id="ch-night">4 September 2024, 22:00</h2>
+          <p>
+            On Anton Bruckner’s 200th birthday, <em>BruQner</em> opened the Ars Electronica Festival in the
+            Mariendom in Linz, as part of the Upper Austrian KulturEXPO antonbruckner2024. Admission was free.
+          </p>
+          <p class="aside">
+            Bruckner and physics have met in Linz before: Ludwig Boltzmann, who founded statistical physics,
+            grew up in the city in the 1850s and took piano lessons from Anton Bruckner.
+          </p>
+        </>
+      )}
     </div>
     <div class="img-wide"><Photo {...p.exterior} sizes={wide} /></div>
     <div class="img-small"><Photo {...p.candles} sizes={narrow} /></div>
@@ -37,11 +58,23 @@ const narrow = '(min-width: 1000px) 34vw, 100vw';
   <section class="wrap grid chapter crowd" aria-labelledby="ch-crowd">
     <p class="big-number num" aria-hidden="true">3 000+</p>
     <div class="text">
-      <h2 id="ch-crowd" class="visually-hidden">More than 3 000 people</h2>
-      <p class="lead">
-        More than 3 000 people came, as many as the cathedral’s fire-safety rules allowed. Most of them
-        sat on the stone floor of the nave, all around the experiment.
-      </p>
+      {de ? (
+        <>
+          <h2 id="ch-crowd" class="visually-hidden">Mehr als 3 000 Menschen</h2>
+          <p class="lead">
+            Mehr als 3 000 Menschen kamen, so viele, wie der Brandschutz im Dom erlaubte. Die meisten saßen auf
+            dem Steinboden des Langhauses, rund um das Experiment.
+          </p>
+        </>
+      ) : (
+        <>
+          <h2 id="ch-crowd" class="visually-hidden">More than 3 000 people</h2>
+          <p class="lead">
+            More than 3 000 people came, as many as the cathedral’s fire-safety rules allowed. Most of them
+            sat on the stone floor of the nave, all around the experiment.
+          </p>
+        </>
+      )}
     </div>
   </section>
   <div class="wrap grid pair">
@@ -54,13 +87,27 @@ const narrow = '(min-width: 1000px) 34vw, 100vw';
     <Photo {...p.lecture} bleed sizes={full} />
     <div class="wrap grid">
       <div class="text">
-        <h2 id="ch-lecture">First, a lecture</h2>
-        <p>
-          Before the music, about twenty-five minutes of physics: Clemens Wenger, Philipp Haslinger and
-          Johannes Kofler explained what entanglement is, why Bell’s inequality separates it from anything
-          classical, and how the experiment in the middle of the cathedral would conduct the two organs.
-          The afternoon performance on 6 September had the lecture in German.
-        </p>
+        {de ? (
+          <>
+            <h2 id="ch-lecture">Zuerst ein Vortrag</h2>
+            <p>
+              Vor der Musik gab es rund fünfundzwanzig Minuten Physik: Clemens Wenger, Philipp Haslinger und
+              Johannes Kofler erklärten, was Verschränkung ist, warum die Bellsche Ungleichung sie von allem
+              Klassischen trennt und wie das Experiment in der Mitte des Doms die beiden Orgeln dirigieren würde.
+              Bei der Nachmittagsvorstellung am 6. September wurde der Vortrag auf Deutsch gehalten.
+            </p>
+          </>
+        ) : (
+          <>
+            <h2 id="ch-lecture">First, a lecture</h2>
+            <p>
+              Before the music, about twenty-five minutes of physics: Clemens Wenger, Philipp Haslinger and
+              Johannes Kofler explained what entanglement is, why Bell’s inequality separates it from anything
+              classical, and how the experiment in the middle of the cathedral would conduct the two organs.
+              The afternoon performance on 6 September had the lecture in German.
+            </p>
+          </>
+        )}
       </div>
     </div>
   </section>
@@ -70,13 +117,28 @@ const narrow = '(min-width: 1000px) 34vw, 100vw';
     <div class="grid organs-head">
       <p class="big-number num" aria-hidden="true">30 m</p>
       <div class="text">
-        <h2 id="ch-organs">Two organs, thirty metres apart</h2>
-        <p>
-          The Mariendom has two organs that are tuned to each other and can be played together, which is why
-          the piece could only happen here. One photon of every pair went to each organ. The organists read
-          their next bar from a screen, one bar ahead, sent over cables laid through the cathedral: WiFi
-          was too unreliable for music.
-        </p>
+        {de ? (
+          <>
+            <h2 id="ch-organs">Zwei Orgeln, dreißig Meter auseinander</h2>
+            <p>
+              Der Mariendom hat zwei Orgeln, die aufeinander abgestimmt sind und gemeinsam gespielt werden
+              können. Nur deshalb konnte das Stück hier entstehen. Von jedem Photonenpaar ging das Messergebnis
+              des einen Photons an die eine Orgel, das seines Partners an die andere. Die Organisten lasen ihren
+              nächsten Takt jeweils einen Takt im Voraus von einem Bildschirm ab. Die Daten liefen über Kabel,
+              die quer durch den Dom verlegt waren: Für Musik war WLAN zu unzuverlässig.
+            </p>
+          </>
+        ) : (
+          <>
+            <h2 id="ch-organs">Two organs, thirty metres apart</h2>
+            <p>
+              The Mariendom has two organs that are tuned to each other and can be played together, which is why
+              the piece could only happen here. One photon of every pair went to each organ. The organists read
+              their next bar from a screen, one bar ahead, sent over cables laid through the cathedral: WiFi
+              was too unreliable for music.
+            </p>
+          </>
+        )}
       </div>
     </div>
     <div class="grid stations">
@@ -97,24 +159,45 @@ const narrow = '(min-width: 1000px) 34vw, 100vw';
   <section class="wrap grid chapter score" aria-labelledby="ch-score">
     <div class="motifs"><Photo {...p.motifs} sizes={narrow} class="inverted" /></div>
     <div class="text">
-      <h2 id="ch-score">What the photons chose</h2>
-      <p>
-        Clemens Wenger turned Bruckner’s <em>Perger Präludium</em> (1884) into more than 250 precomposed
-        bars: some identical to Bruckner’s, many varied, inverted, transposed or rhythmically intensified.
-        For every photon pair, the experiment picked one of four motifs for each organ, named after the
-        setting that was measured and its outcome: A1+, A1−, A2+ and A2− for Alice, B1+ to B2− for Bob.
-        The motifs are arranged so that the stronger-than-classical correlations mostly produce polyrhythms.
-      </p>
-      <h3>The form</h3>
+      {de ? (
+        <>
+          <h2 id="ch-score">Was die Photonen wählten</h2>
+          <p>
+            Clemens Wenger hat Bruckners <em>Perger Präludium</em> (1884) zu mehr als 250 vorkomponierten Takten
+            verarbeitet: manche Note für Note wie bei Bruckner, viele variiert, gespiegelt, transponiert oder
+            rhythmisch verdichtet. Für jedes Photonenpaar wählte das Experiment für jede Orgel eines von vier
+            Motiven. Benannt sind sie nach der gemessenen Einstellung und ihrem Ergebnis: A1+, A1−, A2+ und A2−
+            für Alice, B1+ bis B2− für Bob. Die Motive sind so angelegt, dass die Korrelationen, die stärker sind,
+            als es klassisch möglich wäre, vor allem Polyrhythmen hervorbringen.
+          </p>
+          <h3>Die Form</h3>
+        </>
+      ) : (
+        <>
+          <h2 id="ch-score">What the photons chose</h2>
+          <p>
+            Clemens Wenger turned Bruckner’s <em>Perger Präludium</em> (1884) into more than 250 precomposed
+            bars: some identical to Bruckner’s, many varied, inverted, transposed or rhythmically intensified.
+            For every photon pair, the experiment picked one of four motifs for each organ, named after the
+            setting that was measured and its outcome: A1+, A1−, A2+ and A2− for Alice, B1+ to B2− for Bob.
+            The motifs are arranged so that the stronger-than-classical correlations mostly produce polyrhythms.
+          </p>
+          <h3>The form</h3>
+        </>
+      )}
       <ol class="form">
         {sections.map((s) => (
           <li>
             <span class="n num">{s.n}</span>
-            <span class="part"><span class="part-title">{s.title}</span>{s.text && <span class="part-text">{s.text}</span>}</span>
+            <span class="part"><span class="part-title" lang={de ? 'en' : undefined}>{s.title}</span>{s.text && <span class="part-text">{pick(lang, s.text)}</span>}</span>
           </li>
         ))}
       </ol>
-      <p class="dim small">The piece opened with Bruckner’s original, played in the dark, and lasted about eighteen minutes.</p>
+      <p class="dim small">
+        {de
+          ? 'Zu Beginn erklang Bruckners Original, im Dunkeln gespielt. Insgesamt dauerte das Stück etwa achtzehn Minuten.'
+          : 'The piece opened with Bruckner’s original, played in the dark, and lasted about eighteen minutes.'}
+      </p>
     </div>
   </section>
 
@@ -123,20 +206,35 @@ const narrow = '(min-width: 1000px) 34vw, 100vw';
     <Photo {...p.caseCross} bleed sizes={full} />
     <div class="wrap grid exp-body">
       <div class="text">
-        <h2 id="ch-experiment">The conductor, at the crossing</h2>
-        <p>
-          The experiment stood in a glass case lit from inside, at the crossing of the cathedral beneath the
-          altar cross. A violet laser made pairs of entangled infrared photons; a few times a second one pair
-          was measured and its result sent to the organs and the projectors.
-        </p>
-        <p><a href="/physics/">How the experiment works</a></p>
+        {de ? (
+          <>
+            <h2 id="ch-experiment">Der Dirigent in der Vierung</h2>
+            <p>
+              Das Experiment stand in einer von innen beleuchteten Glasvitrine in der Vierung, unter dem
+              Altarkreuz. Ein violetter Laser erzeugte verschränkte Paare infraroter Photonen. Mehrmals pro
+              Sekunde wurde ein Paar gemessen und das Ergebnis an die Orgeln und die Projektoren geschickt.
+            </p>
+            <p><a href={localize(lang, '/physics/')}>Wie das Experiment funktioniert</a></p>
+          </>
+        ) : (
+          <>
+            <h2 id="ch-experiment">The conductor, at the crossing</h2>
+            <p>
+              The experiment stood in a glass case lit from inside, at the crossing of the cathedral beneath the
+              altar cross. A violet laser made pairs of entangled infrared photons; a few times a second one pair
+              was measured and its result sent to the organs and the projectors.
+            </p>
+            <p><a href="/physics/">How the experiment works</a></p>
+          </>
+        )}
       </div>
       <div class="bell-moment">
-        <p class="big-number num" aria-hidden="true">S ≈ 2.45</p>
+        <p class="big-number num" aria-hidden="true">S ≈ {num(lang, 2.45)}</p>
         <BellScale value={2.45} />
         <p class="small">
-          The Bell value measured that night. No classical source can produce correlations above 2. In the
-          classical middle section of the piece it dropped below 2, on purpose.
+          {de
+            ? 'Der Bell-Wert, der an diesem Abend gemessen wurde. Keine klassische Quelle kann Korrelationen über 2 erzeugen. Im klassischen Mittelteil des Stücks fiel er unter 2, und zwar mit Absicht.'
+            : 'The Bell value measured that night. No classical source can produce correlations above 2. In the classical middle section of the piece it dropped below 2, on purpose.'}
         </p>
       </div>
     </div>
@@ -151,13 +249,28 @@ const narrow = '(min-width: 1000px) 34vw, 100vw';
     <Photo {...p.invertedCone} bleed sizes={full} />
     <div class="wrap grid">
       <div class="text">
-        <h2 id="ch-light">Cones of light</h2>
-        <p>
-          In the crystal, entangled pairs leave along two cones of light. The visuals drew them: three laser
-          projectors faced the audience and shone into haze, so each projected ring became a cone of light
-          in the air above the people. Circles meant entanglement, straight lines meant classical
-          correlations, and every shape was triggered by a measured photon pair.
-        </p>
+        {de ? (
+          <>
+            <h2 id="ch-light">Lichtkegel</h2>
+            <p>
+              Die verschränkten Paare verlassen den Kristall entlang zweier Lichtkegel. Genau diese
+              Kegel zeichneten die Visuals nach: Drei Laserprojektoren waren auf das Publikum gerichtet und
+              strahlten in den Nebel, sodass jeder projizierte Ring über den Köpfen zu einem Kegel aus Licht
+              wurde. Kreise standen für Verschränkung, gerade Linien für klassische Korrelationen, und jede Form
+              wurde von einem gemessenen Photonenpaar ausgelöst.
+            </p>
+          </>
+        ) : (
+          <>
+            <h2 id="ch-light">Cones of light</h2>
+            <p>
+              In the crystal, entangled pairs leave along two cones of light. The visuals drew them: three laser
+              projectors faced the audience and shone into haze, so each projected ring became a cone of light
+              in the air above the people. Circles meant entanglement, straight lines meant classical
+              correlations, and every shape was triggered by a measured photon pair.
+            </p>
+          </>
+        )}
       </div>
     </div>
     <div class="wrap grid trio">
@@ -170,9 +283,13 @@ const narrow = '(min-width: 1000px) 34vw, 100vw';
   <!-- Afterwards -->
   <section class="wrap grid chapter after" aria-labelledby="ch-after">
     <div class="text">
-      <h2 id="ch-after">Afterwards</h2>
-      <p>After the last chord, the audience came down to the crossing to look inside the case.</p>
-      <p class="ui more"><a href={SHOW}>More photographs from the premiere</a></p>
+      <h2 id="ch-after">{de ? 'Danach' : 'Afterwards'}</h2>
+      <p>
+        {de
+          ? 'Nach dem letzten Akkord kam das Publikum nach vorne in die Vierung, um einen Blick in die Vitrine zu werfen.'
+          : 'After the last chord, the audience came down to the crossing to look inside the case.'}
+      </p>
+      <p class="ui more"><a href={SHOW}>{de ? 'Mehr Fotos von der Uraufführung' : 'More photographs from the premiere'}</a></p>
     </div>
     <div class="img-wide"><Photo {...p.visitors} sizes={wide} /></div>
     <div class="img-small"><Photo {...p.caseAndCrowd} sizes={narrow} /></div>

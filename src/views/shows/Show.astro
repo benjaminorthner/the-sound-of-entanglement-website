@@ -6,23 +6,35 @@ import BellScale from '../../components/BellScale.astro';
 import YouTube from '../../components/YouTube.astro';
 import Gallery from '../../components/shows/Gallery.astro';
 import TalkArticle from '../../components/shows/TalkArticle.astro';
-import { publicShows, pieceOf, place, venueLine, isUpcoming, videoInfo, type Show } from '../../components/shows/data';
+import { pieceOf, venueLine, isUpcoming, videoInfo, linkLabel, type Show } from '../../components/shows/data';
 import { formatRange, formatDateShort } from '../../lib/format';
-
+import { getLang, localize, useT } from '../../i18n';
+import { localized } from '../../i18n/content';
+import { photosDe, photoKey } from '../../i18n/photos.de';
 
 interface Props { show: Show; prev?: Show; next?: Show }
-const { show, prev, next } = Astro.props;
-const d = show.data;
-const { Content } = await render(show);
+const lang = getLang(Astro);
+const t = useT(lang);
+const L = <T,>(v: { en: T; de: T }) => v[lang];
+const { data: d, entry } = await localized('shows', Astro.props.show, lang);
+const show = { ...Astro.props.show, data: d };
+const prev = Astro.props.prev && { ...Astro.props.prev, data: (await localized('shows', Astro.props.prev, lang)).data };
+const next = Astro.props.next && { ...Astro.props.next, data: (await localized('shows', Astro.props.next, lang)).data };
+const { Content } = await render(entry);
 const piece = await pieceOf(show);
 const upcoming = isUpcoming(show);
 const hasCover = !!d.cover;
-const kindLabel = d.kind === 'talk' ? 'Talk' : d.kind === 'exhibition' ? 'Exhibition' : upcoming ? 'Upcoming performance' : 'Performance';
+const kindLabel =
+  d.kind === 'talk' ? L({ en: 'Talk', de: 'Vortrag' })
+  : d.kind === 'exhibition' ? L({ en: 'Exhibition', de: 'Ausstellung' })
+  : upcoming ? L({ en: 'Upcoming performance', de: 'Kommender Auftritt' })
+  : L({ en: 'Performance', de: 'Auftritt' });
 const videoPoster = d.gallery[1]?.src ?? d.cover?.src;
-const video = videoInfo[show.id] ?? { title: piece ? `${piece.data.title}, film` : 'Film' };
+const video = videoInfo(show.id, lang) ?? { title: piece ? `${piece.data.title}, ${L({ en: 'film', de: 'Film' })}` : 'Film' };
 const isTalk = d.kind !== 'performance';
+const coverAlt = d.cover && (lang === 'de' ? (photosDe[photoKey(d.cover.src.src)]?.alt ?? d.cover.alt) : d.cover.alt);
 ---
-<Base title={d.title} description={d.summary} underHeader={hasCover} image={d.cover?.src} imageAlt={d.cover?.alt}>
+<Base title={d.title} description={d.summary} underHeader={hasCover} image={d.cover?.src} imageAlt={coverAlt}>
   {hasCover && (
     <div class="cover">
       <Photo {...d.cover!} bleed loading="eager" sizes="100vw" />
@@ -32,12 +44,12 @@ const isTalk = d.kind !== 'performance';
   <article class:list={['wrap', 'show', { textled: !hasCover }]}>
     <header class="head">
       <p class="kind ui">
-        <a href="/shows/">Shows</a>
+        <a href={localize(lang, '/shows/')}>{t('nav.shows')}</a>
         <span aria-hidden="true">/</span>
-        {kindLabel}{d.premiere && ', premiere'}
+        {kindLabel}{d.premiere && L({ en: ', premiere', de: ', Uraufführung' })}
       </p>
       <h1>{d.title}</h1>
-      <p class="when num">{formatRange(d.date, d.endDate)}{d.time && !d.endDate && <span class="dim">, {d.time}</span>}</p>
+      <p class="when num">{formatRange(d.date, d.endDate, lang)}{d.time && !d.endDate && <span class="dim">, {d.time}{L({ en: '', de: ' Uhr' })}</span>}</p>
       <p class="where">{venueLine(show)}</p>
     </header>
 
@@ -63,34 +75,36 @@ const isTalk = d.kind !== 'performance';
       <dl>
         {piece && (
           <div>
-            <dt class="ui">Piece</dt>
-            <dd><a href={`/pieces/${piece.id}/`}><em>{piece.data.title}</em></a>{d.premiere && <span class="premiere"> premiere</span>}</dd>
+            <dt class="ui">{L({ en: 'Piece', de: 'Stück' })}</dt>
+            <dd><a href={localize(lang, `/pieces/${piece.id}/`)}><em>{piece.data.title}</em></a>{d.premiere && <span class="premiere"> {L({ en: 'premiere', de: 'Uraufführung' })}</span>}</dd>
           </div>
         )}
         {d.format && (
           <div><dt class="ui">Format</dt><dd>{d.format}</dd></div>
         )}
         {d.lineup.length > 0 && (
-          <div><dt class="ui">On stage</dt><dd><ul>{d.lineup.map((p) => <li>{p}</li>)}</ul></dd></div>
+          <div><dt class="ui">{L({ en: 'On stage', de: 'Auf der Bühne' })}</dt><dd><ul>{d.lineup.map((p) => <li>{p}</li>)}</ul></dd></div>
         )}
         {d.lecture.length > 0 && (
-          <div><dt class="ui">{d.kind === 'talk' ? 'Speaker' : 'Lecture'}</dt><dd><ul>{d.lecture.map((p) => <li>{p}</li>)}</ul></dd></div>
+          <div><dt class="ui">{d.kind === 'talk' ? L({ en: 'Speaker', de: 'Vortrag' }) : L({ en: 'Lecture', de: 'Vortrag' })}</dt><dd><ul>{d.lecture.map((p) => <li>{p}</li>)}</ul></dd></div>
         )}
         {d.audience && (
-          <div><dt class="ui">Audience</dt><dd>{d.audience}</dd></div>
+          <div><dt class="ui">{L({ en: 'Audience', de: 'Publikum' })}</dt><dd>{d.audience}</dd></div>
         )}
         {d.links.length > 0 && (
-          <div><dt class="ui">Links</dt><dd><ul>{d.links.map((l) => <li><a href={l.url}>{l.label}</a></li>)}</ul></dd></div>
+          <div><dt class="ui">Links</dt><dd><ul>{d.links.map((l) => <li><a href={l.url}>{linkLabel(l.label, lang)}</a></li>)}</ul></dd></div>
         )}
       </dl>
 
       {d.bell !== undefined && (
         <div class="bell">
-          <p class="bell-title ui">Bell value measured that night</p>
+          <p class="bell-title ui">{L({ en: 'Bell value measured that night', de: 'Bell-Wert, an diesem Abend gemessen' })}</p>
           <BellScale value={d.bell} compact />
           <p class="bell-note dim">
-            Calculated from the photon pairs that conducted the performance. No classical source, and no human
-            conductor, can go above 2.
+            {L({
+              en: 'Calculated from the photon pairs that conducted the performance. No classical source, and no human conductor, can go above 2.',
+              de: 'Berechnet aus den Photonenpaaren, die den Abend dirigiert haben. Keine klassische Quelle und kein menschlicher Dirigent kommt über 2 hinaus.',
+            })}
           </p>
         </div>
       )}
@@ -101,24 +115,24 @@ const isTalk = d.kind !== 'performance';
 
   {d.gallery.length > 0 && (
     <div class="wrap gallery-wrap">
-      <h2 class="gallery-title">{isTalk ? "From the talk" : "Photographs"}</h2>
-      <Gallery items={d.gallery} label={`Photographs from ${d.title}`} />
+      <h2 class="gallery-title">{isTalk ? L({ en: 'From the talk', de: d.kind === 'exhibition' ? 'Aus der Ausstellung' : 'Vom Vortrag' }) : L({ en: 'Photographs', de: 'Fotos' })}</h2>
+      <Gallery items={d.gallery} label={L({ en: `Photographs from ${d.title}`, de: `Fotos: ${d.title}` })} />
     </div>
   )}
 
-  <nav class="wrap prevnext" aria-label="Other shows">
+  <nav class="wrap prevnext" aria-label={L({ en: 'Other shows', de: 'Weitere Auftritte' })}>
     {prev ? (
-      <a class="pn prev" href={`/shows/${prev.id}/`}>
-        <span class="ui dim">Earlier</span>
+      <a class="pn prev" href={localize(lang, `/shows/${prev.id}/`)}>
+        <span class="ui dim">{L({ en: 'Earlier', de: 'Davor' })}</span>
         <span class="pn-title">{prev.data.title}</span>
-        <span class="ui dim num">{formatDateShort(prev.data.date)}, {prev.data.city}</span>
+        <span class="ui dim num">{formatDateShort(prev.data.date, lang)}, {prev.data.city}</span>
       </a>
     ) : <span />}
     {next ? (
-      <a class="pn next" href={`/shows/${next.id}/`}>
-        <span class="ui dim">Later</span>
+      <a class="pn next" href={localize(lang, `/shows/${next.id}/`)}>
+        <span class="ui dim">{L({ en: 'Later', de: 'Danach' })}</span>
         <span class="pn-title">{next.data.title}</span>
-        <span class="ui dim num">{formatDateShort(next.data.date)}, {next.data.city}</span>
+        <span class="ui dim num">{formatDateShort(next.data.date, lang)}, {next.data.city}</span>
       </a>
     ) : <span />}
   </nav>

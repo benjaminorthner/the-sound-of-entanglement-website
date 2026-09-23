@@ -6,10 +6,12 @@ the í.
 
 ## Core team
 
+Clemens Wenger and Benjamin Orthner run the project day to day (Benjamin, Sept 2026: "this whole project is run on Clemens and myself"). Philipp Haslinger initiated it. The people page says so above the "Who does what" list.
+
 | Person | Role in the project | Affiliation (current) |
 |---|---|---|
 | **Clemens Wenger** | Composer and musical director. Builds all data-to-music mappings in Max/MSP. Plays synthesizer, electric piano and the "VoQoder". Books shows. | Univ.-Prof. of Composition, Anton Bruckner Privatuniversität Linz (since Oct 2025) |
-| **Benjamin Orthner** | Built the Bell experiment and wrote all its control code. Operates it at every show. Built the visual systems (Python/GLSL for BruQner, TouchDesigner since). Handles networking and OSC. Thesis author. Sometimes co-lectures. | Atominstitut, TU Wien |
+| **Benjamin Orthner** | Built the Bell experiment and wrote all its control code. Operates it at every show. Built the visual systems (Python/GLSL for BruQner, TouchDesigner since). Handles networking and OSC. Made this website. Thesis author. Sometimes co-lectures. | Atominstitut, TU Wien |
 | **Philipp Haslinger** | Project lead and initiator, thesis supervisor, main funder of the experiment. Lectures. | Assoc. Prof., Atominstitut, TU Wien |
 | **Johannes Kofler** | Theorist. Had the idea of using a Bell test. Often gives the lecture. Contributed the theory for one of Anton Zeilinger's Nobel-prize experiments. | Senior Lecturer, Institute for Integrated Circuits and Quantum Computing, JKU Linz |
 | **Richard Küng** | Organisation, financing, connections. Lectures. Wrote the Der Standard blog piece. | Univ.-Prof., head of QUICK, JKU Linz |

@@ -8,13 +8,19 @@
 import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import type { Show } from './data';
-import { speakers, pieceOf, place } from './data';
+import { speakers, pieceOf, place, linkLabel } from './data';
+import { getLang, localize } from '../../i18n';
+import { localized } from '../../i18n/content';
 
+/** `show` should already carry localized data. */
 interface Props { show: Show }
 const { show } = Astro.props;
+const lang = getLang(Astro);
+const L = <T,>(v: { en: T; de: T }) => v[lang];
 const d = show.data;
-const piece = await pieceOf(show);
-const people = await speakers(d.lecture);
+const pieceEntry = await pieceOf(show);
+const piece = pieceEntry && { ...pieceEntry, data: (await localized('pieces', pieceEntry, lang)).data };
+const people = await speakers(d.lecture, lang);
 // Without a specific piece, list the pieces that had premiered by the date of the talk.
 const firstShown = new Map<string, number>();
 for (const s of await getCollection('shows', (s) => s.data.kind === 'performance' && !!s.data.piece)) {
@@ -32,10 +38,10 @@ const repertoire = piece
     <div class="prose"><slot /></div>
   </div>
 
-  <aside class="side" aria-label="About this talk">
+  <aside class="side" aria-label={L({ en: 'About this talk', de: 'Zum Vortrag' })}>
     {people.length > 0 && (
       <section class="block">
-        <h2 class="label ui">{people.length > 1 ? 'Speakers' : 'Speaker'}</h2>
+        <h2 class="label ui">{people.length > 1 ? L({ en: 'Speakers', de: 'Vortragende' }) : L({ en: 'Speaker', de: 'Vortrag' })}</h2>
         <ul class="speakers">
           {people.map(({ raw, person, extra }) => (
             <li>
@@ -52,7 +58,7 @@ const repertoire = piece
                 <span class="portrait empty" aria-hidden="true"></span>
               )}
               <span class="who">
-                {person ? <a href={`/people/#${person.id}`}>{person.data.name}</a> : raw}
+                {person ? <a href={localize(lang, `/people/#${person.id}`)}>{person.data.name}</a> : raw}
                 {extra && <span class="dim"> {extra}</span>}
                 {person && <span class="role dim">{person.data.role}{person.data.affiliation && `, ${person.data.affiliation}`}</span>}
               </span>
@@ -63,18 +69,18 @@ const repertoire = piece
     )}
 
     <section class="block">
-      <h2 class="label ui">Where</h2>
+      <h2 class="label ui">{L({ en: 'Where', de: 'Ort' })}</h2>
       <p class="where">{d.venue}<br />{place(show)}</p>
       {d.format && <p class="format dim">{d.format}</p>}
       {d.links.length > 0 && (
-        <ul class="links">{d.links.map((l) => <li><a href={l.url}>{l.label}</a></li>)}</ul>
+        <ul class="links">{d.links.map((l) => <li><a href={l.url}>{linkLabel(l.label, lang)}</a></li>)}</ul>
       )}
     </section>
 
     {piece ? (
       <section class="block">
-        <h2 class="label ui">Piece presented</h2>
-        <a class="piece" href={`/pieces/${piece.id}/`}>
+        <h2 class="label ui">{L({ en: 'Piece presented', de: 'Vorgestelltes Stück' })}</h2>
+        <a class="piece" href={localize(lang, `/pieces/${piece.id}/`)}>
           {piece.data.cover && (
             <Image src={piece.data.cover.src} alt="" widths={[400, 800]} sizes="(min-width: 860px) 25vw, 100vw" format="webp" quality={78} />
           )}
@@ -84,10 +90,10 @@ const repertoire = piece
       </section>
     ) : (
       <section class="block">
-        <h2 class="label ui">{d.kind === 'exhibition' ? 'The pieces so far' : 'Presented'}</h2>
+        <h2 class="label ui">{d.kind === 'exhibition' ? L({ en: 'The pieces so far', de: 'Die bisherigen Stücke' }) : L({ en: 'Presented', de: 'Vorgestellt' })}</h2>
         <ul class="pieces">
           {repertoire.map((p) => (
-            <li><a href={`/pieces/${p.id}/`}><em>{p.data.title}</em></a> <span class="dim">{p.data.year}</span></li>
+            <li><a href={localize(lang, `/pieces/${p.id}/`)}><em>{p.data.title}</em></a> <span class="dim">{p.data.year}</span></li>
           ))}
         </ul>
       </section>
@@ -95,18 +101,18 @@ const repertoire = piece
   </aside>
 </div>
 
-<nav class="further" aria-label="Read further">
+<nav class="further" aria-label={L({ en: 'Read further', de: 'Weiterlesen' })}>
   <a href="https://arxiv.org/abs/2509.08892">
-    <span class="f-title">The paper</span>
+    <span class="f-title">{L({ en: 'The paper', de: 'Das Paper' })}</span>
     <span class="dim">The Sound of Entanglement, arXiv:2509.08892</span>
   </a>
-  <a href="/physics/">
-    <span class="f-title">How the experiment works</span>
-    <span class="dim">Entangled photons, the Bell test, the clicks</span>
+  <a href={localize(lang, '/physics/')}>
+    <span class="f-title">{L({ en: 'How the experiment works', de: 'So funktioniert das Experiment' })}</span>
+    <span class="dim">{L({ en: 'Entangled photons, the Bell test, the clicks', de: 'Verschränkte Photonen, der Bell-Test, das Klicken' })}</span>
   </a>
-  <a href="/publications/">
-    <span class="f-title">Papers and press</span>
-    <span class="dim">Talks, films and articles</span>
+  <a href={localize(lang, '/publications/')}>
+    <span class="f-title">{L({ en: 'Papers and press', de: 'Publikationen und Presse' })}</span>
+    <span class="dim">{L({ en: 'Talks, films and articles', de: 'Vorträge, Filme und Artikel' })}</span>
   </a>
 </nav>
 

@@ -119,6 +119,10 @@ const supporters = defineCollection({
       role: z.string().optional(),
       /** Details such as grant numbers. */
       note: z.string().optional(),
+      /** German versions of name, role and note, for /de/ pages (fall back to English). */
+      nameDe: z.string().optional(),
+      roleDe: z.string().optional(),
+      noteDe: z.string().optional(),
       url: z.url().optional(),
       /** Monochrome logo from src/assets/logos/ (see scripts/prepare_logos.py). */
       logo: image().optional(),

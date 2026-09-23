@@ -2,9 +2,18 @@
 import { getCollection, getEntry } from 'astro:content';
 import { Image } from 'astro:assets';
 import { formatDate, formatRange } from '../../lib/format';
+import { getLang, localize, useT } from '../../i18n';
+import { localizeAll, localized } from '../../i18n/content';
 
+const lang = getLang(Astro);
+const t = useT(lang);
+const de = lang === 'de';
 const now = new Date();
-const performances = await getCollection('shows', (s) => !s.data.draft && s.data.kind === 'performance');
+const performances = await localizeAll(
+  'shows',
+  await getCollection('shows', (s) => !s.data.draft && s.data.kind === 'performance'),
+  lang,
+);
 const next = performances.filter((s) => s.data.date >= now).sort((a, b) => +a.data.date - +b.data.date)[0];
 const recent = performances
   .filter((s) => s.data.date < now && s.data.cover)
@@ -14,32 +23,35 @@ const pieceTitles = new Map(
   await Promise.all(
     [...new Set(recent.map((s) => s.data.piece?.id).filter(Boolean))].map(async (id) => [
       id!,
-      (await getEntry('pieces', id!))?.data.title ?? '',
+      await (async () => {
+        const p = await getEntry('pieces', id!);
+        return p ? (await localized('pieces', p, lang)).data.title : '';
+      })(),
     ] as const),
   ),
 );
 ---
 <section class="shows section" aria-labelledby="shows-title">
   <div class="wrap">
-    <h2 id="shows-title" class="visually-hidden">Shows</h2>
+    <h2 id="shows-title" class="visually-hidden">{de ? 'Auftritte' : 'Shows'}</h2>
 
     {next && (
       <div class="next grid">
-        <p class="label ui dim">Next performance</p>
+        <p class="label ui dim">{de ? 'Nächste Aufführung' : 'Next performance'}</p>
         <div class="when">
-          <p class="date"><a href={`/shows/${next.id}/`}>{formatDate(next.data.date)}</a></p>
+          <p class="date"><a href={localize(lang, `/shows/${next.id}/`)}>{formatDate(next.data.date, lang)}</a></p>
           <p class="where">{next.data.venue.includes(next.data.city) ? next.data.venue : `${next.data.venue}, ${next.data.city}`}</p>
-          <p class="dim">{next.data.title}.{!next.data.time && ' Programme and time to follow.'}</p>
+          <p class="dim">{next.data.title}.{!next.data.time && (de ? ' Programm und Uhrzeit folgen.' : ' Programme and time to follow.')}</p>
         </div>
       </div>
     )}
 
     <div class="recent">
-      <h3 class="ui recent-title">Recent performances</h3>
+      <h3 class="ui recent-title">{de ? 'Zuletzt gespielt' : 'Recent performances'}</h3>
       <ul>
         {recent.map((s) => (
           <li>
-            <a href={`/shows/${s.id}/`}>
+            <a href={localize(lang, `/shows/${s.id}/`)}>
               {s.data.cover && (
                 <Image
                   src={s.data.cover.src}
@@ -49,15 +61,15 @@ const pieceTitles = new Map(
                   format="webp"
                 />
               )}
-              <span class="d ui dim num">{formatRange(s.data.date, s.data.endDate)}</span>
+              <span class="d ui dim num">{formatRange(s.data.date, s.data.endDate, lang)}</span>
               <span class="t">{s.data.city}</span>
-              <span class="p">{s.data.piece ? pieceTitles.get(s.data.piece.id) : s.data.title}{s.data.premiere ? ', premiere' : ''}</span>
+              <span class="p">{s.data.piece ? pieceTitles.get(s.data.piece.id) : s.data.title}{s.data.premiere ? (de ? ', Uraufführung' : ', premiere') : ''}</span>
             </a>
-            {s.data.cover && <span class="credit ui">Photo: {s.data.cover.credit.replace(/^©\s*/, '© ')}</span>}
+            {s.data.cover && <span class="credit ui">{t('photo.credit')}: {s.data.cover.credit.replace(/^©\s*/, '© ')}</span>}
           </li>
         ))}
       </ul>
-      <p class="all ui"><a href="/shows/">All shows and talks since 2024</a></p>
+      <p class="all ui"><a href={localize(lang, '/shows/')}>{de ? 'Alle Auftritte und Vorträge seit 2024' : 'All shows and talks since 2024'}</a></p>
     </div>
   </div>
 </section>

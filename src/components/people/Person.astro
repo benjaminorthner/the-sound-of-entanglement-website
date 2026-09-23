@@ -1,16 +1,34 @@
 ---
 import { render, type CollectionEntry } from 'astro:content';
 import Portrait from './Portrait.astro';
+import { getLang } from '../../i18n';
+import { localized } from '../../i18n/content';
+import { photosDe, photoKey } from '../../i18n/photos.de';
 
 interface Props {
   person: CollectionEntry<'people'>;
 }
 const { person } = Astro.props;
-const { Content } = await render(person);
-const d = person.data;
+const lang = getLang(Astro);
+const { data: d, entry } = await localized('people', person, lang);
+const { Content } = await render(entry);
+
+// Link labels that are not names
+const linkDe: Record<string, string> = {
+  'JKU profile': 'JKU-Profil',
+  'Qudit quantum technology group': 'Forschungsgruppe Qudit-Quantentechnologie',
+};
+// Portrait alt texts on German pages: shared photo table first, then these
+const altDe: Record<string, string> = {
+  'benjamin-orthner': 'Benjamin Orthner beim Experiment am Europäischen Forum Alpbach, während er den Aufbau erklärt.',
+  'judith-schwarz': 'Porträt von Judith Schwarz am Schlagzeug.',
+};
+const portraitAlt = (p: NonNullable<typeof d.portrait>) =>
+  lang === 'de' ? (photosDe[photoKey(p.src.src)]?.alt ?? altDe[person.id] ?? `Porträt von ${d.name}.`) : p.alt;
+const label = (l: string) => (lang === 'de' ? (linkDe[l] ?? l) : l);
 ---
 <article class="person" id={person.id}>
-  {d.portrait && <Portrait src={d.portrait.src} alt={d.portrait.alt} credit={d.portrait.credit} />}
+  {d.portrait && <Portrait src={d.portrait.src} alt={portraitAlt(d.portrait)} credit={d.portrait.credit} />}
   <div class="text">
     <h3>{d.website ? <a class="name-link" href={d.website}>{d.name}</a> : d.name}</h3>
     <p class="role">{d.role}</p>
@@ -18,7 +36,7 @@ const d = person.data;
     <div class="bio"><Content /></div>
     {d.links.length > 0 && (
       <ul class="links ui">
-        {d.links.map((l) => <li><a href={l.url}>{l.label}</a></li>)}
+        {d.links.map((l) => <li><a href={l.url}>{label(l.label)}</a></li>)}
       </ul>
     )}
   </div>

@@ -8,6 +8,7 @@
  * `measured` lists values actually measured at shows, drawn on the same scale.
  */
 import BellScale from '../BellScale.astro';
+import { getLang, intlLocale } from '../../i18n';
 
 interface Props {
   measured: { label: string; value: number }[];
@@ -19,25 +20,65 @@ const cells = [
   { k: 2, a: 2, b: 1, sign: '+' },
   { k: 3, a: 2, b: 2, sign: '−' },
 ];
+const lang = getLang(Astro);
+// Strings for the page and for the script (passed as a JSON island on the root).
+const L = lang === 'de'
+  ? {
+      source: 'Quelle', quantum: 'Verschränkte Photonen', classical: 'Klassische Quelle mit verborgenen Anweisungen',
+      run: 'Start', pause: 'Pause', step: 'Ein Paar messen', faster: 'Schneller', slower: 'Langsamer', reset: 'Neu beginnen',
+      sourceLbl: 'Quelle', start: 'Auf Start drücken oder die Paare einzeln messen.',
+      caption: 'Korrelationen für die vier Kombinationen von Einstellungen', head: ['Einstellungen', 'Paare', 'Korrelation E'],
+      legend: 'Striche unter der Skala: bei unseren Auftritten gemessene Werte. Ring und schattierter Bereich: diese Simulation und ihre Unsicherheit. Anfangs kann der Wert über 2√2 hinausspringen; der Ring bleibt dann am Ende der Skala stehen.',
+      history: 'Der Bell-Wert, während immer mehr Paare gemessen werden',
+      disclaimer: 'Eine Simulation mit derselben Statistik wie unser Experiment, also S ≈ 2,45 für verschränkte Photonen. Die klassische Quelle folgt der bestmöglichen Strategie mit verborgenen Variablen.',
+      pair: 'Paar {n}: Alice misst {a} und erhält {A}, Bob misst {b} und erhält {B}. {same}',
+      same: 'Dasselbe Ergebnis.', opposite: 'Entgegengesetzte Ergebnisse.',
+      pairs0: 'Nach 0 Paaren.', pairs1: 'Nach 1 Paar.', pairsN: 'Nach {n} Paaren.',
+      few: ' Zu wenige Paare, um schon etwas zu sagen.',
+      clear: ' Über 2, und zwar um mehr als die Unsicherheit: Das schafft keine klassische Quelle.',
+      above: ' Über 2, aber noch nicht um mehr als die Unsicherheit.',
+      below: ' An oder unter der klassischen Grenze.',
+      resetQ: 'Verschränkte Photonen. Auf Start drücken oder die Paare einzeln messen.',
+      resetC: 'Klassische Quelle: Jedes Paar trägt verborgene Anweisungen für jede Einstellung mit sich. Auf Start drücken.',
+    }
+  : {
+      source: 'Source', quantum: 'Entangled photons', classical: 'Classical source with hidden instructions',
+      run: 'Run', pause: 'Pause', step: 'Measure one pair', faster: 'Faster', slower: 'Slower', reset: 'Start again',
+      sourceLbl: 'source', start: 'Press run, or measure pairs one at a time.',
+      caption: 'Correlations for the four combinations of settings', head: ['Settings', 'Pairs', 'Correlation E'],
+      legend: 'Ticks below the scale: values measured at our shows. Ring and shaded band: this simulation and its uncertainty. Early on, the value can jump past 2√2; the ring then waits at the end.',
+      history: 'Bell value as more pairs are measured',
+      disclaimer: 'This is a simulation that uses the same statistics as our experiment, with S ≈ 2.45 for entangled photons. The classical source follows the best possible hidden-variable strategy.',
+      pair: 'Pair {n}: Alice measured {a} and got {A}, Bob measured {b} and got {B}: {same}.',
+      same: 'the same result', opposite: 'opposite results',
+      pairs0: 'From 0 pairs.', pairs1: 'From 1 pair.', pairsN: 'From {n} pairs.',
+      few: ' Too few pairs to say anything yet.',
+      clear: ' Above 2, by more than the uncertainty: no classical source can do this.',
+      above: ' Above 2, but not yet by more than the uncertainty.',
+      below: ' At or below the classical limit.',
+      resetQ: 'Entangled photons. Press run, or measure pairs one at a time.',
+      resetC: 'Classical source: each pair carries hidden instructions for every setting. Press run.',
+    };
+const client = { ...L, head: undefined, locale: intlLocale(lang) };
 ---
-<div class="lab" data-lab>
+<div class="lab" data-lab data-l={JSON.stringify(client)}>
   <div class="controls">
     <fieldset class="mode">
-      <legend class="visually-hidden">Source</legend>
+      <legend class="visually-hidden">{L.source}</legend>
       <label>
         <input type="radio" name="bell-mode" value="quantum" checked />
-        <span>Entangled photons</span>
+        <span>{L.quantum}</span>
       </label>
       <label>
         <input type="radio" name="bell-mode" value="classical" />
-        <span>Classical source with hidden instructions</span>
+        <span>{L.classical}</span>
       </label>
     </fieldset>
     <div class="buttons">
-      <button type="button" class="btn primary" data-run>Run</button>
-      <button type="button" class="btn" data-step>Measure one pair</button>
-      <button type="button" class="btn" data-fast aria-pressed="false">Faster</button>
-      <button type="button" class="btn quiet" data-reset>Start again</button>
+      <button type="button" class="btn primary" data-run>{L.run}</button>
+      <button type="button" class="btn" data-step>{L.step}</button>
+      <button type="button" class="btn" data-fast aria-pressed="false">{L.faster}</button>
+      <button type="button" class="btn quiet" data-reset>{L.reset}</button>
     </div>
   </div>
 
@@ -48,7 +89,7 @@ const cells = [
       <line x1="400" y1="110" x2="650" y2="110" class="beam bob-beam" />
       <!-- source -->
       <circle cx="400" cy="110" r="7" class="source" />
-      <text x="400" y="150" class="lbl" text-anchor="middle">source</text>
+      <text x="400" y="150" class="lbl" text-anchor="middle">{L.sourceLbl}</text>
       <!-- Alice -->
       <g class="station" transform="translate(150 110)">
         <circle r="34" class="dial" />
@@ -72,13 +113,13 @@ const cells = [
     </svg>
   </div>
 
-  <p class="last" aria-live="polite" data-last>Press run, or measure pairs one at a time.</p>
+  <p class="last" aria-live="polite" data-last>{L.start}</p>
 
   <div class="results">
     <table class="corr">
-      <caption class="visually-hidden">Correlations for the four combinations of settings</caption>
+      <caption class="visually-hidden">{L.caption}</caption>
       <thead>
-        <tr><th scope="col">Settings</th><th scope="col">Pairs</th><th scope="col">Correlation E</th></tr>
+        <tr><th scope="col">{L.head[0]}</th><th scope="col">{L.head[1]}</th><th scope="col">{L.head[2]}</th></tr>
       </thead>
       <tbody>
         {cells.map((c) => (
@@ -97,22 +138,16 @@ const cells = [
     <div class="s-panel">
       <p class="s-formula">S = |E<sub>11</sub> + E<sub>12</sub> + E<sub>21</sub> − E<sub>22</sub>|</p>
       <p class="s-value num"><span data-s>–</span><span class="sigma dim" data-sigma></span></p>
-      <p class="s-note dim" data-snote>From 0 pairs.</p>
+      <p class="s-note dim" data-snote>{L.pairs0}</p>
       <div class="scale">
         <BellScale live range="full" marks={measured} />
-        <p class="scale-legend ui dim">
-          Ticks below the scale: values measured at our shows. Ring and shaded band: this simulation and
-          its uncertainty. Early on, the value can jump past 2√2; the ring then waits at the end.
-        </p>
+        <p class="scale-legend ui dim">{L.legend}</p>
       </div>
-      <canvas class="history" data-history aria-label="Bell value as more pairs are measured" role="img"></canvas>
+      <canvas class="history" data-history aria-label={L.history} role="img"></canvas>
     </div>
   </div>
 
-  <p class="disclaimer ui dim">
-    This is a simulation that uses the same statistics as our experiment, with S ≈ 2.45 for
-    entangled photons. The classical source follows the best possible hidden-variable strategy.
-  </p>
+  <p class="disclaimer ui dim">{L.disclaimer}</p>
 </div>
 
 <script>
@@ -120,6 +155,10 @@ const cells = [
 
   const root = document.querySelector<HTMLElement>('[data-lab]')!;
   const q = <T extends Element>(s: string) => root.querySelector<T>(s)!;
+  const L = JSON.parse(root.dataset.l!) as Record<string, string>;
+  const fmtInt = (n: number) => n.toLocaleString(L.locale);
+  const fmt2 = (x: number) => x.toLocaleString(L.locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fill = (tpl: string, v: Record<string, string | number>) => tpl.replace(/\{(\w+)\}/g, (_, k) => String(v[k]));
   const runBtn = q<HTMLButtonElement>('[data-run]');
   const stepBtn = q<HTMLButtonElement>('[data-step]');
   const fastBtn = q<HTMLButtonElement>('[data-fast]');
@@ -172,10 +211,14 @@ const cells = [
     bobDial.setAttribute('transform', `rotate(${-BOB[e.b]})`);
     flash(dets[e.A === 1 ? 'alice-plus' : 'alice-minus']);
     flash(dets[e.B === 1 ? 'bob-plus' : 'bob-minus']);
-    const same = e.A === e.B ? 'the same result' : 'opposite results';
-    lastEl.textContent =
-      `Pair ${e.n + 1}: Alice measured a${sub(e.a)} and got ${e.A > 0 ? '+1' : '−1'}, ` +
-      `Bob measured b${sub(e.b)} and got ${e.B > 0 ? '+1' : '−1'}: ${same}.`;
+    lastEl.textContent = fill(L.pair, {
+      n: e.n + 1,
+      a: `a${sub(e.a)}`,
+      A: e.A > 0 ? '+1' : '−1',
+      b: `b${sub(e.b)}`,
+      B: e.B > 0 ? '+1' : '−1',
+      same: e.A === e.B ? L.same : L.opposite,
+    });
   }
 
   function sigma(): number {
@@ -209,8 +252,8 @@ const cells = [
     cellEls.forEach((el, k) => {
       const a = (k >> 1) as 0 | 1, b = (k & 1) as 0 | 1;
       const E = test.E(a, b);
-      el.querySelector<HTMLElement>('[data-count]')!.textContent = counts[k].toLocaleString('en-GB');
-      el.querySelector<HTMLElement>('[data-e]')!.textContent = counts[k] ? (E >= 0 ? '+' : '−') + Math.abs(E).toFixed(2) : '–';
+      el.querySelector<HTMLElement>('[data-count]')!.textContent = fmtInt(counts[k]);
+      el.querySelector<HTMLElement>('[data-e]')!.textContent = counts[k] ? (E >= 0 ? '+' : '−') + fmt2(Math.abs(E)) : '–';
       const fill = el.querySelector<HTMLElement>('[data-fill]')!;
       fill.style.left = E >= 0 ? '50%' : `${50 + E * 50}%`;
       fill.style.width = `${Math.abs(E) * 50}%`;
@@ -219,21 +262,21 @@ const cells = [
     if (n === 0) {
       sEl.textContent = '–';
       sigmaEl.textContent = '';
-      sNote.textContent = 'From 0 pairs.';
+      sNote.textContent = L.pairs0;
       scale.style.setProperty('--x', '0%');
       scale.style.setProperty('--lo', '0%');
       scale.style.setProperty('--hi', '0%');
       scale.classList.remove('quantum');
     } else {
       const S = test.S, sg = sigma();
-      sEl.textContent = S.toFixed(2);
-      sigmaEl.textContent = isFinite(sg) && n > 8 ? ` ± ${sg.toFixed(2)}` : '';
-      const pairs = `From ${n.toLocaleString('en-GB')} pair${n === 1 ? '' : 's'}.`;
+      sEl.textContent = fmt2(S);
+      sigmaEl.textContent = isFinite(sg) && n > 8 ? ` ± ${fmt2(sg)}` : '';
+      const pairs = n === 1 ? L.pairs1 : fill(L.pairsN, { n: fmtInt(n) });
       let verdict = '';
-      if (n < 40) verdict = ' Too few pairs to say anything yet.';
-      else if (S - 2 * sg > 2) verdict = ' Above 2, by more than the uncertainty: no classical source can do this.';
-      else if (S > 2) verdict = ' Above 2, but not yet by more than the uncertainty.';
-      else verdict = ' At or below the classical limit.';
+      if (n < 40) verdict = L.few;
+      else if (S - 2 * sg > 2) verdict = L.clear;
+      else if (S > 2) verdict = L.above;
+      else verdict = L.below;
       sNote.textContent = pairs + verdict;
       scale.style.setProperty('--x', pct(S));
       scale.classList.toggle('quantum', S > 2);
@@ -294,7 +337,7 @@ const cells = [
 
   function setRunning(on: boolean) {
     running = on;
-    runBtn.textContent = on ? 'Pause' : 'Run';
+    runBtn.textContent = on ? L.pause : L.run;
     runBtn.setAttribute('aria-pressed', String(on));
     if (on) { lastTick = 0; acc = 0; raf = requestAnimationFrame(loop); }
     else cancelAnimationFrame(raf);
@@ -305,9 +348,7 @@ const cells = [
     test = new BellTest({ mode });
     history.length = 0;
     counts.fill(0);
-    lastEl.textContent = mode === 'quantum'
-      ? 'Entangled photons. Press run, or measure pairs one at a time.'
-      : 'Classical source: each pair carries hidden instructions for every setting. Press run.';
+    lastEl.textContent = mode === 'quantum' ? L.resetQ : L.resetC;
     render();
   }
 
@@ -316,7 +357,7 @@ const cells = [
   fastBtn.addEventListener('click', () => {
     fast = !fast;
     fastBtn.setAttribute('aria-pressed', String(fast));
-    fastBtn.textContent = fast ? 'Slower' : 'Faster';
+    fastBtn.textContent = fast ? L.slower : L.faster;
   });
   resetBtn.addEventListener('click', () => { setRunning(false); reset(); });
   root.querySelectorAll<HTMLInputElement>('input[name="bell-mode"]').forEach((r) =>

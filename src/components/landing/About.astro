@@ -2,53 +2,98 @@
 import Photo from '../Photo.astro';
 import hazeOverCase from '../../assets/photos/2024-bruqner-linz/haze-over-case.jpg';
 import washington from '../../assets/photos/2025-washington/landscape-above-stage.jpg';
+import { getLang } from '../../i18n';
+
+const de = getLang(Astro) === 'de';
 ---
 <section class="about section" aria-labelledby="about-title">
   <div class="wrap grid">
     <div class="intro">
-      <h2 id="about-title">A physics experiment as the conductor</h2>
-      <p>
-        <em>The Sound of Entanglement</em> is a live performance conducted by a Bell test. On stage stands the
-        experiment: a laser, a crystal, mirrors and four single-photon detectors in a lit glass case. About twice a
-        second it measures a pair of entangled photons, and the results tell the musicians what to play and the
-        visuals what to show.
-      </p>
-      <p>
-        Each result on its own is pure chance. Compared with its partner, it is correlated more strongly than any
-        classical process allows, so the music follows an order that no human conductor or computer could give it.
-        Every performance is different, and none can be repeated.
-      </p>
+      {de ? (
+        <>
+          <h2 id="about-title">Ein physikalisches Experiment als Dirigent</h2>
+          <p>
+            Bei <em>The Sound of Entanglement</em> dirigiert ein Bell-Test die Aufführung. Das Experiment steht
+            selbst auf der Bühne: ein Laser, ein Kristall, Spiegel und vier Einzelphotonendetektoren in einem
+            beleuchteten Glaskasten. Etwa zweimal pro Sekunde misst es ein Paar verschränkter Photonen, und die
+            Ergebnisse geben vor, was die Musiker:innen spielen und was die Visuals zeigen.
+          </p>
+          <p>
+            Jedes einzelne Ergebnis ist reiner Zufall. Mit seinem Partner verglichen, ist es aber stärker
+            korreliert, als es irgendein klassischer Vorgang erlaubt. So folgt die Musik einer Ordnung, die ihr
+            kein menschlicher Dirigent und kein Computer geben könnte. Keine Aufführung gleicht der anderen, und
+            keine lässt sich wiederholen.
+          </p>
+        </>
+      ) : (
+        <>
+          <h2 id="about-title">A physics experiment as the conductor</h2>
+          <p>
+            <em>The Sound of Entanglement</em> is a live performance conducted by a Bell test. On stage stands the
+            experiment: a laser, a crystal, mirrors and four single-photon detectors in a lit glass case. About twice a
+            second it measures a pair of entangled photons, and the results tell the musicians what to play and the
+            visuals what to show.
+          </p>
+          <p>
+            Each result on its own is pure chance. Compared with its partner, it is correlated more strongly than any
+            classical process allows, so the music follows an order that no human conductor or computer could give it.
+            Every performance is different, and none can be repeated.
+          </p>
+        </>
+      )}
     </div>
 
     <Photo
       class="first"
       src={hazeOverCase}
-      alt="Clouds of projected light hang in the dark nave above the glowing glass case of the experiment; the audience sits on the floor around it."
+      alt={de
+        ? 'Wolken aus projiziertem Licht hängen im dunklen Kirchenschiff über dem leuchtenden Glaskasten des Experiments; das Publikum sitzt rundherum auf dem Boden.'
+        : 'Clouds of projected light hang in the dark nave above the glowing glass case of the experiment; the audience sits on the floor around it.'}
       credit="Florian Voggeneder / Ars Electronica"
-      caption="BruQner, Mariendom Linz, 4 September 2024"
+      caption={de ? 'BruQner, Mariendom Linz, 4. September 2024' : 'BruQner, Mariendom Linz, 4 September 2024'}
       sizes="(min-width: 900px) 58vw, 100vw"
     />
 
     <Photo
       class="second"
       src={washington}
-      alt="A white-line landscape fills the screen above the band and the lit experiment on a dark stage."
+      alt={de
+        ? 'Eine Landschaft aus weißen Linien füllt die Leinwand über der Band und dem beleuchteten Experiment auf der dunklen Bühne.'
+        : 'A white-line landscape fills the screen above the band and the lit experiment on a dark stage.'}
       credit="Kaveh Sardari"
-      caption="8 Rooms, Johns Hopkins University, Washington DC, 14 April 2025"
+      caption={de ? '8 Rooms, Johns Hopkins University, Washington DC, 14. April 2025' : '8 Rooms, Johns Hopkins University, Washington DC, 14 April 2025'}
       sizes="(min-width: 900px) 66vw, 100vw"
     />
 
     <div class="history">
-      <p>
-        The project brings together musicians, a visual artist and quantum physicists from Vienna, Linz and
-        Innsbruck. The experiment was built at TU Wien as a master thesis. It premiered in 2024 in the Mariendom
-        Linz, at the opening of Ars Electronica, in front of more than 3 000 people.
-      </p>
-      <p>
-        Since then it has played in Vienna City Hall, at Johns Hopkins University in Washington, at the European
-        Forum Alpbach and at the CIVA festival, each time with a short physics lecture first and about twenty
-        minutes of music after.
-      </p>
+      {de ? (
+        <>
+          <p>
+            Im Projekt treffen Musik, bildende Kunst und Quantenphysik aus Wien, Linz und Innsbruck aufeinander.
+            Gebaut wurde das Experiment im Rahmen einer Masterarbeit an der TU Wien. Die
+            Uraufführung fand 2024 zur Eröffnung der Ars Electronica im Mariendom Linz statt, vor mehr als 3.000
+            Menschen.
+          </p>
+          <p>
+            Seither war es im Wiener Rathaus zu erleben, an der Johns Hopkins University in Washington, beim
+            Europäischen Forum Alpbach und beim CIVA Festival: jedes Mal zuerst mit einem kurzen Physikvortrag,
+            danach mit rund zwanzig Minuten Musik.
+          </p>
+        </>
+      ) : (
+        <>
+          <p>
+            The project brings together musicians, a visual artist and quantum physicists from Vienna, Linz and
+            Innsbruck. The experiment was built at TU Wien as a master thesis. It premiered in 2024 in the Mariendom
+            Linz, at the opening of Ars Electronica, in front of more than 3 000 people.
+          </p>
+          <p>
+            Since then it has played in Vienna City Hall, at Johns Hopkins University in Washington, at the European
+            Forum Alpbach and at the CIVA festival, each time with a short physics lecture first and about twenty
+            minutes of music after.
+          </p>
+        </>
+      )}
     </div>
   </div>
 </section>

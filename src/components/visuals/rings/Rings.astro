@@ -8,19 +8,25 @@
  * Data: src/data/bruqner_premiere_2024-09-04.json (see docs/data.md).
  */
 import LiveBell from '../../pieces/LiveBell.astro';
+import { getLang } from '../../../i18n';
+
+const lang = getLang(Astro);
+const de = lang === 'de';
 ---
-<section class="rings-visual" data-rings aria-label="Live replay of photon pairs measured at the BruQner premiere">
+<section class="rings-visual" data-rings data-lang={lang} aria-label={de ? 'Wiedergabe der Photonenpaare, die bei der Uraufführung von BruQner gemessen wurden' : 'Live replay of photon pairs measured at the BruQner premiere'}>
   <canvas aria-hidden="true"></canvas>
   <div class="overlay wrap">
     <div class="caption">
       <p class="ui source">
-        Photon pairs measured at the premiere in the Mariendom Linz, 4 September 2024, replayed at the pace they arrived.
+        {de
+          ? 'Photonenpaare, gemessen bei der Uraufführung im Linzer Mariendom am 4.\u00a0September 2024, abgespielt in dem Tempo, in dem sie damals eintrafen.'
+          : 'Photon pairs measured at the premiere in the Mariendom Linz, 4 September 2024, replayed at the pace they arrived.'}
       </p>
       <p class="ui count num" data-count>&nbsp;</p>
       <p class="ui legend">
-        <span class="item"><span class="sw" style="--c: var(--alice)"></span><span class="sw" style="--c: var(--bob)"></span>both stations chose the same setting.</span>
-        <span class="item"><span class="sw" style="--c: var(--photon)"></span><span class="sw" style="--c: var(--violet)"></span>different settings.</span>
-        <span class="item">The same colour on both sides means the same outcome.</span>
+        <span class="item"><span class="sw" style="--c: var(--alice)"></span><span class="sw" style="--c: var(--bob)"></span>{de ? 'beide Stationen wählten dieselbe Einstellung.' : 'both stations chose the same setting.'}</span>
+        <span class="item"><span class="sw" style="--c: var(--photon)"></span><span class="sw" style="--c: var(--violet)"></span>{de ? 'unterschiedliche Einstellungen.' : 'different settings.'}</span>
+        <span class="item">{de ? 'Gleiche Farbe auf beiden Seiten heißt gleiches Ergebnis.' : 'The same colour on both sides means the same outcome.'}</span>
       </p>
       <button class="ui pause" type="button" aria-pressed="false" data-pause>Pause</button>
     </div>
@@ -37,9 +43,42 @@ import LiveBell from '../../pieces/LiveBell.astro';
   const RED: RGB = [255, 125, 125], BLUE: RGB = [143, 143, 255], YELLOW: RGB = [255, 255, 179], VIOLET: RGB = [255, 179, 255];
   const LIFE = 5.3; // seconds a ring lives, as in the cathedral
 
+  /** Readout text in the page's language (data-lang on the section). */
+  const TEXT = {
+    en: {
+      int: (n: number) => n.toLocaleString('en'),
+      dec: (x: number, d = 2) => x.toFixed(d),
+      pair: (i: string, of: string, at: string) => `Pair ${i} of ${of}, measured at ${at}`,
+      few: 'too few pairs to tell anything yet.',
+      clear: (first: string) => `more than two standard deviations above the classical limit${first ? `, first reached at pair ${first}` : ''}.`,
+      above: 'above 2, but not yet by more than the uncertainty.',
+      within: 'within the classical limit so far.',
+      running: (S: string, sg: string, n: string, note: string) => `S = ${S} ± ${sg} from ${n} pairs: ${note}`,
+      still: 'A still frame. The Bell value uses all 2 000 pairs of the excerpt, measured from 23:00:10.',
+      final: (S: string, sg: string, z: string) => `S = ${S} ± ${sg} from 2 000 pairs, ${z} standard deviations above the classical limit.`,
+      pause: 'Pause',
+      resume: 'Resume',
+    },
+    de: {
+      int: (n: number) => n.toLocaleString('de-AT'),
+      dec: (x: number, d = 2) => x.toFixed(d).replace('.', ','),
+      pair: (i: string, of: string, at: string) => `Paar ${i} von ${of}, gemessen um ${at}`,
+      few: 'noch zu wenige Paare für eine Aussage.',
+      clear: (first: string) => `mehr als zwei Standardabweichungen über der klassischen Grenze${first ? `, zum ersten Mal bei Paar ${first}` : ''}.`,
+      above: 'über 2, aber noch nicht deutlicher als die Messunsicherheit.',
+      within: 'bisher innerhalb der klassischen Grenze.',
+      running: (S: string, sg: string, n: string, note: string) => `S = ${S} ± ${sg} aus ${n} Paaren: ${note}`,
+      still: 'Ein Standbild. Der Bell-Wert beruht auf allen 2 000 Paaren des Ausschnitts, gemessen ab 23:00:10.',
+      final: (S: string, sg: string, z: string) => `S = ${S} ± ${sg} aus 2 000 Paaren, ${z} Standardabweichungen über der klassischen Grenze.`,
+      pause: 'Pause',
+      resume: 'Weiter',
+    },
+  };
+
   document.querySelectorAll<HTMLElement>('[data-rings]').forEach((root) => {
     const data = premiere as Excerpt;
     const events = decodeExcerpt(data);
+    const L = TEXT[root.dataset.lang === 'de' ? 'de' : 'en'];
     const canvas = root.querySelector('canvas')!;
     const ctx = canvas.getContext('2d')!;
     const $count = root.querySelector<HTMLElement>('[data-count]')!;
@@ -122,17 +161,17 @@ import LiveBell from '../../pieces/LiveBell.astro';
     }
 
     function readout(e: ReplayEvent | null) {
-      if (e) $count.textContent = `Pair ${(e.n + 1).toLocaleString('en')} of ${data.count.toLocaleString('en')}, measured at ${clockAt(data.start, elapsedMs)}`;
+      if (e) $count.textContent = L.pair(L.int(e.n + 1), L.int(data.count), clockAt(data.start, elapsedMs));
       const n = stats.n;
       if (!n) return;
       const S = stats.S, sg = stats.sigma, z = (S - 2) / sg;
       if (z >= 2 && firstClear === null) firstClear = n;
       let note: string;
-      if (n < 30) note = 'too few pairs to tell anything yet.';
-      else if (z >= 2) note = `more than two standard deviations above the classical limit${firstClear ? `, first reached at pair ${firstClear}` : ''}.`;
-      else if (S > 2) note = 'above 2, but not yet by more than the uncertainty.';
-      else note = 'within the classical limit so far.';
-      setLiveBell($bell, S, sg, `S = ${S.toFixed(2)} ± ${sg.toFixed(2)} from ${n.toLocaleString('en')} pairs: ${note}`);
+      if (n < 30) note = L.few;
+      else if (z >= 2) note = L.clear(firstClear ? String(firstClear) : '');
+      else if (S > 2) note = L.above;
+      else note = L.within;
+      setLiveBell($bell, S, sg, L.running(L.dec(S), L.dec(sg), L.int(n), note));
     }
 
     function consume(e: ReplayEvent, at: number) {
@@ -170,7 +209,7 @@ import LiveBell from '../../pieces/LiveBell.astro';
 
     $pause.addEventListener('click', () => {
       paused = !paused;
-      $pause.textContent = paused ? 'Resume' : 'Pause';
+      $pause.textContent = paused ? L.resume : L.pause;
       $pause.setAttribute('aria-pressed', String(paused));
     });
 
@@ -188,9 +227,9 @@ import LiveBell from '../../pieces/LiveBell.astro';
         if (i === 23) clock = t + 0.4;
       });
       pump = 0;
-      $count.textContent = 'A still frame. The Bell value uses all 2 000 pairs of the excerpt, measured from 23:00:10.';
+      $count.textContent = L.still;
       const z = (stats.S - 2) / stats.sigma;
-      setLiveBell($bell, stats.S, stats.sigma, `S = ${stats.S.toFixed(2)} ± ${stats.sigma.toFixed(2)} from 2 000 pairs, ${z.toFixed(1)} standard deviations above the classical limit.`);
+      setLiveBell($bell, stats.S, stats.sigma, L.final(L.dec(stats.S), L.dec(stats.sigma), L.dec(z, 1)));
       draw(clock);
     } else {
       whileVisible(root, (ts) => frame(ts));

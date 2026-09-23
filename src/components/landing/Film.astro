@@ -1,6 +1,9 @@
 ---
 import YouTube from '../YouTube.astro';
 import poster from '../../assets/photos/2024-bruqner-making-of/pump-laser-crystal.jpg';
+import { getLang } from '../../i18n';
+
+const de = getLang(Astro) === 'de';
 ---
 <section class="film section" aria-labelledby="film-title">
   <div class="wrap grid">
@@ -9,21 +12,40 @@ import poster from '../../assets/photos/2024-bruqner-making-of/pump-laser-crysta
         id="_mIf_OFN1YI"
         title="BruQner – The Sound of Entanglement"
         poster={poster}
-        posterAlt="A violet laser beam leaves the source module of the experiment, in a dark close-up."
-        duration="18 min"
+        posterAlt={de
+          ? 'Ein violetter Laserstrahl verlässt das Quellmodul des Experiments, dunkle Nahaufnahme.'
+          : 'A violet laser beam leaves the source module of the experiment, in a dark close-up.'}
+        duration={de ? '18 Min.' : '18 min'}
       />
     </div>
     <div class="text">
-      <h2 id="film-title">The film</h2>
-      <p>
-        A documentary that follows the team of artists and scientists through the days before the premiere in
-        the Mariendom Linz. The piece was inspired by Bruckner's <em>Perger Präludium</em>, but nobody could know
-        what it was going to sound like.
-      </p>
-      <p class="credits ui dim">
-        Directed by Deniz Lindenberg, camera Florian Lindenberg, produced by Alexander Ploier. weitblickfilm, 2025.
-        Poster image: film still, weitblickfilm.
-      </p>
+      {de ? (
+        <>
+          <h2 id="film-title">Der Film</h2>
+          <p>
+            Ein Dokumentarfilm begleitet das Team aus Kunst und Wissenschaft durch die Tage vor der Uraufführung im
+            Mariendom Linz. Als Vorlage diente Bruckners <em>Perger Präludium</em>, doch wie das Stück klingen
+            würde, konnte niemand wissen.
+          </p>
+          <p class="credits ui dim">
+            Regie: Deniz Lindenberg, Kamera: Florian Lindenberg, Produktion: Alexander Ploier. weitblickfilm, 2025.
+            Vorschaubild: Filmstill, weitblickfilm.
+          </p>
+        </>
+      ) : (
+        <>
+          <h2 id="film-title">The film</h2>
+          <p>
+            A documentary that follows the team of artists and scientists through the days before the premiere in
+            the Mariendom Linz. The piece was inspired by Bruckner's <em>Perger Präludium</em>, but nobody could know
+            what it was going to sound like.
+          </p>
+          <p class="credits ui dim">
+            Directed by Deniz Lindenberg, camera Florian Lindenberg, produced by Alexander Ploier. weitblickfilm, 2025.
+            Poster image: film still, weitblickfilm.
+          </p>
+        </>
+      )}
     </div>
   </div>
 </section>

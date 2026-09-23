@@ -7,30 +7,34 @@
 import { Image } from 'astro:assets';
 import BellScale from '../BellScale.astro';
 import { formatRange } from '../../lib/format';
+import { getLang, localize, useT } from '../../i18n';
 import { pieceOf, venueLine, type Show } from './data';
 
+/** `show` should already carry localized data (see localizeAll). */
 interface Props { show: Show }
 const { show } = Astro.props;
+const lang = getLang(Astro);
+const t = useT(lang);
 const d = show.data;
 const piece = await pieceOf(show);
-const href = `/shows/${show.id}/`;
+const href = localize(lang, `/shows/${show.id}/`);
 ---
 <article class:list={['entry', { premiere: d.premiere, 'no-cover': !d.cover }]}>
-  <p class="date ui num">{formatRange(d.date, d.endDate)}</p>
+  <p class="date ui num">{formatRange(d.date, d.endDate, lang)}</p>
   <div class="text">
     <h4><a href={href}>{d.title}</a></h4>
     <p class="where">{venueLine(show)}</p>
     <p class="piece">
       {piece ? (
         <>
-          <a href={`/pieces/${piece.id}/`}><em>{piece.data.title}</em></a>
-          {d.premiere && <span class="premiere-mark">premiere</span>}
+          <a href={localize(lang, `/pieces/${piece.id}/`)}><em>{piece.data.title}</em></a>
+          {d.premiere && <span class="premiere-mark">{lang === 'de' ? 'Uraufführung' : 'premiere'}</span>}
         </>
-      ) : d.kind === 'exhibition' ? 'Film in an exhibition' : null}
+      ) : d.kind === 'exhibition' ? (lang === 'de' ? 'Film in einer Ausstellung' : 'Film in an exhibition') : null}
     </p>
     {d.bell !== undefined && (
       <div class="bell">
-        <BellScale value={d.bell} compact label="measured that night" />
+        <BellScale value={d.bell} compact label={t('bell.measuredThatNight')} />
       </div>
     )}
   </div>

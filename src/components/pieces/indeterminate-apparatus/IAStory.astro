@@ -2,13 +2,18 @@
 /**
  * Indeterminate Apparatus: the piece told along its own logic, then its two
  * performances. Photos and captions: ./story.ts. The 1024 px CIVA photos are
- * never shown wider than about half the page.
+ * never shown wider than about half the page. German copy sits next to the
+ * English.
  */
 import Photo from '../../Photo.astro';
-import { photos as p, parts } from './story';
+import { photos, parts, inLang } from './story';
+import { getLang, localize, pick } from '../../../i18n';
 
-const CIVA = '/shows/2025-10-03-civa/';
-const JKU = '/shows/2025-11-19-jku-zirkus-des-wissens/';
+const lang = getLang(Astro);
+const de = lang === 'de';
+const p = Object.fromEntries(Object.entries(photos).map(([k, v]) => [k, inLang(lang, v)])) as Record<keyof typeof photos, ReturnType<typeof inLang>>;
+const CIVA = localize(lang, '/shows/2025-10-03-civa/');
+const JKU = localize(lang, '/shows/2025-11-19-jku-zirkus-des-wissens/');
 const full = '100vw';
 const wide = '(min-width: 1000px) 58vw, 100vw';
 const half = '(min-width: 1000px) 45vw, 100vw';
@@ -18,49 +23,83 @@ const narrow = '(min-width: 1000px) 30vw, 100vw';
   <!-- The Bell metronome -->
   <section class="wrap grid chapter metronome" aria-labelledby="ia-metronome">
     <div class="text">
-      <h2 id="ia-metronome">A metronome that has to settle</h2>
-      <p>
-        The Bell value <em>S</em> is worked out continuously from the incoming photon pairs, and it sets the
-        tempo. At the start there are only a few pairs, so <em>S</em> jumps between 0 and 4 and there is no
-        steady beat. This noise is fundamental: it is the shot noise of counting single photons. As pairs
-        accumulate, the value settles, and so does the tempo.
-      </p>
-      <p>
-        Manu Mayr and Judith Schwarz follow this uncertain metronome on their screens, so every section starts
-        in an unpredictable way and only gradually finds its time.
-      </p>
+      {de ? (
+        <>
+          <h2 id="ia-metronome">Ein Metronom, das erst zur Ruhe kommen muss</h2>
+          <p>
+            Der Bell-Wert <em>S</em> wird laufend aus den eintreffenden Photonenpaaren berechnet, und er bestimmt
+            das Tempo. Am Anfang gibt es erst wenige Paare: <em>S</em> springt zwischen 0 und 4 hin und her, von
+            einem gleichmäßigen Puls keine Spur. Dieses Rauschen ist grundlegend, es ist das Schrotrauschen, das
+            beim Zählen einzelner Photonen unweigerlich entsteht. Je mehr Paare zusammenkommen, desto ruhiger wird
+            der Wert, und mit ihm das Tempo.
+          </p>
+          <p>
+            Manu Mayr und Judith Schwarz folgen diesem unbestimmten Metronom auf ihren Bildschirmen. So beginnt
+            jeder Abschnitt unvorhersehbar und findet erst nach und nach zu seinem Zeitmaß.
+          </p>
+        </>
+      ) : (
+        <>
+          <h2 id="ia-metronome">A metronome that has to settle</h2>
+          <p>
+            The Bell value <em>S</em> is worked out continuously from the incoming photon pairs, and it sets the
+            tempo. At the start there are only a few pairs, so <em>S</em> jumps between 0 and 4 and there is no
+            steady beat. This noise is fundamental: it is the shot noise of counting single photons. As pairs
+            accumulate, the value settles, and so does the tempo.
+          </p>
+          <p>
+            Manu Mayr and Judith Schwarz follow this uncertain metronome on their screens, so every section starts
+            in an unpredictable way and only gradually finds its time.
+          </p>
+        </>
+      )}
     </div>
     <div class="img-wide"><Photo {...p.slideSBpm} sizes={wide} /></div>
     <div class="img-small"><Photo {...p.clemensTempo} sizes={narrow} /></div>
   </section>
 
   <section class="wrap chapter three" aria-labelledby="ia-three">
-    <h2 id="ia-three">Three sections, about seven minutes each</h2>
+    <h2 id="ia-three">{de ? 'Drei Abschnitte zu je etwa sieben Minuten' : 'Three sections, about seven minutes each'}</h2>
     <ol class="parts">
       {parts.map((x) => (
         <li class:list={[x.n === 2 && 'classical']}>
           <span class="part-n ui num">{x.n}</span>
           <span class="bpm num">{x.bpm}</span>
-          <span class="mode">{x.mode}, <span class="num">{x.s}</span></span>
+          <span class="mode">{pick(lang, x.mode)}, <span class="num">{pick(lang, x.s)}</span></span>
         </li>
       ))}
     </ol>
     <p class="dim note">
-      In the second section the wave plates are turned so that the experiment can only produce classical
-      correlations. The Bell value can no longer go above 2, and the tempo drops audibly.
+      {de
+        ? 'Im zweiten Abschnitt werden die Halbwellenplatten so gedreht, dass das Experiment nur noch klassische Korrelationen liefern kann. Der Bell-Wert kommt nicht mehr über 2 hinaus, und das Tempo sinkt hörbar.'
+        : 'In the second section the wave plates are turned so that the experiment can only produce classical correlations. The Bell value can no longer go above 2, and the tempo drops audibly.'}
     </p>
   </section>
 
   <!-- The classical section -->
   <section class="wrap grid chapter classical" aria-labelledby="ia-classical">
     <div class="text">
-      <h2 id="ia-classical">The most concrete object in the room</h2>
-      <p>
-        The images follow the same logic as the tempo. While <em>S</em> is chaotic, the picture falls apart
-        into loose points; as it settles, an image forms. The entangled sections have abstract motifs. The
-        classical one shows “a very concrete and realistic object”: a 3D scan of the experiment itself, made of
-        points.
-      </p>
+      {de ? (
+        <>
+          <h2 id="ia-classical">Das konkreteste Objekt im Raum</h2>
+          <p>
+            Die Bilder folgen derselben Logik wie das Tempo. Solange <em>S</em> chaotisch ist, zerfällt das Bild
+            in lose Punkte; erst wenn sich der Wert beruhigt, fügt es sich zusammen. Die verschränkten Abschnitte
+            zeigen abstrakte Motive, der klassische dagegen „ein sehr konkretes und realistisches Objekt“: einen
+            3D-Scan des Experiments selbst, aus lauter Punkten.
+          </p>
+        </>
+      ) : (
+        <>
+          <h2 id="ia-classical">The most concrete object in the room</h2>
+          <p>
+            The images follow the same logic as the tempo. While <em>S</em> is chaotic, the picture falls apart
+            into loose points; as it settles, an image forms. The entangled sections have abstract motifs. The
+            classical one shows “a very concrete and realistic object”: a 3D scan of the experiment itself, made of
+            points.
+          </p>
+        </>
+      )}
     </div>
     <div class="img-half"><Photo {...p.pointcloudOverBand} sizes={half} /></div>
     <div class="img-portrait"><Photo {...p.pointcloudPortrait} sizes={narrow} /></div>
@@ -72,13 +111,23 @@ const narrow = '(min-width: 1000px) 30vw, 100vw';
     <div class="wrap"><Photo {...p.voqoderSlide} sizes={full} /></div>
     <div class="wrap grid">
       <div class="text">
-        <h2 id="ia-voqoder">The VoQoder</h2>
-        <p>
-          Clemens Wenger splits his keyboard in two. The left hand plays a synthesizer called Alice, the right
-          hand one called Bob, and every measurement changes their sound: he chooses the notes, the experiment
-          chooses how they sound. Both are wired through a vocoder, an encoding circuit from the 1930s, which
-          only makes a sound when both sides play at once, the way a coincidence needs both photons.
-        </p>
+        <h2 id="ia-voqoder">{de ? 'Der VoQoder' : 'The VoQoder'}</h2>
+        {de ? (
+          <p>
+            Clemens Wenger teilt seine Klaviatur in zwei Hälften. Die linke Hand spielt einen Synthesizer namens
+            Alice, die rechte einen namens Bob, und jede Messung verändert ihren Klang: Er wählt die Töne, das
+            Experiment bestimmt, wie sie klingen. Beide laufen durch einen Vocoder, eine Schaltung zur
+            Sprachkodierung aus den 1930er-Jahren. Er gibt nur dann einen Ton von sich, wenn beide Seiten
+            gleichzeitig spielen, so wie eine Koinzidenz beide Photonen braucht.
+          </p>
+        ) : (
+          <p>
+            Clemens Wenger splits his keyboard in two. The left hand plays a synthesizer called Alice, the right
+            hand one called Bob, and every measurement changes their sound: he chooses the notes, the experiment
+            chooses how they sound. Both are wired through a vocoder, an encoding circuit from the 1930s, which
+            only makes a sound when both sides play at once, the way a coincidence needs both photons.
+          </p>
+        )}
       </div>
       <div class="img-portrait"><Photo {...p.keysPortrait} sizes={narrow} /></div>
     </div>
@@ -87,12 +136,25 @@ const narrow = '(min-width: 1000px) 30vw, 100vw';
   <!-- Images of the quantum parts -->
   <section class="wrap grid chapter visuals" aria-labelledby="ia-visuals">
     <div class="text">
-      <h2 id="ia-visuals">Abstract motifs</h2>
-      <p>
-        In the entangled sections the screen holds lines, curves and points that are driven by the same live
-        measurements as the music: single strokes of light, fans of lines, pixels sorted into streaks. Visuals
-        by Enar de Dios Rodríguez and Benjamin Orthner.
-      </p>
+      {de ? (
+        <>
+          <h2 id="ia-visuals">Abstrakte Motive</h2>
+          <p>
+            In den verschränkten Abschnitten zeigt die Leinwand Linien, Kurven und Punkte, gesteuert von denselben
+            Live-Messungen wie die Musik: einzelne Lichtstriche, aufgefächerte Linien, Pixel, die zu Schlieren
+            sortiert werden. Die Visuals stammen von Enar de Dios Rodríguez und Benjamin Orthner.
+          </p>
+        </>
+      ) : (
+        <>
+          <h2 id="ia-visuals">Abstract motifs</h2>
+          <p>
+            In the entangled sections the screen holds lines, curves and points that are driven by the same live
+            measurements as the music: single strokes of light, fans of lines, pixels sorted into streaks. Visuals
+            by Enar de Dios Rodríguez and Benjamin Orthner.
+          </p>
+        </>
+      )}
     </div>
     <div class="v1"><Photo {...p.whiteCurve} sizes={half} /></div>
     <div class="v2"><Photo {...p.lightStroke} sizes={narrow} /></div>
@@ -107,13 +169,28 @@ const narrow = '(min-width: 1000px) 30vw, 100vw';
     <Photo {...p.caseWoodPanels} bleed sizes={full} />
     <div class="wrap grid">
       <div class="text">
-        <h2 id="ia-premiere">Premiere: CIVA, Belvedere 21, Vienna</h2>
-        <p>
-          The piece premiered on 3 October 2025 in the cinema of Belvedere 21, at CIVA, the festival for
-          contemporary immersive and virtual art. It was so new that night that it did not have a name yet.
-          Philipp Haslinger and Benjamin Orthner gave the lecture, and a question round followed the music.
-        </p>
-        <p class="ui more"><a href={CIVA}>All photographs from CIVA</a></p>
+        {de ? (
+          <>
+            <h2 id="ia-premiere">Uraufführung: CIVA, Belvedere 21, Wien</h2>
+            <p>
+              Uraufgeführt wurde das Stück am 3. Oktober 2025 im Kino des Belvedere 21, beim CIVA, dem Festival
+              für zeitgenössische immersive und virtuelle Kunst. An diesem Abend war es noch so neu, dass es nicht
+              einmal einen Namen hatte. Den Vortrag hielten Philipp Haslinger und Benjamin Orthner, nach der Musik
+              folgte eine Fragerunde.
+            </p>
+            <p class="ui more"><a href={CIVA}>Alle Fotos vom CIVA</a></p>
+          </>
+        ) : (
+          <>
+            <h2 id="ia-premiere">Premiere: CIVA, Belvedere 21, Vienna</h2>
+            <p>
+              The piece premiered on 3 October 2025 in the cinema of Belvedere 21, at CIVA, the festival for
+              contemporary immersive and virtual art. It was so new that night that it did not have a name yet.
+              Philipp Haslinger and Benjamin Orthner gave the lecture, and a question round followed the music.
+            </p>
+            <p class="ui more"><a href={CIVA}>All photographs from CIVA</a></p>
+          </>
+        )}
       </div>
     </div>
     <div class="wrap grid pair">
@@ -133,12 +210,25 @@ const narrow = '(min-width: 1000px) 30vw, 100vw';
     <Photo {...p.jkuAudience} bleed sizes={full} />
     <div class="wrap grid">
       <div class="text">
-        <h2 id="ia-linz">Then Linz</h2>
-        <p>
-          Seven weeks later, with its name, the piece came to the Zirkus des Wissens at the Johannes Kepler
-          University in Linz, with a lecture in German by Richard Küng and Johannes Kofler.
-        </p>
-        <p class="ui more"><a href={JKU}>All photographs from Linz</a></p>
+        {de ? (
+          <>
+            <h2 id="ia-linz">Dann Linz</h2>
+            <p>
+              Sieben Wochen später kam das Stück, nun mit Namen, in den Zirkus des Wissens an der Johannes Kepler
+              Universität Linz. Den Vortrag hielten dort Richard Küng und Johannes Kofler, auf Deutsch.
+            </p>
+            <p class="ui more"><a href={JKU}>Alle Fotos aus Linz</a></p>
+          </>
+        ) : (
+          <>
+            <h2 id="ia-linz">Then Linz</h2>
+            <p>
+              Seven weeks later, with its name, the piece came to the Zirkus des Wissens at the Johannes Kepler
+              University in Linz, with a lecture in German by Richard Küng and Johannes Kofler.
+            </p>
+            <p class="ui more"><a href={JKU}>All photographs from Linz</a></p>
+          </>
+        )}
       </div>
       <div class="l1"><Photo {...p.jkuSphere} sizes={half} /></div>
     </div>

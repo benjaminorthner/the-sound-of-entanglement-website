@@ -6,20 +6,38 @@
  * is highlighted while step n is current. The ordered list is both the
  * navigation and the text alternative.
  */
-const steps = [
+import { getLang } from '../../i18n';
+
+const lang = getLang(Astro);
+const de = lang === 'de';
+const stepsEn = [
   { title: 'Laser', text: 'A violet 405 nm laser, the only light in the experiment you can see, shines into the source.' },
   { title: 'Crystal', text: 'In a thin crystal of beta barium borate, about one laser photon in a hundred billion splits into two infrared 810 nm photons. The pair is entangled in polarisation.' },
   { title: 'Two paths', text: 'Mirrors send one photon of each pair to Alice and the other to Bob, about thirty centimetres apart on the same breadboard.' },
   { title: 'Choosing a setting', text: 'On each side, a motor turns a half-wave plate to one of two angles, chosen at random for every measurement. This is the click you hear.' },
   { title: 'Beam splitter', text: 'A polarising beam splitter lets the photon through or reflects it. Through counts as +1, reflected as −1.' },
   { title: 'Detectors', text: 'Optical fibres carry the photon to one of four single-photon detectors, two for Alice and two for Bob.' },
-  { title: 'Coincidence', text: 'A time tagger stamps every detection to a few trillionths of a second. Two detections less than a nanosecond apart belong to the same pair, and that pair becomes the next musical decision: Alice\'s setting, Bob\'s setting, Alice\'s result, Bob\'s result.' },
+  { title: 'Coincidence', text: "A time tagger stamps every detection to a few trillionths of a second. Two detections less than a nanosecond apart belong to the same pair, and that pair becomes the next musical decision: Alice's setting, Bob's setting, Alice's result, Bob's result." },
 ];
+const stepsDe = [
+  { title: 'Laser', text: 'Ein violetter Laser mit 405 nm Wellenlänge strahlt in die Quelle. Sein Licht ist das einzige im ganzen Experiment, das man sehen kann.' },
+  { title: 'Kristall', text: 'In einem dünnen Kristall aus Beta-Bariumborat zerfällt etwa eines von hundert Milliarden Laserphotonen in zwei infrarote Photonen mit 810 nm. Die beiden sind in ihrer Polarisation verschränkt.' },
+  { title: 'Zwei Wege', text: 'Spiegel schicken ein Photon jedes Paares zu Alice, das andere zu Bob. Die beiden sitzen etwa dreißig Zentimeter voneinander entfernt auf derselben Grundplatte.' },
+  { title: 'Einstellung wählen', text: 'Auf jeder Seite dreht ein Motor eine Halbwellenplatte auf einen von zwei Winkeln, für jede Messung neu ausgelost. Das ist das Klicken, das man hört.' },
+  { title: 'Strahlteiler', text: 'Ein polarisierender Strahlteiler lässt das Photon durch oder lenkt es ab. Durchgelassen zählt als +1, abgelenkt als −1.' },
+  { title: 'Detektoren', text: 'Glasfasern führen das Photon zu einem von vier Einzelphotonendetektoren, zwei für Alice und zwei für Bob.' },
+  { title: 'Koinzidenz', text: 'Ein Time Tagger versieht jede Detektion mit einem Zeitstempel, genau auf wenige billionstel Sekunden. Liegen zwei Detektionen weniger als eine Nanosekunde auseinander, gehören sie zum selben Paar. Dieses Paar liefert die nächste musikalische Entscheidung: Alices Einstellung, Bobs Einstellung, Alices Ergebnis, Bobs Ergebnis.' },
+];
+const steps = de ? stepsDe : stepsEn;
+const ui = de
+  ? { title: 'Die Messkette des Experiments, Schritt für Schritt gezeichnet. Die Schritte sind in der Liste neben der Zeichnung beschrieben.', hint: ' Auf die Zeichnung klicken oder die Pfeiltasten verwenden.', prev: 'Zurück', next: 'Weiter: {t}', again: 'Von vorn', progress: 'Schritt {i} von {n}: {t}', first: 'Schritt 1 von 7', laser: 'Laser', crystal: 'Kristall', hwp: 'λ/2-Platte', detectors: 'Detektoren', time: 'Time', tagger: 'Tagger', music: 'zur Musik' }
+  : { title: 'The measurement chain of the experiment, drawn step by step. The steps are described in the list next to the drawing.', hint: ' Click the drawing or use the arrow keys.', prev: 'Previous', next: 'Next: {t}', again: 'Start again', progress: 'Step {i} of {n}: {t}', first: 'Step 1 of 7', laser: 'laser', crystal: 'crystal', hwp: 'half-wave plate', detectors: 'detectors', time: 'time', tagger: 'tagger', music: 'to the music' };
+const fill = (tpl: string, v: Record<string, string | number>) => tpl.replace(/\{(\w)\}/g, (_, k) => String(v[k]));
 ---
-<div class="setup-steps" data-steps>
+<div class="setup-steps" data-steps data-next-tpl={ui.next} data-again={ui.again} data-progress-tpl={ui.progress}>
   <div class="figure">
     <svg data-advance tabindex="0" aria-describedby="ss-hint" viewBox="0 0 920 440" role="img" aria-labelledby="ss-title">
-      <title id="ss-title">The measurement chain of the experiment, drawn step by step. The steps are described in the list next to the drawing.</title>
+      <title id="ss-title">{ui.title}</title>
       <defs>
         <!-- userSpaceOnUse: a bounding-box filter region collapses on horizontal lines (zero height) and hides them -->
         <filter id="ss-glow" filterUnits="userSpaceOnUse" x="0" y="0" width="920" height="440">
@@ -33,13 +51,13 @@ const steps = [
         <rect x="30" y="192" width="96" height="56" rx="3" class="box" />
         <text x="78" y="226" class="t" text-anchor="middle">405 nm</text>
         <line x1="126" y1="220" x2="206" y2="220" class="pump" filter="url(#ss-glow)" />
-        <text x="78" y="276" class="t dim" text-anchor="middle">laser</text>
+        <text x="78" y="276" class="t dim" text-anchor="middle">{ui.laser}</text>
       </g>
 
       <!-- 2 crystal -->
       <g class="part" data-from="2">
         <rect x="206" y="194" width="10" height="52" class="crystal" />
-        <text x="211" y="276" class="t dim" text-anchor="middle">crystal</text>
+        <text x="211" y="276" class="t dim" text-anchor="middle">{ui.crystal}</text>
         <circle cx="228" cy="208" r="4" class="photon" filter="url(#ss-glow)" />
         <circle cx="228" cy="232" r="4" class="photon" filter="url(#ss-glow)" />
       </g>
@@ -60,8 +78,8 @@ const steps = [
         <line x1="400" y1="330" x2="530" y2="330" class="beam bob-b" />
         <g transform="translate(440 110)"><g class="hwp"><rect x="-5" y="-26" width="10" height="52" class="plate" /></g></g>
         <g transform="translate(440 330)"><g class="hwp hwp-b"><rect x="-5" y="-26" width="10" height="52" class="plate" /></g></g>
-        <text x="440" y="66" class="t dim" text-anchor="middle">half-wave plate</text>
-        <text x="440" y="384" class="t dim" text-anchor="middle">half-wave plate</text>
+        <text x="440" y="66" class="t dim" text-anchor="middle">{ui.hwp}</text>
+        <text x="440" y="384" class="t dim" text-anchor="middle">{ui.hwp}</text>
       </g>
 
       <!-- 5 beam splitters -->
@@ -86,7 +104,7 @@ const steps = [
         <path d="M540 30 a14 14 0 0 1 28 0 z" class="det alice-d" />
         <path d="M690 316 a14 14 0 0 1 0 28 z" class="det bob-d" />
         <path d="M540 410 a14 14 0 0 0 28 0 z" class="det bob-d" />
-        <text x="720" y="150" class="t dim">detectors</text>
+        <text x="720" y="150" class="t dim">{ui.detectors}</text>
       </g>
 
       <!-- 7 time tagger -->
@@ -96,17 +114,17 @@ const steps = [
         <path d="M704 330 C 760 330, 760 250, 790 244" class="fibre" />
         <path d="M568 418 C 700 430, 760 270, 790 234" class="fibre" />
         <rect x="790" y="182" width="104" height="76" rx="3" class="box" />
-        <text x="842" y="214" class="t" text-anchor="middle">time</text>
-        <text x="842" y="234" class="t" text-anchor="middle">tagger</text>
+        <text x="842" y="214" class="t" text-anchor="middle">{ui.time}</text>
+        <text x="842" y="234" class="t" text-anchor="middle">{ui.tagger}</text>
         <text x="842" y="290" class="t dim tail" text-anchor="middle">[a, b, A, B]</text>
-        <text x="842" y="312" class="t dim tail" text-anchor="middle">to the music</text>
+        <text x="842" y="312" class="t dim tail" text-anchor="middle">{ui.music}</text>
       </g>
     </svg>
     <div class="stepper">
-      <p class="progress ui" aria-live="polite"><span data-progress>Step 1 of 7</span><span class="hint dim" id="ss-hint"> Click the drawing or use the arrow keys.</span></p>
+      <p class="progress ui" aria-live="polite"><span data-progress>{ui.first}</span><span class="hint dim" id="ss-hint">{ui.hint}</span></p>
       <div class="nav">
-        <button type="button" class="btn" data-prev>Previous</button>
-        <button type="button" class="btn primary" data-next>Next: Crystal</button>
+        <button type="button" class="btn" data-prev>{ui.prev}</button>
+        <button type="button" class="btn primary" data-next>{fill(ui.next, { t: steps[1].title })}</button>
       </div>
     </div>
   </div>
@@ -137,6 +155,7 @@ const steps = [
     const progress = root.querySelector<HTMLElement>('[data-progress]')!;
     const titles = buttons.map((b) => b.querySelector('.step-title')!.textContent ?? '');
     let step = 1;
+    const fill = (tpl: string, v: Record<string, string | number>) => tpl.replace(/\{(\w)\}/g, (_, k) => String(v[k]));
 
     function show(n: number) {
       step = Math.max(1, Math.min(N, n));
@@ -154,8 +173,8 @@ const steps = [
         else b.removeAttribute('aria-current');
       });
       prev.disabled = step === 1;
-      next.textContent = step === N ? 'Start again' : `Next: ${titles[step]}`;
-      progress.textContent = `Step ${step} of ${N}: ${titles[step - 1]}`;
+      next.textContent = step === N ? root.dataset.again! : fill(root.dataset.nextTpl!, { t: titles[step] });
+      progress.textContent = fill(root.dataset.progressTpl!, { i: step, n: N, t: titles[step - 1] });
     }
 
     buttons.forEach((b) => b.addEventListener('click', () => show(Number(b.dataset.step))));

@@ -3,8 +3,12 @@ import Base from '../../layouts/Base.astro';
 import TimelineEntry from '../../components/shows/TimelineEntry.astro';
 import { publicShows, isUpcoming, place, pieceOf } from '../../components/shows/data';
 import { formatRange, year } from '../../lib/format';
+import { getLang, localize } from '../../i18n';
+import { localizeAll } from '../../i18n/content';
 
-const shows = await publicShows();
+const lang = getLang(Astro);
+const L = <T,>(v: { en: T; de: T }) => v[lang];
+const shows = await localizeAll('shows', await publicShows(), lang);
 const now = new Date();
 
 const upcoming = shows.filter((s) => s.data.kind === 'performance' && isUpcoming(s, now));
@@ -19,27 +23,46 @@ const years = [...new Set(past.map((s) => year(s.data.date)))];
 const byYear = years.map((y) => ({ y, list: past.filter((s) => year(s.data.date) === y) }));
 
 const upcomingPieces = await Promise.all(upcoming.map(pieceOf));
+// Read by the countdown script, which runs in the browser.
+const countdownWords = L({
+  en: { days: 'In {n} days', tomorrow: 'Tomorrow', today: 'Today' },
+  de: { days: 'In {n} Tagen', tomorrow: 'Morgen', today: 'Heute' },
+});
 ---
-<Base title="Shows" description="Upcoming and past performances of The Sound of Entanglement, with the Bell value measured at each.">
+<Base
+  title={L({ en: 'Shows', de: 'Auftritte' })}
+  description={L({
+    en: 'Upcoming and past performances of The Sound of Entanglement, with the Bell value measured at each.',
+    de: 'Kommende und vergangene Auftritte von The Sound of Entanglement, jeweils mit dem gemessenen Bell-Wert.',
+  })}
+>
   <section class="wrap intro">
-    <h1>Shows</h1>
+    <h1>{L({ en: 'Shows', de: 'Auftritte' })}</h1>
     <p class="lede">
-      Every performance runs the experiment live. Each one has its own Bell value, measured from the photon
-      pairs that conducted it that night. Above 2, no classical conductor could have done it.
+      {L({
+        en: 'Every performance runs the experiment live. Each one has its own Bell value, measured from the photon pairs that conducted it that night. Above 2, no classical conductor could have done it.',
+        de: 'Bei jedem Auftritt läuft das Experiment live mit, und jeder hat seinen eigenen Bell-Wert, gemessen an den Photonenpaaren, die an diesem Abend dirigiert haben. Liegt er über 2, hätte das kein klassischer Dirigent geschafft.',
+      })}
     </p>
   </section>
 
   {upcoming.length > 0 && (
     <section class="wrap upcoming" aria-labelledby="next">
-      <h2 id="next" class="next-head"><span class="live-dot" aria-hidden="true"></span>{upcoming.length > 1 ? 'Upcoming shows' : 'Next show'}</h2>
+      <h2 id="next" class="next-head"><span class="live-dot" aria-hidden="true"></span>{upcoming.length > 1 ? L({ en: 'Upcoming shows', de: 'Kommende Auftritte' }) : L({ en: 'Next show', de: 'Nächster Auftritt' })}</h2>
       {upcoming.map((s, i) => (
-        <a class="next" href={`/shows/${s.id}/`}>
-          <p class="next-date num">{formatRange(s.data.date, s.data.endDate)}</p>
-          <p class="countdown ui" data-countdown={s.data.date.toISOString()}></p>
+        <a class="next" href={localize(lang, `/shows/${s.id}/`)}>
+          <p class="next-date num">{formatRange(s.data.date, s.data.endDate, lang)}</p>
+          <p
+            class="countdown ui"
+            data-countdown={s.data.date.toISOString()}
+            data-days={countdownWords.days}
+            data-tomorrow={countdownWords.tomorrow}
+            data-today={countdownWords.today}
+          ></p>
           <p class="next-where">{s.data.venue}, {place(s)}</p>
           <p class="next-what dim">
             {s.data.title}.{' '}
-            {upcomingPieces[i] ? <em>{upcomingPieces[i]!.data.title}</em> : 'Programme, venue and time to follow.'}
+            {upcomingPieces[i] ? <em>{upcomingPieces[i]!.data.title}</em> : L({ en: 'Programme, venue and time to follow.', de: 'Programm, Ort und Uhrzeit folgen.' })}
           </p>
         </a>
       ))}
@@ -47,7 +70,7 @@ const upcomingPieces = await Promise.all(upcoming.map(pieceOf));
   )}
 
   <section class="wrap past" aria-labelledby="past">
-    <h2 id="past" class="visually-hidden">Past performances</h2>
+    <h2 id="past" class="visually-hidden">{L({ en: 'Past performances', de: 'Vergangene Auftritte' })}</h2>
     {byYear.map(({ y, list }) => (
       <div class="year">
         <h3 class="year-label num">{y}</h3>
@@ -58,17 +81,17 @@ const upcomingPieces = await Promise.all(upcoming.map(pieceOf));
 
   <section class="wrap other" aria-labelledby="talks">
     <div class="other-head">
-      <h2 id="talks">Talks and exhibitions</h2>
-      <p class="dim">Where the project was presented without a live performance.</p>
+      <h2 id="talks">{L({ en: 'Talks and exhibitions', de: 'Vorträge und Ausstellungen' })}</h2>
+      <p class="dim">{L({ en: 'Where the project was presented without a live performance.', de: 'Präsentationen des Projekts ohne Live-Aufführung.' })}</p>
     </div>
     <ul class="talks">
       {other.map((s) => (
         <li>
-          <span class="t-date ui num dim">{formatRange(s.data.date, s.data.endDate)}</span>
-          <a class="t-title" href={`/shows/${s.id}/`}>{s.data.title}</a>
+          <span class="t-date ui num dim">{formatRange(s.data.date, s.data.endDate, lang)}</span>
+          <a class="t-title" href={localize(lang, `/shows/${s.id}/`)}>{s.data.title}</a>
           <span class="t-where dim">{s.data.venue === s.data.title ? place(s) : `${s.data.venue}, ${place(s)}`}</span>
           <span class="t-kind ui dim">
-            {s.data.kind === 'exhibition' ? 'Exhibition' : s.data.lecture.length ? s.data.lecture.join(', ') : 'Talk'}
+            {s.data.kind === 'exhibition' ? L({ en: 'Exhibition', de: 'Ausstellung' }) : s.data.lecture.length ? s.data.lecture.join(', ') : L({ en: 'Talk', de: 'Vortrag' })}
           </span>
         </li>
       ))}
@@ -83,7 +106,8 @@ const upcomingPieces = await Promise.all(upcoming.map(pieceOf));
     const start = new Date(el.dataset.countdown!).setUTCHours(0, 0, 0, 0);
     const today = new Date().setUTCHours(0, 0, 0, 0);
     const d = Math.round((start - today) / day);
-    el.textContent = d > 1 ? `In ${d} days` : d === 1 ? 'Tomorrow' : d === 0 ? 'Today' : '';
+    const w = el.dataset;
+    el.textContent = d > 1 ? w.days!.replace('{n}', String(d)) : d === 1 ? w.tomorrow! : d === 0 ? w.today! : '';
   });
 </script>
 

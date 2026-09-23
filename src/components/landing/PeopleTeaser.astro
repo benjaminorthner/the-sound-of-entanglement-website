@@ -1,8 +1,12 @@
 ---
 import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
+import { getLang, localize } from '../../i18n';
+import { localizeAll } from '../../i18n/content';
 
-const all = await getCollection('people', (p) => p.data.group !== 'organists' && !!p.data.portrait);
+const lang = getLang(Astro);
+const de = lang === 'de';
+const all = await localizeAll('people', await getCollection('people', (p) => p.data.group !== 'organists' && !!p.data.portrait), lang);
 const groupOrder = { team: 0, musicians: 1, organists: 2 } as const;
 const people = all.sort(
   (a, b) => groupOrder[a.data.group] - groupOrder[b.data.group] || a.data.order - b.data.order,
@@ -11,16 +15,28 @@ const people = all.sort(
 <section class="people section" aria-labelledby="people-title">
   <div class="wrap">
     <div class="head">
-      <h2 id="people-title">The people</h2>
-      <p class="dim">
-        A composer, a visual artist, quantum physicists and computer scientists from TU Wien, JKU Linz and the
-        University of Innsbruck, and a band.
-      </p>
+      {de ? (
+        <>
+          <h2 id="people-title">Das Team</h2>
+          <p class="dim">
+            Menschen aus Komposition, bildender Kunst, Quantenphysik und Informatik, von der TU Wien, der JKU Linz
+            und der Universität Innsbruck, dazu eine Band.
+          </p>
+        </>
+      ) : (
+        <>
+          <h2 id="people-title">The people</h2>
+          <p class="dim">
+            A composer, a visual artist, quantum physicists and computer scientists from TU Wien, JKU Linz and the
+            University of Innsbruck, and a band.
+          </p>
+        </>
+      )}
     </div>
     <ul>
       {people.map((p) => (
         <li>
-          <a href={`/people/#${p.id}`}>
+          <a href={localize(lang, `/people/#${p.id}`)}>
             {p.data.portrait && (
               <Image src={p.data.portrait.src} alt="" widths={[240, 400]} sizes="(min-width: 900px) 12vw, 30vw" format="webp" />
             )}
@@ -31,12 +47,12 @@ const people = all.sort(
       ))}
     </ul>
     <p class="credits ui">
-      Portraits: {people.map((p) => {
+      {de ? 'Porträts' : 'Portraits'}: {people.map((p) => {
         const c = p.data.portrait!.credit.replace(/^©\s*/, '');
-        return `${p.data.name}, ${c === p.data.name ? 'own photo' : `© ${c}`}`;
+        return `${p.data.name}, ${c === p.data.name ? (de ? 'eigenes Foto' : 'own photo') : `© ${c}`}`;
       }).join('; ')}.
     </p>
-    <p class="all ui"><a href="/people/">Everyone involved</a></p>
+    <p class="all ui"><a href={localize(lang, '/people/')}>{de ? 'Alle Beteiligten' : 'Everyone involved'}</a></p>
   </div>
 </section>
 

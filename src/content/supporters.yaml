@@ -7,6 +7,8 @@
 - id: fwf
   name: FWF Austrian Science Fund
   group: funding
+  nameDe: "FWF Wissenschaftsfonds"
+  noteDe: "Projekte Y1121, P36041 und P35953; START-Preis q-shadows, 713361001."
   note: "Grants Y1121, P36041 and P35953; START Award q-shadows, 713361001."
   url: https://www.fwf.ac.at/
   logo: ../assets/logos/fwf.png
@@ -16,6 +18,8 @@
 - id: beyondc
   name: FWF SFB BeyondC
   group: funding
+  roleDe: "Spezialforschungsbereich zu Quantencomputing"
+  noteDe: "SFB BeyondC, 10.55776/FG7."
   role: Special Research Programme on quantum computation
   note: "SFB BeyondC, 10.55776/FG7."
   url: https://www.beyondc.at/
@@ -26,6 +30,8 @@
 - id: quanta
   name: "FWF Cluster of Excellence quantA – Quantum Austria"
   group: funding
+  nameDe: "FWF-Exzellenzcluster quantA – Quantum Austria"
+  roleDe: "Förderte die Auftritte 2025"
   role: Supported the performances in 2025
   url: https://www.quantumaustria.at/
   logo: ../assets/logos/quanta.png
@@ -35,6 +41,7 @@
 - id: lit
   name: "LIT – Linz Institute of Technology, JKU"
   group: funding
+  noteDe: "Die Ausschreibung LIT-Ars finanzierte die Quantenhardware und den Dokumentarfilm."
   note: "The LIT-Ars call funded the quantum hardware and the documentary."
   url: https://www.jku.at/lit/
   logo: ../assets/logos/jku-lit.png
@@ -42,6 +49,8 @@
 - id: stadt-wien-kultur
   name: Stadt Wien Kultur
   group: funding
+  roleDe: "Kulturabteilung der Stadt Wien (MA 7)"
+  noteDe: "Arbeitsstipendium Komposition."
   role: Cultural department of the City of Vienna
   note: "Arbeitsstipendium Komposition (working grant for composition)."
   url: https://www.wien.gv.at/kultur/
@@ -51,6 +60,8 @@
 - id: bmwkms
   name: Federal Ministry for Housing, Arts, Culture, Media and Sport (BMWKMS)
   group: funding
+  nameDe: "Bundesministerium für Wohnen, Kunst, Kultur, Medien und Sport (BMWKMS)"
+  noteDe: "Staatsstipendium Komposition."
   note: "Staatsstipendium Komposition (state grant for composition)."
   url: https://www.bmwkms.gv.at/
   logo: ../assets/logos/bmwkms.png
@@ -61,6 +72,7 @@
 - id: tu-wien
   name: TU Wien
   group: institutions
+  roleDe: "Atominstitut, wo das Experiment gebaut wurde"
   role: Atominstitut, where the experiment was built
   url: https://www.tuwien.at/
   logo: ../assets/logos/tu-wien.png
@@ -70,6 +82,8 @@
 - id: jku
   name: Johannes Kepler University Linz
   group: institutions
+  nameDe: "Johannes Kepler Universität Linz"
+  roleDe: "Department of Quantum Information and Computation at Kepler (QUICK)"
   role: Department of Quantum Information and Computation at Kepler (QUICK)
   url: https://www.jku.at/
   logo: ../assets/logos/jku.png
@@ -79,6 +93,8 @@
 - id: uibk
   name: University of Innsbruck
   group: institutions
+  nameDe: "Universität Innsbruck"
+  roleDe: "Institut für Experimentalphysik"
   role: Institute for Experimental Physics
   url: https://www.uibk.ac.at/
   logo: ../assets/logos/uibk.png
@@ -94,6 +110,8 @@
 - id: bruckneruni
   name: Anton Bruckner Private University Linz
   group: institutions
+  nameDe: "Anton Bruckner Privatuniversität Linz"
+  roleDe: "Institut für Komposition, Dirigieren und Computermusik"
   role: Institute for Composition, Conducting and Computer Music
   url: https://www.bruckneruni.ac.at/
   logo: ../assets/logos/bruckneruni.png
@@ -102,6 +120,7 @@
 - id: kunstuni-linz
   name: University of Art and Design Linz
   group: institutions
+  nameDe: "Kunstuniversität Linz"
   url: https://www.kunstuni-linz.at/
   logo: ../assets/logos/kunstuni-linz.png
   scale: 0.95
@@ -111,6 +130,8 @@
 - id: kulturexpo
   name: OÖ KulturEXPO Anton Bruckner 2024
   group: premiere
+  roleDe: "Ein Projekt der"
+  noteDe: "BruQner entstand als Auftragswerk im Rahmen des Brucknerjahr-2024-Projektcalls des Landes Oberösterreich."
   role: A project of
   note: "BruQner was commissioned through the Brucknerjahr 2024 project call of Land Oberösterreich."
   url: https://www.anton-bruckner-2024.at/
@@ -121,6 +142,8 @@
 - id: ars-electronica
   name: Ars Electronica
   group: premiere
+  roleDe: "In Kooperation mit"
+  noteDe: "BruQner eröffnete das Ars Electronica Festival 2024."
   role: In cooperation with
   note: "BruQner opened the Ars Electronica Festival 2024."
   url: https://ars.electronica.art/
@@ -130,6 +153,7 @@
 - id: mariendom
   name: Mariendom Linz
   group: premiere
+  roleDe: "Ort der Uraufführung"
   role: Host of the premiere
   url: https://www.mariendom.at/
   logo: ../assets/logos/mariendom.png
@@ -140,6 +164,8 @@
 - id: acf-washington
   name: Austrian Cultural Forum Washington
   group: hosts
+  nameDe: "Österreichisches Kulturforum Washington"
+  roleDe: "Präsentierte die Aufführung beim Science Diplomacy Summit 2025"
   role: Presented the performance at the Science Diplomacy Summit 2025
   url: https://www.acfdc.org/
   logo: ../assets/logos/acf-washington.png
@@ -151,11 +177,13 @@
 - id: ball
   name: Vienna Ball of Sciences
   group: hosts
+  nameDe: "Wiener Ball der Wissenschaften"
   url: https://www.wissenschaftsball.at/
   order: 3
 - id: expo
   name: EXPO 2025 Osaka, Austrian Pavilion
   group: hosts
+  nameDe: "EXPO 2025 Osaka, Österreich-Pavillon"
   url: https://www.expoaustria.at/en/
   order: 4
 - id: millstatt
@@ -165,6 +193,7 @@
 - id: alpbach
   name: European Forum Alpbach
   group: hosts
+  nameDe: "Europäisches Forum Alpbach"
   url: https://www.alpbach.org/
   order: 6
 - id: civa
@@ -181,15 +210,19 @@
 - id: thanks-trawoeger
   name: Norbert Trawöger
   group: thanks
+  roleDe: "Brucknerfest 2024, für anregende Gespräche"
   role: Bruckner Festival 2024, for fruitful discussions
   order: 1
 - id: thanks-hochreiter
   name: Martina Hochreiter
   group: thanks
+  roleDe: "für Einblicke in die Geschichte der aleatorischen Musik"
   role: for insights into the history of aleatoric music
   order: 2
 - id: thanks-acf
   name: Verena Daughton and Sarah Bamberger
   group: thanks
+  nameDe: "Verena Daughton und Sarah Bamberger"
+  roleDe: "Österreichisches Kulturforum Washington"
   role: Austrian Cultural Forum Washington
   order: 3

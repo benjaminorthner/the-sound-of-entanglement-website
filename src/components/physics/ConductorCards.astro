@@ -9,10 +9,36 @@
  * +1 = loud or wooden, −1 = soft or metallic.
  * A1/B1 = the answer to "volume", A2/B2 = the answer to "timbre".
  */
-const questions = [
-  { q: 'volume', plus: 'loud', minus: 'soft' },
-  { q: 'timbre', plus: 'wooden', minus: 'metallic' },
-];
+import { getLang } from '../../i18n';
+
+const de = getLang(Astro) === 'de';
+const questions = de
+  ? [
+      { q: 'Lautstärke', ask: 'Bei der Frage nach der Lautstärke spiele', plus: 'laut', minus: 'leise' },
+      { q: 'Klangfarbe', ask: 'Bei der Frage nach der Klangfarbe spiele', plus: 'hölzern', minus: 'metallisch' },
+    ]
+  : [
+      { q: 'volume', ask: 'If asked for volume, play', plus: 'loud', minus: 'soft' },
+      { q: 'timbre', ask: 'If asked for timbre, play', plus: 'wooden', minus: 'metallic' },
+    ];
+const L = de
+  ? {
+      role: { alice: 'erste Musikerin', bob: 'zweiter Musiker' },
+      aria: (who: string, i: number) => `${who}, bei der Frage nach der ${questions[i].q}`,
+      caption: 'Wie die vier Kombinationen von Fragen mit diesen Karten zählen',
+      head: ['Frage an Alice', 'Frage an Bob', 'Gespielt wird', 'Wert'],
+      shuffle: 'Den Dirigenten zufällig wählen lassen',
+      play: '{a} und {b}: {r}', alike: 'gleich', unlike: 'verschieden',
+    }
+  : {
+      role: { alice: 'first musician', bob: 'second musician' },
+      aria: (who: string, i: number) => `${who}, if asked for ${questions[i].q}`,
+      caption: 'How the four combinations of questions score with these cards',
+      head: ['Alice is asked', 'Bob is asked', 'They play', 'Counts'],
+      shuffle: 'Let the conductor choose at random',
+      play: '{a} and {b}: {r}', alike: 'alike', unlike: 'unlike',
+    };
+const client = { q: questions.map(({ plus, minus }) => ({ plus, minus })), play: L.play, alike: L.alike, unlike: L.unlike };
 // the example from the 2024 slides: Alice loud & wooden, Bob loud & metallic
 const initial = { alice: [1, 1], bob: [1, -1] };
 const pairs = [
@@ -22,18 +48,18 @@ const pairs = [
   { a: 1, b: 1, sign: -1 },
 ];
 ---
-<div class="conductor" data-conductor>
+<div class="conductor" data-conductor data-l={JSON.stringify(client)}>
   <div class="cards">
     {(['alice', 'bob'] as const).map((who) => (
       <fieldset class:list={['card', who]}>
         <legend>
           <span class="who">{who === 'alice' ? 'Alice' : 'Bob'}</span>
-          <span class="dim"> {who === 'alice' ? 'first' : 'second'} musician</span>
+          <span class="dim"> {L.role[who]}</span>
         </legend>
         {questions.map((q, i) => (
           <div class="row">
-            <span class="ask">If asked for {q.q}, play</span>
-            <div class="choice" role="radiogroup" aria-label={`${who === 'alice' ? 'Alice' : 'Bob'}, if asked for ${q.q}`}>
+            <span class="ask">{q.ask}</span>
+            <div class="choice" role="radiogroup" aria-label={L.aria(who === 'alice' ? 'Alice' : 'Bob', i)}>
               {[1, -1].map((v) => (
                 <label>
                   <input
@@ -56,13 +82,13 @@ const pairs = [
 
   <div class="score" aria-live="polite">
     <table>
-      <caption class="visually-hidden">How the four combinations of questions score with these cards</caption>
+      <caption class="visually-hidden">{L.caption}</caption>
       <thead>
         <tr>
-          <th scope="col">Alice is asked</th>
-          <th scope="col">Bob is asked</th>
-          <th scope="col">They play</th>
-          <th scope="col" class="n">Counts</th>
+          <th scope="col">{L.head[0]}</th>
+          <th scope="col">{L.head[1]}</th>
+          <th scope="col">{L.head[2]}</th>
+          <th scope="col" class="n">{L.head[3]}</th>
         </tr>
       </thead>
       <tbody>
@@ -80,17 +106,20 @@ const pairs = [
       <span data-sum-expr></span> = <strong data-sum></strong>
     </p>
     <div class="actions">
-      <button type="button" class="btn" data-shuffle>Let the conductor choose at random</button>
+      <button type="button" class="btn" data-shuffle>{L.shuffle}</button>
     </div>
   </div>
 </div>
 
 <script>
   document.querySelectorAll<HTMLElement>('[data-conductor]').forEach((root) => {
-    const Q = [
-      { plus: 'loud', minus: 'soft' },
-      { plus: 'wooden', minus: 'metallic' },
-    ];
+    const L = JSON.parse(root.dataset.l!) as {
+      q: { plus: string; minus: string }[];
+      play: string;
+      alike: string;
+      unlike: string;
+    };
+    const Q = L.q;
     const PAIRS = [
       { a: 0, b: 0, sign: 1 },
       { a: 0, b: 1, sign: 1 },
@@ -110,8 +139,10 @@ const pairs = [
         const agree = A * B;
         sum += p.sign * agree;
         const row = root.querySelector<HTMLElement>(`[data-pair="${k}"]`)!;
-        row.querySelector('[data-play]')!.textContent =
-          `${word(p.a, A)} and ${word(p.b, B)}: ${agree > 0 ? 'alike' : 'unlike'}`;
+        row.querySelector('[data-play]')!.textContent = L.play
+          .replace('{a}', word(p.a, A))
+          .replace('{b}', word(p.b, B))
+          .replace('{r}', agree > 0 ? L.alike : L.unlike);
         row.querySelector('[data-term]')!.textContent = `${p.sign < 0 ? '−' : ''}(${sgn(agree)})`;
         row.classList.toggle('minus', p.sign < 0);
         parts.push(`${k === 0 ? '' : p.sign < 0 ? ' − ' : ' + '}(${sgn(agree)})`);

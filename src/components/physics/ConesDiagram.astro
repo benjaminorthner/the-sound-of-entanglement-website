@@ -7,22 +7,41 @@
  * which crystal a pair came from, and the pair is entangled. The two photons
  * of a pair always leave on opposite sides of the cone.
  */
+import { getLang } from '../../i18n';
+
+const L = getLang(Astro) === 'de'
+  ? {
+      title: 'Wie verschränkte Photonenpaare entstehen',
+      desc: 'Ein violetter Laser mit 405 Nanometern Wellenlänge trifft auf zwei dünne Kristalle. Ganz selten zerfällt ein Pumpphoton in zwei infrarote Photonen mit 810 Nanometern, die auf gegenüberliegenden Seiten eines Lichtkegels austreten. Die beiden Kristalle erzeugen zwei Kegel, die sich überlappen; Paare aus der Überlappung sind verschränkt. Ein Photon fliegt zu Alice, das andere zu Bob.',
+      laser: '405-nm-Laser', laser2: 'violett, etwa 12 mW',
+      crystals: 'zwei dünne Kristalle,', crystals2: 'um 90° gegeneinander gedreht',
+      rate: 'etwa eines von 10¹¹ Photonen', rate2: 'zerfällt in zwei 810-nm-Photonen',
+      alice: 'zu Alice', bob: 'zu Bob',
+      overlap: ['wo sich die Kegel', 'überlappen, sind', 'Paare verschränkt'],
+      caption: 'Die infraroten Photonen sind unsichtbar. Die Lichtkegel, die bei der Uraufführung in den Nebel projiziert wurden, waren genau dieses Bild, nur riesengroß.',
+    }
+  : {
+      title: 'How entangled photon pairs are made',
+      desc: 'A violet 405 nanometre laser enters two thin crystals. Rarely, a pump photon splits into two infrared 810 nanometre photons, which leave on opposite sides of a cone of light. Two crystals make two overlapping cones; pairs from the overlap are entangled. One photon goes to Alice, the other to Bob.',
+      laser: '405 nm laser', laser2: 'violet, about 12 mW',
+      crystals: 'two thin crystals,', crystals2: 'rotated 90° to each other',
+      rate: 'about one photon in 10¹¹', rate2: 'splits into two 810 nm photons',
+      alice: 'to Alice', bob: 'to Bob',
+      overlap: ['overlapping cones:', 'pairs from here', 'are entangled'],
+      caption: 'The infrared photons are invisible. The cones of light projected into haze at the premiere were this picture, made large.',
+    };
 ---
 <figure class="cones">
   <svg viewBox="0 0 900 440" role="img" aria-labelledby="cones-title cones-desc">
-    <title id="cones-title">How entangled photon pairs are made</title>
-    <desc id="cones-desc">
-      A violet 405 nanometre laser enters two thin crystals. Rarely, a pump photon splits into two
-      infrared 810 nanometre photons, which leave on opposite sides of a cone of light. Two crystals
-      make two overlapping cones; pairs from the overlap are entangled. One photon goes to Alice, the
-      other to Bob.
-    </desc>
+    <title id="cones-title">{L.title}</title>
+    <desc id="cones-desc">{L.desc}</desc>
     <defs>
       <linearGradient id="cone-fill" x1="0" x2="1">
         <stop offset="0" stop-color="#ebe7df" stop-opacity="0.16" />
         <stop offset="1" stop-color="#ebe7df" stop-opacity="0.02" />
       </linearGradient>
-      <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <!-- userSpaceOnUse: a bounding-box filter region collapses on the horizontal pump line (zero height) and hides it -->
+      <filter id="glow" filterUnits="userSpaceOnUse" x="0" y="0" width="900" height="440">
         <feGaussianBlur stdDeviation="4" result="b" />
         <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
       </filter>
@@ -53,22 +72,19 @@
     <path d="M718 362 C 760 380, 790 384, 815 384" class="to-bob" />
 
     <!-- labels -->
-    <text x="30" y="200" class="t">405 nm laser</text>
-    <text x="30" y="250" class="t dim">violet, about 12 mW</text>
-    <text x="212" y="300" class="t" text-anchor="middle">two thin crystals,</text>
-    <text x="212" y="320" class="t" text-anchor="middle">rotated 90° to each other</text>
-    <text x="440" y="120" class="t dim" text-anchor="middle">about one photon in 10¹¹</text>
-    <text x="440" y="140" class="t dim" text-anchor="middle">splits into two 810 nm photons</text>
-    <text x="822" y="61" class="t alice-t">to Alice</text>
-    <text x="822" y="389" class="t bob-t">to Bob</text>
-    <text x="774" y="226" class="t dim">overlapping cones:</text>
-    <text x="774" y="246" class="t dim">pairs from here</text>
-    <text x="774" y="266" class="t dim">are entangled</text>
+    <text x="30" y="200" class="t">{L.laser}</text>
+    <text x="30" y="250" class="t dim">{L.laser2}</text>
+    <text x="212" y="300" class="t" text-anchor="middle">{L.crystals}</text>
+    <text x="212" y="320" class="t" text-anchor="middle">{L.crystals2}</text>
+    <text x="440" y="120" class="t dim" text-anchor="middle">{L.rate}</text>
+    <text x="440" y="140" class="t dim" text-anchor="middle">{L.rate2}</text>
+    <text x="822" y="61" class="t alice-t">{L.alice}</text>
+    <text x="822" y="389" class="t bob-t">{L.bob}</text>
+    <text x="774" y="226" class="t dim">{L.overlap[0]}</text>
+    <text x="774" y="246" class="t dim">{L.overlap[1]}</text>
+    <text x="774" y="266" class="t dim">{L.overlap[2]}</text>
   </svg>
-  <figcaption class="ui dim">
-    The infrared photons are invisible. The cones of light projected into haze at the premiere were
-    this picture, made large.
-  </figcaption>
+  <figcaption class="ui dim">{L.caption}</figcaption>
 </figure>
 
 <style>

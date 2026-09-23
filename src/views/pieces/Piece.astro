@@ -11,6 +11,9 @@ import Metronome from '../../components/visuals/metronome/Metronome.astro';
 import BruqnerStory from '../../components/pieces/bruqner/BruqnerStory.astro';
 import IAStory from '../../components/pieces/indeterminate-apparatus/IAStory.astro';
 import { formatDate } from '../../lib/format';
+import { getLang, localize, useT } from '../../i18n';
+import { localized, localizeAll } from '../../i18n/content';
+import { pieceImage } from './photos.de';
 
 
 interface Props {
@@ -19,22 +22,34 @@ interface Props {
   next?: CollectionEntry<'pieces'>;
 }
 const { piece, prev, next } = Astro.props;
-const d = piece.data;
-const { Content } = await render(piece);
+const lang = getLang(Astro);
+const de = lang === 'de';
+const t = useT(lang);
+const loc = await localized('pieces', piece, lang);
+const d = loc.data;
+const { Content } = await render(loc.entry);
+const prevTitle = prev && (await localized('pieces', prev, lang)).data.title;
+const nextTitle = next && (await localized('pieces', next, lang)).data.title;
 
-const shows = (await getCollection('shows', (s) => !s.data.draft && s.data.piece?.id === piece.id))
-  .sort((a, b) => +b.data.date - +a.data.date);
+const shows = await localizeAll('shows', (await getCollection('shows', (s) => !s.data.draft && s.data.piece?.id === piece.id))
+  .sort((a, b) => +b.data.date - +a.data.date), lang);
 const premiere = shows.filter((s) => s.data.premiere).sort((a, b) => +a.data.date - +b.data.date)[0];
 const hasVisual = d.visual !== 'none';
 // These pieces get a photographic story instead of the generic image layout.
 const isStory = piece.id === 'bruqner' || piece.id === 'indeterminate-apparatus';
-const [firstImage, ...moreImages] = d.images;
-const composers = d.composers.join(', ').replace(/, ([^,]*)$/, ' and $1');
+const cover = d.cover && pieceImage(lang, d.cover);
+const [firstImage, ...moreImages] = d.images.map((img) => pieceImage(lang, img));
+const and = de ? 'und' : 'and';
+const composers = d.composers.join(', ').replace(/, ([^,]*)$/, ` ${and} $1`);
+const listenTitle = d.youtube && d.audio.length
+  ? (de ? 'Hören und sehen' : 'Listen and watch')
+  : d.youtube ? (de ? 'Video' : 'Watch') : (de ? 'Hören' : 'Listen');
+const durations: Record<string, string> = de ? { bruqner: '18 Min.', '8-rooms': '12 Min.' } : { bruqner: '18 min', '8-rooms': '12 min' };
 // Figures drawn on white are shown inverted so they sit on the dark page.
 const LIGHT_FIGURES = ['bruqner-motifs', 'quantum-random-walk'];
 const isLight = (src: { src: string }) => LIGHT_FIGURES.some((f) => src.src.includes(f));
 ---
-<Base title={d.title} description={d.summary} underHeader={hasVisual} image={d.cover?.src} imageAlt={d.cover?.alt}>
+<Base title={d.title} description={d.summary} underHeader={hasVisual} image={cover?.src} imageAlt={cover?.alt}>
   {d.visual === 'rings' && <Rings />}
   {d.visual === 'terrain' && <Terrain />}
   {d.visual === 'metronome' && <Metronome />}
@@ -42,16 +57,16 @@ const isLight = (src: { src: string }) => LIGHT_FIGURES.some((f) => src.src.incl
   <article class:list={['piece', { plain: !hasVisual }]}>
     <header class="wrap grid head">
       <div class="title">
-        <p class="ui back"><a href="/pieces/">Pieces</a></p>
+        <p class="ui back"><a href={localize(lang, '/pieces/')}>{t('nav.pieces')}</a></p>
         <h1>{d.title}</h1>
         <p class="forces">{d.forces}</p>
       </div>
       <dl class="facts ui">
-        <div><dt>Year</dt><dd class="num">{d.year}</dd></div>
-        <div><dt>Music</dt><dd>{composers}</dd></div>
-        {d.visualsBy.length > 0 && <div><dt>Visuals</dt><dd>{d.visualsBy.join(' and ')}</dd></div>}
+        <div><dt>{de ? 'Jahr' : 'Year'}</dt><dd class="num">{d.year}</dd></div>
+        <div><dt>{de ? 'Musik' : 'Music'}</dt><dd>{composers}</dd></div>
+        {d.visualsBy.length > 0 && <div><dt>Visuals</dt><dd>{d.visualsBy.join(` ${and} `)}</dd></div>}
         {premiere && (
-          <div><dt>Premiere</dt><dd><a href={`/shows/${premiere.id}/`}>{formatDate(premiere.data.date)}, {premiere.data.city}</a></dd></div>
+          <div><dt>{de ? 'Uraufführung' : 'Premiere'}</dt><dd><a href={localize(lang, `/shows/${premiere.id}/`)}>{formatDate(premiere.data.date, lang)}, {premiere.data.city}</a></dd></div>
         )}
       </dl>
     </header>
@@ -74,9 +89,9 @@ const isLight = (src: { src: string }) => LIGHT_FIGURES.some((f) => src.src.incl
     {piece.id === 'bruqner' && <BruqnerStory />}
     {piece.id === 'indeterminate-apparatus' && <IAStory />}
 
-    {d.cover && !isStory && (
+    {cover && !isStory && (
       <div class="cover">
-        <Photo {...d.cover} bleed sizes="100vw" />
+        <Photo {...cover} bleed sizes="100vw" />
       </div>
     )}
 
@@ -92,20 +107,20 @@ const isLight = (src: { src: string }) => LIGHT_FIGURES.some((f) => src.src.incl
 
     {(d.audio.length > 0 || d.youtube) && (
       <section class="wrap grid listen" aria-labelledby="listen">
-        <h2 id="listen" class="section-title">{d.youtube && d.audio.length ? 'Listen and watch' : d.youtube ? 'Watch' : 'Listen'}</h2>
+        <h2 id="listen" class="section-title">{listenTitle}</h2>
         {d.audio.length > 0 && (
           <div class="audio">
             {d.audio.map((a) => <AudioPlayer src={a.src} title={a.title} note={a.note} />)}
           </div>
         )}
-        {d.youtube && d.cover && (
+        {d.youtube && cover && (
           <div class="video">
             <YouTube
               id={d.youtube}
-              title={piece.id === 'bruqner' ? 'BruQner – The Sound of Entanglement, documentary' : `${d.title}, live`}
-              poster={d.cover.src}
-              posterAlt={d.cover.alt}
-              duration={piece.id === 'bruqner' ? '18 min' : piece.id === '8-rooms' ? '12 min' : undefined}
+              title={piece.id === 'bruqner' ? `BruQner – The Sound of Entanglement, ${de ? 'Dokumentarfilm' : 'documentary'}` : `${d.title}, live`}
+              poster={cover.src}
+              posterAlt={cover.alt}
+              duration={durations[piece.id]}
             />
           </div>
         )}
@@ -114,16 +129,20 @@ const isLight = (src: { src: string }) => LIGHT_FIGURES.some((f) => src.src.incl
 
     {shows.length > 0 && (
       <section class="wrap perf" aria-labelledby="performances">
-        <h2 id="performances" class="section-title">{shows.some((s) => s.data.kind === 'talk') ? 'Performances and talks' : 'Performances'}</h2>
-        <p class="dim perf-note">With the Bell value measured during each performance. Above 2, no classical source could have produced the correlations.</p>
+        <h2 id="performances" class="section-title">{shows.some((s) => s.data.kind === 'talk') ? (de ? 'Aufführungen und Vorträge' : 'Performances and talks') : (de ? 'Aufführungen' : 'Performances')}</h2>
+        <p class="dim perf-note">
+          {de
+            ? 'Mit dem Bell-Wert, der bei der jeweiligen Aufführung gemessen wurde. Liegt er über 2, kann keine klassische Quelle die Korrelationen erzeugt haben.'
+            : 'With the Bell value measured during each performance. Above 2, no classical source could have produced the correlations.'}
+        </p>
         <Performances shows={shows} />
       </section>
     )}
 
-    <nav class="wrap pager ui" aria-label="Other pieces">
-      {prev ? <a href={`/pieces/${prev.id}/`} rel="prev"><span class="dim">Previous</span> {prev.data.title}</a> : <span></span>}
-      <a href="/pieces/" class="all">All pieces</a>
-      {next ? <a href={`/pieces/${next.id}/`} rel="next" class="next"><span class="dim">Next</span> {next.data.title}</a> : <span></span>}
+    <nav class="wrap pager ui" aria-label={de ? 'Weitere Stücke' : 'Other pieces'}>
+      {prev ? <a href={localize(lang, `/pieces/${prev.id}/`)} rel="prev"><span class="dim">{de ? 'Voriges' : 'Previous'}</span> {prevTitle}</a> : <span></span>}
+      <a href={localize(lang, '/pieces/')} class="all">{de ? 'Alle Stücke' : 'All pieces'}</a>
+      {next ? <a href={localize(lang, `/pieces/${next.id}/`)} rel="next" class="next"><span class="dim">{de ? 'Nächstes' : 'Next'}</span> {nextTitle}</a> : <span></span>}
     </nav>
   </article>
 </Base>

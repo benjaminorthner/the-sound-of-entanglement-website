@@ -7,35 +7,61 @@ import Vinyl from '../../components/album/Vinyl.astro';
 import { Image } from 'astro:assets';
 import studioAligning from '../../assets/photos/2026-album-studio/aligning-in-studio.jpg';
 import studioDrums from '../../assets/photos/2026-album-studio/drums-room.jpg';
-import studioKeys from '../../assets/photos/2026-album-studio/keys-portrait.jpg';
-const studio = [
-  { src: studioAligning, alt: 'Benjamin Orthner aligning the optics of the experiment in the recording studio.' },
-  { src: studioDrums, alt: 'The drummer in the live room of the studio.' },
-  { src: studioKeys, alt: 'The keyboard player recording, surrounded by keyboards.' },
-];
+import studioKeys from '../../assets/photos/2026-album-studio/studio-keys-portrait.jpg';
 import { formatDate } from '../../lib/format';
+import { getLang, localize, pick, useT } from '../../i18n';
+import { localizeAll } from '../../i18n/content';
+import { pieceImage } from './photos.de';
 
-const pieces = (await getCollection('pieces')).sort((a, b) => a.data.order - b.data.order);
+const lang = getLang(Astro);
+const de = lang === 'de';
+const t = useT(lang);
+const studio = [
+  { src: studioAligning, alt: { en: 'Benjamin Orthner aligning the optics of the experiment in the recording studio.', de: 'Benjamin Orthner justiert im Aufnahmestudio die Optik des Experiments.' } },
+  { src: studioDrums, alt: { en: 'The drummer in the live room of the studio.', de: 'Die Schlagzeugerin im Aufnahmeraum des Studios.' } },
+  { src: studioKeys, alt: { en: 'The keyboard player recording, surrounded by keyboards.', de: 'Der Keyboarder bei der Aufnahme, umgeben von Keyboards.' } },
+];
+
+const pieces = await localizeAll('pieces', (await getCollection('pieces')).sort((a, b) => a.data.order - b.data.order), lang);
 const repertoire = pieces.filter((p) => p.data.status === 'repertoire');
 const experimental = pieces.filter((p) => p.data.status === 'experimental');
-const shows = await getCollection('shows', (s) => !s.data.draft && s.data.kind === 'performance');
+const shows = await localizeAll('shows', await getCollection('shows', (s) => !s.data.draft && s.data.kind === 'performance'), lang);
 const premiereOf = (id: string) =>
   shows.filter((s) => s.data.piece?.id === id && s.data.premiere).sort((a, b) => +a.data.date - +b.data.date)[0];
 ---
-<Base title="Pieces" description="Three pieces for entangled photons and live musicians: BruQner, 8 Rooms and Indeterminate Apparatus.">
+<Base
+  title={t('nav.pieces')}
+  description={de
+    ? 'Drei Stücke für verschränkte Photonen und Live-Musik: BruQner, 8 Rooms und Indeterminate Apparatus.'
+    : 'Three pieces for entangled photons and live musicians: BruQner, 8 Rooms and Indeterminate Apparatus.'}
+>
   <header class="wrap intro">
-    <h1>Pieces</h1>
-    <p class="lede">
-      Every piece receives the same kind of data: a few times a second, one result for Alice and one for Bob.
-      What changes from piece to piece is what those results are allowed to decide.
-    </p>
-    <div class="idea">
-      <p>
-        Each measurement gives Alice one of four outcomes and Bob one of four: sixteen possible combinations.
-        Every mapping in these pieces is built on one fact about them.
+    <h1>{t('nav.pieces')}</h1>
+    {de ? (
+      <p class="lede">
+        Jedes Stück bekommt dieselbe Art von Daten: mehrmals pro Sekunde ein Ergebnis für Alice und eines für Bob.
+        Von Stück zu Stück ändert sich nur, worüber diese Ergebnisse entscheiden dürfen.
       </p>
+    ) : (
+      <p class="lede">
+        Every piece receives the same kind of data: a few times a second, one result for Alice and one for Bob.
+        What changes from piece to piece is what those results are allowed to decide.
+      </p>
+    )}
+    <div class="idea">
+      {de ? (
+        <p>
+          Bei jeder Messung erhält Alice eines von vier möglichen Ergebnissen, Bob ebenso: sechzehn Kombinationen
+          insgesamt. Alles, was in diesen Stücken aus den Messungen Musik macht, beruht auf einer einzigen Tatsache.
+        </p>
+      ) : (
+        <p>
+          Each measurement gives Alice one of four outcomes and Bob one of four: sixteen possible combinations.
+          Every mapping in these pieces is built on one fact about them.
+        </p>
+      )}
       <blockquote>
-        <p>“Entanglement enhances some combinations and suppresses others.”</p>
+        <p>{de ? '„Verschränkung verstärkt manche Kombinationen und unterdrückt andere.“' : '“Entanglement enhances some combinations and suppresses others.”'}</p>
         <footer class="ui dim">Clemens Wenger</footer>
       </blockquote>
     </div>
@@ -48,20 +74,20 @@ const premiereOf = (id: string) =>
         <section class:list={['piece', i % 2 ? 'flip' : '']} aria-labelledby={`p-${p.id}`}>
           <div class="wrap grid">
             {p.data.cover && (
-              <a class="image" href={`/pieces/${p.id}/`} tabindex="-1" aria-hidden="true">
-                <Photo {...p.data.cover} sizes="(min-width: 1000px) 62vw, 100vw" ratio="3 / 2" />
+              <a class="image" href={localize(lang, `/pieces/${p.id}/`)} tabindex="-1" aria-hidden="true">
+                <Photo {...pieceImage(lang, p.data.cover)} sizes="(min-width: 1000px) 62vw, 100vw" ratio="3 / 2" />
               </a>
             )}
             <div class="text">
               <p class="year ui num">{p.data.year}</p>
-              <h2 id={`p-${p.id}`}><a href={`/pieces/${p.id}/`}>{p.data.title}</a></h2>
+              <h2 id={`p-${p.id}`}><a href={localize(lang, `/pieces/${p.id}/`)}>{p.data.title}</a></h2>
               <p class="forces">{p.data.forces}</p>
               <p class="summary">{p.data.summary}</p>
               <p class="mapping dim">{p.data.mapping}</p>
               <p class="meta ui dim">
-                {premiere && <>Premiered {formatDate(premiere.data.date)}, {premiere.data.venue.replace(/ \(.*\)$/, '')}, {premiere.data.city}.</>}
+                {premiere && <>{de ? 'Uraufführung am' : 'Premiered'} {formatDate(premiere.data.date, lang)}, {premiere.data.venue.replace(/ \(.*\)$/, '')}, {premiere.data.city}.</>}
               </p>
-              <p class="more ui"><a href={`/pieces/${p.id}/`}>About {p.data.title}</a></p>
+              <p class="more ui"><a href={localize(lang, `/pieces/${p.id}/`)}>{de ? 'Mehr zu' : 'About'} {p.data.title}</a></p>
             </div>
           </div>
         </section>
@@ -70,7 +96,25 @@ const premiereOf = (id: string) =>
   </div>
 
   <section class="wrap grid statement" aria-labelledby="statement">
-    <h2 id="statement">Why compose for an experiment</h2>
+    <h2 id="statement">{de ? 'Warum für ein Experiment komponieren' : 'Why compose for an experiment'}</h2>
+    {de ? (
+    <div class="statement-text">
+      <p>
+        Wir spielen mit der Natur, nicht mit Datensammlungen. Gemessen wird in Echtzeit, und die Musiker:innen
+        antworten live darauf, auf der Bühne, das Experiment direkt vor sich.
+      </p>
+      <p>
+        Der Zufall ist objektiv. Er hat keine Launen und kein Lieblingsmaterial, und genau deshalb bleiben die
+        musikalische Form und der Klang wirklich offen.
+      </p>
+      <p>
+        Dazu bringt die Verschränkung etwas mit, das kein Würfel kann: Zufall und Ordnung zugleich. Was das ist
+        und was Musik damit anfangen kann, ist Neuland für die Musiktheorie. Es verlangt nach einem neuen
+        Instrument, nach neuen Kompositionen und am Ende nach einer neuen Ästhetik.
+      </p>
+      <p class="ui dim byline">Clemens Wenger, Komponist. Nach seinen Notizen für den Vortrag zur Uraufführung.</p>
+    </div>
+    ) : (
     <div class="statement-text">
       <p>
         We play with nature, not with data collections. The measurements happen in real time, and the
@@ -87,17 +131,22 @@ const premiereOf = (id: string) =>
       </p>
       <p class="ui dim byline">Clemens Wenger, composer. Adapted from his notes for the premiere lecture.</p>
     </div>
+    )}
   </section>
 
   <section class="wrap grid experiments" aria-labelledby="experiments">
     <div class="exp-head">
-      <h2 id="experiments">Studies</h2>
-      <p class="dim">Two experimental pieces from the rehearsal events in Vienna in 2024, while the setup was being prepared for the premiere.</p>
+      <h2 id="experiments">{de ? 'Studien' : 'Studies'}</h2>
+      <p class="dim">
+        {de
+          ? 'Zwei Experimentalstücke, entstanden 2024 bei den Probeterminen in Wien, während der Aufbau für die Uraufführung vorbereitet wurde.'
+          : 'Two experimental pieces from the rehearsal events in Vienna in 2024, while the setup was being prepared for the premiere.'}
+      </p>
     </div>
     <ul class="exp-list">
       {experimental.map((p) => (
         <li>
-          <h3><a href={`/pieces/${p.id}/`}>{p.data.title}</a></h3>
+          <h3><a href={localize(lang, `/pieces/${p.id}/`)}>{p.data.title}</a></h3>
           <p class="dim">{p.data.summary}</p>
           {p.data.audio[0] && <AudioPlayer src={p.data.audio[0].src} title={p.data.audio[0].title} note={p.data.audio[0].note} />}
         </li>
@@ -106,20 +155,27 @@ const premiereOf = (id: string) =>
   </section>
 
   <section class="wrap grid album" aria-labelledby="album">
-    <a class="album-record" href="/album/" aria-label="Sounds of Entanglement, the album"><Vinyl size="small" /></a>
+    <a class="album-record" href={localize(lang, '/album/')} aria-label={de ? 'Sounds of Entanglement, das Album' : 'Sounds of Entanglement, the album'}><Vinyl size="small" /></a>
     <div class="album-text">
-      <h2 id="album"><a href="/album/"><em>Sounds of Entanglement</em></a></h2>
-      <p class="status">Recorded. Not released yet. Vinyl and digital.</p>
-      <p class="about">
-        The first album of The Uncertain Question (Clemens Wenger, Manu Mayr, Judith Schwarz): music conducted
-        by pairs of entangled photons, recorded live with the experiment in the studio.
-      </p>
-      <a class="studio-strip" href="/album/" aria-label="Photographs from the recording, on the album page">
-        {studio.map((i) => <Image src={i.src} alt={i.alt} widths={[320, 480, 640]} sizes="(min-width: 1000px) 16vw, 30vw" format="webp" />)}
+      <h2 id="album"><a href={localize(lang, '/album/')}><em>Sounds of Entanglement</em></a></h2>
+      <p class="status">{de ? 'Aufgenommen, aber noch nicht erschienen. Auf Vinyl und digital.' : 'Recorded. Not released yet. Vinyl and digital.'}</p>
+      {de ? (
+        <p class="about">
+          Das erste Album von The Uncertain Question (Clemens Wenger, Manu Mayr, Judith Schwarz): Musik, dirigiert
+          von verschränkten Photonenpaaren, live im Studio aufgenommen, mit dem Experiment mitten im Raum.
+        </p>
+      ) : (
+        <p class="about">
+          The first album of The Uncertain Question (Clemens Wenger, Manu Mayr, Judith Schwarz): music conducted
+          by pairs of entangled photons, recorded live with the experiment in the studio.
+        </p>
+      )}
+      <a class="studio-strip" href={localize(lang, '/album/')} aria-label={de ? 'Fotos von den Aufnahmen, auf der Albumseite' : 'Photographs from the recording, on the album page'}>
+        {studio.map((i) => <Image src={i.src} alt={pick(lang, i.alt)} widths={[320, 480, 640]} sizes="(min-width: 1000px) 16vw, 30vw" format="webp" />)}
       </a>
       <p class="strip-foot ui">
-        <a href="/album/">About the album</a>
-        <span class="dim">Photos from the recording: Benjamin Orthner</span>
+        <a href={localize(lang, '/album/')}>{de ? 'Mehr zum Album' : 'About the album'}</a>
+        <span class="dim">{de ? 'Fotos von den Aufnahmen: Benjamin Orthner' : 'Photos from the recording: Benjamin Orthner'}</span>
       </p>
     </div>
   </section>

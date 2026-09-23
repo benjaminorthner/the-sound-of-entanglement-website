@@ -8,14 +8,20 @@
  * Walk rule (paper, supplementary material):
  *   x += A·δ(a,a1) + B·δ(b,b1),   y += A·δ(a,a2) + B·δ(b,b2)
  */
+import { getLang } from '../../../i18n';
+
 const rooms = Array.from({ length: 9 }, (_, i) => i + 1);
+const lang = getLang(Astro);
+const de = lang === 'de';
 ---
-<section class="terrain-visual" data-terrain aria-label="Live replay of the 8 Rooms clicks and random walk, measured at the Vienna Ball of Sciences">
+<section class="terrain-visual" data-terrain data-lang={lang} aria-label={de ? 'Wiedergabe der Klicks und der Zufallsbewegung von 8 Rooms, gemessen beim Wiener Ball der Wissenschaften' : 'Live replay of the 8 Rooms clicks and random walk, measured at the Vienna Ball of Sciences'}>
   <canvas class="land" aria-hidden="true"></canvas>
   <div class="overlay wrap">
     <div class="caption">
       <p class="ui source">
-        Measured on the night of the premiere, Vienna City Hall, 25 January 2025. Each pair sends a click with its echo pattern into Alice's half (left) and Bob's half (right); the clicks pile up into the landscape.
+        {de
+          ? 'Gemessen am Abend der Uraufführung im Wiener Rathaus, 25.\u00a0Jänner 2025. Jedes Paar schickt einen Klick mit seinem Echomuster in Alices Hälfte (links) und in Bobs Hälfte (rechts); aus den Klicks wächst die Landschaft.'
+          : "Measured on the night of the premiere, Vienna City Hall, 25 January 2025. Each pair sends a click with its echo pattern into Alice's half (left) and Bob's half (right); the clicks pile up into the landscape."}
       </p>
       <p class="ui now num" data-now>&nbsp;</p>
       <p class="ui bell num" data-bell>&nbsp;</p>
@@ -24,9 +30,9 @@ const rooms = Array.from({ length: 9 }, (_, i) => i + 1);
     <figure class="map">
       <div class="grid-map" aria-hidden="true">
         <canvas></canvas>
-        {rooms.map((r) => <span class="room ui" data-room={r - 1}>{r === 9 ? '9, exit' : r}</span>)}
+        {rooms.map((r) => <span class="room ui" data-room={r - 1}>{r === 9 ? (de ? '9, Ende' : '9, exit') : r}</span>)}
       </div>
-      <figcaption class="ui" data-status aria-live="polite">The walk starts in the middle of room 1.</figcaption>
+      <figcaption class="ui" data-status aria-live="polite">{de ? 'Der Weg beginnt in der Mitte von Raum 1.' : 'The walk starts in the middle of room 1.'}</figcaption>
     </figure>
   </div>
 </section>
@@ -91,9 +97,40 @@ const rooms = Array.from({ length: 9 }, (_, i) => i + 1);
   ];
   type Cam = (typeof CAMS)[number];
 
+  /** Readout text in the page's language (data-lang on the section). */
+  const TEXT = {
+    en: {
+      dec: (x: number) => x.toFixed(2),
+      exit: 'Room 9, the exit: the piece would end here. The walk starts again in room 1.',
+      inRoom: (r: number) => `In room ${r}.`,
+      finale: ' Every door now leads to room 9.',
+      doors: (d: number, after: number) => ` ${d} ${d === 1 ? 'door' : 'doors'} passed; after ${after}, every door leads to room 9.`,
+      pair: (clock: string, i: number, of: number) => `${clock}, pair ${i} of ${of}. `,
+      station: (name: string, setting: number, outcome: string) => `${name}: setting ${setting}, ${outcome}.`,
+      bellFew: 'Bell value so far: not enough pairs yet. Classical limit: 2.',
+      bell: (S: string, sg: string) => `Bell value so far: ${S} ± ${sg}. Classical limit: 2.`,
+      pause: 'Pause',
+      resume: 'Resume',
+    },
+    de: {
+      dec: (x: number) => x.toFixed(2).replace('.', ','),
+      exit: 'Raum 9, der Ausgang: Hier würde das Stück enden. Der Weg beginnt wieder in Raum 1.',
+      inRoom: (r: number) => `In Raum ${r}.`,
+      finale: ' Jede Tür führt jetzt in Raum 9.',
+      doors: (d: number, after: number) => ` ${d} ${d === 1 ? 'Tür' : 'Türen'} durchschritten; nach ${after} führt jede Tür in Raum 9.`,
+      pair: (clock: string, i: number, of: number) => `${clock}, Paar ${i.toLocaleString('de-AT')} von ${of.toLocaleString('de-AT')}. `,
+      station: (name: string, setting: number, outcome: string) => `${name}: Einstellung ${setting}, ${outcome}.`,
+      bellFew: 'Bell-Wert bisher: noch zu wenige Paare. Klassische Grenze: 2.',
+      bell: (S: string, sg: string) => `Bell-Wert bisher: ${S} ± ${sg}. Klassische Grenze: 2.`,
+      pause: 'Pause',
+      resume: 'Weiter',
+    },
+  };
+
   document.querySelectorAll<HTMLElement>('[data-terrain]').forEach((root) => {
     const data = ball as Excerpt;
     const events = decodeExcerpt(data);
+    const L = TEXT[root.dataset.lang === 'de' ? 'de' : 'en'];
     const land = root.querySelector<HTMLCanvasElement>('canvas.land')!;
     const ctx = land.getContext('2d')!;
     const mapWrap = root.querySelector<HTMLElement>('.grid-map')!;
@@ -311,8 +348,8 @@ const rooms = Array.from({ length: 9 }, (_, i) => i + 1);
     }
     function updateStatus() {
       const r = walk.room;
-      let s = r === EXIT ? 'Room 9, the exit: the piece would end here. The walk starts again in room 1.' : `In room ${r + 1}.`;
-      if (r !== EXIT) s += walk.finale ? ' Every door now leads to room 9.' : ` ${walk.doors} ${walk.doors === 1 ? 'door' : 'doors'} passed; after ${FINALE_AFTER}, every door leads to room 9.`;
+      let s = r === EXIT ? L.exit : L.inRoom(r + 1);
+      if (r !== EXIT) s += walk.finale ? L.finale : L.doors(walk.doors, FINALE_AFTER);
       $status.textContent = s;
     }
     function restartWalk() {
@@ -346,11 +383,9 @@ const rooms = Array.from({ length: 9 }, (_, i) => i + 1);
         if (trail.length > 36) trail.shift();
         updateStatus();
       }
-      $now.innerHTML = `${clockAt(data.start, elapsedMs)}, pair ${e.n + 1} of ${events.length}. ` +
-        `<span class="alice">Alice: setting ${e.a + 1}, ${sign(e.A)}.</span> <span class="bob">Bob: setting ${e.b + 1}, ${sign(e.B)}.</span>`;
-      $bell.textContent = stats.n < 60
-        ? 'Bell value so far: not enough pairs yet. Classical limit: 2.'
-        : `Bell value so far: ${stats.S.toFixed(2)} ± ${stats.sigma.toFixed(2)}. Classical limit: 2.`;
+      $now.innerHTML = L.pair(clockAt(data.start, elapsedMs), e.n + 1, events.length) +
+        `<span class="alice">${L.station('Alice', e.a + 1, sign(e.A))}</span> <span class="bob">${L.station('Bob', e.b + 1, sign(e.B))}</span>`;
+      $bell.textContent = stats.n < 60 ? L.bellFew : L.bell(L.dec(stats.S), L.dec(stats.sigma));
     }
 
     let last = 0;
@@ -388,7 +423,7 @@ const rooms = Array.from({ length: 9 }, (_, i) => i + 1);
 
     $pause.addEventListener('click', () => {
       paused = !paused;
-      $pause.textContent = paused ? 'Resume' : 'Pause';
+      $pause.textContent = paused ? L.resume : L.pause;
       $pause.setAttribute('aria-pressed', String(paused));
     });
 

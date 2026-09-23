@@ -267,6 +267,8 @@ export async function createScene(
     uFlashB: { value: new THREE.Vector4(0, 0, 0.006, 0) },
     uColA: { value: new THREE.Color() },
     uColB: { value: new THREE.Color() },
+    // ripple across the board when a pair is born: crystal x, y, age (s), strength
+    uRipple: { value: new THREE.Vector4(CRYSTAL.x, CRYSTAL.y, 99, 0) },
     // weight of each stop's focus (wide, source, arms, detectors), from scroll
     uFocusW: { value: new THREE.Vector4(1, 0, 0, 0) },
     uFocusSrc: focusUniform(FOCUS.source, 3),
@@ -287,6 +289,7 @@ export async function createScene(
         uniform float uTime, uSettle, uPR, uViewH, uCamDist;
         uniform vec4 uFlashA, uFlashB;
         uniform vec3 uColA, uColB;
+        uniform vec4 uRipple;
         uniform vec4 uFocusW;
         uniform vec3 uFocusSrc[3];
         uniform vec3 uFocusArm[8];
@@ -313,6 +316,17 @@ export async function createScene(
           c = max(mix(vec3(l), c, 1.35), 0.0) * 1.25;
           float plane = 1.0 - smoothstep(-0.225, -0.2, position.z);
           c *= mix(1.0, 0.38, plane);
+
+          // The breadboard breathes: a slow swell of light and a sub-pixel lift,
+          // plus a faint ring spreading from the crystal each time a pair is born.
+          // Only the board moves; the components stay still.
+          vec2 b = position.xy;
+          float swell = sin(b.x * 6.0 + uTime * 0.31) * sin(b.y * 5.0 - uTime * 0.23)
+                      + 0.6 * sin((b.x - b.y) * 11.0 + uTime * 0.47);
+          float rd = length(b - uRipple.xy) - uRipple.z * 0.55;
+          float ring = uRipple.w * exp(-rd * rd / 0.0035) * exp(-uRipple.z * 1.1);
+          p.z += plane * e * (0.0022 * swell + 0.004 * ring);
+          c *= 1.0 + plane * (0.09 * swell + 0.55 * ring);
 
           // focus: the parts that matter at this stop keep their colour,
           // everything else fades to a dim monochrome
@@ -515,6 +529,19 @@ export async function createScene(
     return el;
   });
 
+  /* --- "Alice" and "Bob", shown while the camera is on the two arms --- */
+  const names = (['Alice', 'Bob'] as const).map((name) => {
+    if (!opts.overlay) return null;
+    const el = document.createElement('span');
+    el.className = 'pc-label pc-name';
+    el.setAttribute('aria-hidden', 'true');
+    el.textContent = name;
+    opts.overlay.appendChild(el);
+    return el;
+  });
+  // in front of each arm, below the beam splitter and detectors
+  const NAME_AT = [v(AXIS - 0.46, -0.9, -0.16), v(AXIS + 0.46, -0.9, -0.16)];
+
   /* --- state of the pair being drawn --- */
   interface Pair {
     e: ReplayEvent;
@@ -607,9 +634,10 @@ export async function createScene(
     const mix = (x: number, y: number) => x + (y - x) * ef;
     const st: Stop = {
       tgt: [mix(a0.tgt[0], a1.tgt[0]), mix(a0.tgt[1], a1.tgt[1]), mix(a0.tgt[2], a1.tgt[2])],
-      az: mix(a0.az, a1.az) + mouseX * 6,
-      el: mix(a0.el, a1.el) - mouseY * 4,
-      dist: mix(a0.dist, a1.dist),
+      // a slow idle drift, so the scan never sits completely still
+      az: mix(a0.az, a1.az) + mouseX * 6 + Math.sin(t * 0.21) * 1.8,
+      el: mix(a0.el, a1.el) - mouseY * 4 + Math.sin(t * 0.17 + 1) * 0.9,
+      dist: mix(a0.dist, a1.dist) * (1 + Math.sin(t * 0.13 + 2) * 0.012),
       off: mix(a0.off, a1.off),
       shade: mix(a0.shade, a1.shade),
     };
@@ -638,11 +666,20 @@ export async function createScene(
     shade.uVertical.value = narrow ? 1 : 0;
     shade.uShade.value = st.shade;
     camera.updateMatrixWorld();
+    const nameA = Math.min(1, cloudU.uFocusW.value.z + 0.6 * cloudU.uFocusW.value.w) * common.uSettle.value;
+    names.forEach((el, j) => {
+      if (!el) return;
+      el.style.opacity = nameA < 0.02 ? '0' : String(nameA * 0.85);
+      if (nameA < 0.02) return;
+      tmpA.copy(NAME_AT[j]).project(camera);
+      el.style.transform = `translate(${((tmpA.x + 1) / 2) * w}px, ${((1 - tmpA.y) / 2) * h}px) translate(-50%, -50%)`;
+    });
 
     /* the pair */
     sA.fill(0);
     const fa = cloudU.uFlashA.value;
     const fb = cloudU.uFlashB.value;
+    cloudU.uRipple.value.z += dt;
     fa.w *= Math.pow(0.18, dt);
     fb.w *= Math.pow(0.18, dt);
     beamU.uPump.value = -1;
@@ -663,6 +700,7 @@ export async function createScene(
       }
       // birth flash at the crystal
       const birth = u - T.pump;
+      if (birth >= 0 && cloudU.uRipple.value.z > birth / 1000 + 0.05) cloudU.uRipple.value.set(CRYSTAL.x, CRYSTAL.y, 0, 1);
       if (birth > -60 && birth < 400) {
         const fl = Math.exp(-Math.pow(birth / 160, 2));
         put(I.heads + 2, CRYSTAL, COL.photon, fl, 0.12);
@@ -810,6 +848,7 @@ export async function createScene(
       ro.disconnect();
       removeEventListener('pointermove', onPointer);
       labels.forEach((l) => l?.remove());
+      names.forEach((l) => l?.remove());
       renderer.dispose();
     },
   };

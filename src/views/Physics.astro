@@ -9,57 +9,107 @@ import ClassicalProof from '../components/physics/ClassicalProof.astro';
 import ConductorCards from '../components/physics/ConductorCards.astro';
 import SetupSteps from '../components/physics/SetupSteps.astro';
 import { formatDateShort } from '../lib/format';
+import { getLang, localize, num } from '../i18n';
+import { localizeAll } from '../i18n/content';
 
 import pumpLaser from '../assets/photos/2024-bruqner-making-of/pump-laser-crystal.jpg';
 import setupBeams from '../assets/photos/setup/setup-with-beams.jpg';
 import caseTop from '../assets/photos/setup/case-top-view.jpg';
 
-const measured = (await getCollection('shows', (s) => s.data.bell !== undefined && !s.data.draft))
+// German copy sits next to the English as `de ? … : …`; see docs/german.md.
+const lang = getLang(Astro);
+const de = lang === 'de';
+
+const shows = await getCollection('shows', (s) => s.data.bell !== undefined && !s.data.draft);
+const measured = (await localizeAll('shows', shows, lang))
   .sort((a, b) => +a.data.date - +b.data.date)
-  .map((s) => ({ label: `${s.data.city}, ${formatDateShort(s.data.date)}`, value: s.data.bell!, id: s.id }));
+  .map((s) => ({ label: `${s.data.city}, ${formatDateShort(s.data.date, lang)}`, value: s.data.bell!, id: s.id }));
 
-const sections = [
-  { id: 'chance', title: 'Chance' },
-  { id: 'entanglement', title: 'Entanglement' },
-  { id: 'conductor', title: 'The conductor' },
-  { id: 'bell', title: "Bell's test" },
-  { id: 'try', title: 'Run it yourself' },
-  { id: 'pairs', title: 'Making the pairs' },
-  { id: 'measuring', title: 'Measuring' },
-  { id: 'limits', title: 'What it does not show' },
-];
+const sections = de
+  ? [
+      { id: 'chance', title: 'Zufall' },
+      { id: 'entanglement', title: 'Verschränkung' },
+      { id: 'conductor', title: 'Der Dirigent' },
+      { id: 'bell', title: 'Der Bell-Test' },
+      { id: 'try', title: 'Selbst ausprobieren' },
+      { id: 'pairs', title: 'Wie die Paare entstehen' },
+      { id: 'measuring', title: 'Die Messung' },
+      { id: 'limits', title: 'Was es nicht zeigt' },
+    ]
+  : [
+      { id: 'chance', title: 'Chance' },
+      { id: 'entanglement', title: 'Entanglement' },
+      { id: 'conductor', title: 'The conductor' },
+      { id: 'bell', title: "Bell's test" },
+      { id: 'try', title: 'Run it yourself' },
+      { id: 'pairs', title: 'Making the pairs' },
+      { id: 'measuring', title: 'Measuring' },
+      { id: 'limits', title: 'What it does not show' },
+    ];
+const h = Object.fromEntries(sections.map((s) => [s.id, s.title]));
 
-const lineage = [
-  { year: 'c. 1470', text: 'Johannes Ockeghem writes a mass that can be sung in whichever mode the singers choose.' },
-  { year: 'c. 1780', text: 'Joseph Haydn publishes a game for composing minuets with dice.' },
-  { year: '1787', text: 'A dice game attributed to Mozart promises waltzes "without understanding anything about music or composition".' },
-  { year: '1952', text: "John Cage's 4′33″: the sounds of the room become the piece." },
-  { year: '1957', text: 'Iannis Xenakis composes with probability distributions.' },
-  { year: '1964', text: "Terry Riley's In C leaves the form to the performers." },
-  { year: '2024', text: 'BruQner hands the choices to entangled photons.' },
-];
+const lineage = de
+  ? [
+      { year: 'um 1470', text: 'Johannes Ockeghem schreibt eine Messe, deren Kirchentonart die Sänger selbst wählen.' },
+      { year: 'um 1780', text: 'Joseph Haydn veröffentlicht ein Spiel, mit dem sich Menuette auswürfeln lassen.' },
+      { year: '1787', text: 'Ein Würfelspiel, das Mozart zugeschrieben wird, verspricht Walzer, „ohne musikalisch zu seyn, noch von der Composition etwas zu verstehen“.' },
+      { year: '1952', text: 'John Cages 4′33″: Die Geräusche im Saal werden selbst zum Stück.' },
+      { year: '1957', text: 'Iannis Xenakis komponiert mit Wahrscheinlichkeitsverteilungen.' },
+      { year: '1964', text: 'Terry Rileys In C überlässt die Form den Musiker:innen.' },
+      { year: '2024', text: 'BruQner überlässt die Entscheidungen verschränkten Photonen.' },
+    ]
+  : [
+      { year: 'c. 1470', text: 'Johannes Ockeghem writes a mass that can be sung in whichever mode the singers choose.' },
+      { year: 'c. 1780', text: 'Joseph Haydn publishes a game for composing minuets with dice.' },
+      { year: '1787', text: 'A dice game attributed to Mozart promises waltzes "without understanding anything about music or composition".' },
+      { year: '1952', text: "John Cage's 4′33″: the sounds of the room become the piece." },
+      { year: '1957', text: 'Iannis Xenakis composes with probability distributions.' },
+      { year: '1964', text: "Terry Riley's In C leaves the form to the performers." },
+      { year: '2024', text: 'BruQner hands the choices to entangled photons.' },
+    ];
 ---
-<Base title="The physics" description="How entangled photons conduct music: randomness, entanglement, Bell's test and the experiment we take on stage.">
+<Base
+  title={de ? 'Die Physik' : 'The physics'}
+  description={de
+    ? 'Wie verschränkte Photonen Musik dirigieren: Zufall, Verschränkung, der Bell-Test und das Experiment, das wir auf die Bühne bringen.'
+    : "How entangled photons conduct music: randomness, entanglement, Bell's test and the experiment we take on stage."}
+>
   <header class="wrap intro">
-    <h1>Two photons, one score</h1>
+    <h1>{de ? 'Zwei Photonen, eine Partitur' : 'Two photons, one score'}</h1>
     <div class="opener">
       <p class="question">
-        If a tree falls in the forest and no one is around to hear it, does it make a sound?
+        {de
+          ? 'Wenn im Wald ein Baum umfällt und niemand ist da, der es hört: Macht er dann ein Geräusch?'
+          : 'If a tree falls in the forest and no one is around to hear it, does it make a sound?'}
       </p>
       <blockquote class="moon">
-        <p>“Do you really believe the moon exists only when you are looking at it?”</p>
-        <footer class="ui dim">Albert Einstein, as recalled by Abraham Pais</footer>
+        {de
+          ? <p>„Glauben Sie wirklich, dass der Mond nur existiert, wenn Sie hinsehen?“</p>
+          : <p>“Do you really believe the moon exists only when you are looking at it?”</p>}
+        <footer class="ui dim">{de ? 'Albert Einstein, überliefert von Abraham Pais' : 'Albert Einstein, as recalled by Abraham Pais'}</footer>
       </blockquote>
     </div>
-    <p class="lede">
-      Both questions ask whether things have properties when nobody is looking. It sounds like
-      philosophy, but it can be decided by experiment, and we take that experiment on stage. A laser
-      makes pairs of entangled photons and two stations, Alice and Bob, measure them about twice a
-      second. Each result on its own is pure chance. Compared with each other,
-      the results agree more often than anything in classical physics can arrange. That surplus of
-      agreement is what the music is made of.
-    </p>
-    <nav class="toc ui" aria-label="On this page">
+    {de ? (
+      <p class="lede">
+        Beide Fragen zielen auf dasselbe: Haben die Dinge Eigenschaften, auch wenn niemand hinsieht?
+        Das klingt nach Philosophie, lässt sich aber im Experiment entscheiden, und genau dieses
+        Experiment bringen wir auf die Bühne. Ein Laser erzeugt verschränkte Photonenpaare, zwei
+        Messstationen, Alice und Bob, messen sie etwa zweimal pro Sekunde. Jedes Ergebnis für sich ist
+        reiner Zufall. Vergleicht man sie aber miteinander, stimmen sie öfter überein, als es irgendein
+        Vorgang der klassischen Physik zustande brächte. Aus diesem Überschuss an Übereinstimmung ist
+        die Musik gemacht.
+      </p>
+    ) : (
+      <p class="lede">
+        Both questions ask whether things have properties when nobody is looking. It sounds like
+        philosophy, but it can be decided by experiment, and we take that experiment on stage. A laser
+        makes pairs of entangled photons and two stations, Alice and Bob, measure them about twice a
+        second. Each result on its own is pure chance. Compared with each other,
+        the results agree more often than anything in classical physics can arrange. That surplus of
+        agreement is what the music is made of.
+      </p>
+    )}
+    <nav class="toc ui" aria-label={de ? 'Auf dieser Seite' : 'On this page'}>
       <ol>
         {sections.map((s) => <li><a href={`#${s.id}`}>{s.title}</a></li>)}
       </ol>
@@ -70,28 +120,51 @@ const lineage = [
     src={pumpLaser}
     alt="A violet laser beam leaves the laser module and passes through optics on a dark breadboard."
     credit="weitblickfilm"
-    caption="The 405 nm pump laser, the only light in the experiment you can see."
+    caption={de
+      ? 'Der Pumplaser mit 405 nm: das einzige Licht im Experiment, das man sehen kann.'
+      : 'The 405 nm pump laser, the only light in the experiment you can see.'}
     bleed
     loading="eager"
     ratio="21 / 9"
   />
 
   <section id="chance" class="wrap chapter">
-    <h2>Chance</h2>
+    <h2>{h.chance}</h2>
     <div class="body">
-      <p class="big">A dice roll only looks random. A quantum measurement is random.</p>
-      <p>
-        In classical physics, everything has a cause. Where a roulette ball stops seems random only
-        because the motion is too complicated to follow: the randomness is ours, a lack of
-        knowledge. Whether a single photon passes through a polarising beam splitter or is reflected
-        has no cause at all. The odds are 50:50 and nothing in the universe decides the outcome in
-        advance.
-      </p>
-      <p>
-        Composers have used chance for centuries. All of them used the first kind. <em>The Sound of
-        Entanglement</em> brings in the second kind, and something more: correlations between two
-        random results that no classical process can produce.
-      </p>
+      {de ? (
+        <>
+          <p class="big">Ein Würfel wirkt nur zufällig. Eine Quantenmessung ist es.</p>
+          <p>
+            In der klassischen Physik hat alles eine Ursache. Wo die Roulettekugel liegen bleibt,
+            erscheint nur deshalb zufällig, weil die Bewegung viel zu kompliziert ist, um sie zu
+            verfolgen: Der Zufall steckt in unserem fehlenden Wissen. Ob dagegen ein einzelnes Photon
+            einen polarisierenden Strahlteiler passiert oder abgelenkt wird, hat überhaupt keine
+            Ursache. Die Chancen stehen 50:50, und nichts im Universum legt das Ergebnis vorher fest.
+          </p>
+          <p>
+            Komponist:innen spielen seit Jahrhunderten mit dem Zufall, allerdings immer mit der ersten
+            Sorte. <em>The Sound of Entanglement</em> bringt die zweite ins Spiel, und noch etwas
+            dazu: Korrelationen zwischen zwei zufälligen Ergebnissen, die kein klassischer Vorgang
+            hervorbringen kann.
+          </p>
+        </>
+      ) : (
+        <>
+          <p class="big">A dice roll only looks random. A quantum measurement is random.</p>
+          <p>
+            In classical physics, everything has a cause. Where a roulette ball stops seems random only
+            because the motion is too complicated to follow: the randomness is ours, a lack of
+            knowledge. Whether a single photon passes through a polarising beam splitter or is reflected
+            has no cause at all. The odds are 50:50 and nothing in the universe decides the outcome in
+            advance.
+          </p>
+          <p>
+            Composers have used chance for centuries. All of them used the first kind. <em>The Sound of
+            Entanglement</em> brings in the second kind, and something more: correlations between two
+            random results that no classical process can produce.
+          </p>
+        </>
+      )}
       <ol class="lineage">
         {lineage.map((l) => (
           <li><span class="year num">{l.year}</span><span>{l.text}</span></li>
@@ -101,139 +174,288 @@ const lineage = [
   </section>
 
   <section id="entanglement" class="wrap chapter">
-    <h2>Entanglement</h2>
+    <h2>{h.entanglement}</h2>
     <div class="body">
-      <p class="big">Two photons with one shared fate, and no script written in advance.</p>
-      <p>
-        Think of a pair of gloves packed into two boxes and sent to Alice and Bob. When Alice opens
-        hers and finds a left glove, she knows at once that Bob has the right one. Nothing mysterious
-        happened: the outcome was decided when the gloves were packed.
-      </p>
-      <p>
-        Entangled photons are not like that. As far as any local explanation goes, neither photon has
-        a definite polarisation before it is measured, so each outcome is genuinely random. Yet when
-        the two results are compared, they are correlated: in our source, two photons measured the same
-        way tend to give the same result, far more often than chance would allow. The pair has to be described as one thing: the whole is more than the sum of
-        its parts. Erwin Schrödinger called this
-        "not <em>one</em> but rather <em>the</em> characteristic trait of quantum mechanics".
-      </p>
-      <p>
-        In 1935 Einstein, Podolsky and Rosen argued that this could not be the whole story. The
-        photons must carry hidden instructions, like the gloves, which we simply cannot see. For
-        thirty years this looked like a question for philosophers.
-      </p>
+      {de ? (
+        <>
+          <p class="big">Zwei Photonen, ein gemeinsames Schicksal, und kein Drehbuch, das vorher feststeht.</p>
+          <p>
+            Man stelle sich ein Paar Handschuhe vor, verpackt in zwei Schachteln, die eine geht an
+            Alice, die andere an Bob. Öffnet Alice ihre Schachtel und findet einen linken Handschuh,
+            weiß sie sofort, dass Bob den rechten hat. Daran ist nichts Geheimnisvolles: Entschieden
+            wurde das schon beim Einpacken.
+          </p>
+          <p>
+            Bei verschränkten Photonen ist das anders. Keines der beiden hat vor der Messung eine
+            bestimmte Polarisation, jedenfalls keine, die sich mit einer lokalen Erklärung vereinbaren
+            ließe; jedes Ergebnis ist echter Zufall. Und doch sind die beiden Ergebnisse korreliert, sobald man sie
+            vergleicht: In unserer Quelle liefern zwei Photonen, die auf dieselbe Weise gemessen werden,
+            meist dasselbe Ergebnis, weit öfter, als der Zufall erlauben würde. Das Paar lässt sich nur
+            als Ganzes beschreiben, und dieses Ganze ist mehr als die Summe seiner Teile. Erwin
+            Schrödinger nannte das „nicht <em>einen</em>, sondern <em>den</em> charakteristischen Zug
+            der Quantenmechanik“.
+          </p>
+          <p>
+            1935 hielten Einstein, Podolsky und Rosen dagegen, das könne nicht alles sein. Die Photonen
+            müssten verborgene Anweisungen mit sich tragen, so wie die Handschuhe, nur dass wir sie
+            nicht sehen. Dreißig Jahre lang schien das eine Frage für Philosophen zu bleiben.
+          </p>
+        </>
+      ) : (
+        <>
+          <p class="big">Two photons with one shared fate, and no script written in advance.</p>
+          <p>
+            Think of a pair of gloves packed into two boxes and sent to Alice and Bob. When Alice opens
+            hers and finds a left glove, she knows at once that Bob has the right one. Nothing mysterious
+            happened: the outcome was decided when the gloves were packed.
+          </p>
+          <p>
+            Entangled photons are not like that. As far as any local explanation goes, neither photon has
+            a definite polarisation before it is measured, so each outcome is genuinely random. Yet when
+            the two results are compared, they are correlated: in our source, two photons measured the same
+            way tend to give the same result, far more often than chance would allow. The pair has to be described as one thing: the whole is more than the sum of
+            its parts. Erwin Schrödinger called this
+            "not <em>one</em> but rather <em>the</em> characteristic trait of quantum mechanics".
+          </p>
+          <p>
+            In 1935 Einstein, Podolsky and Rosen argued that this could not be the whole story. The
+            photons must carry hidden instructions, like the gloves, which we simply cannot see. For
+            thirty years this looked like a question for philosophers.
+          </p>
+        </>
+      )}
     </div>
   </section>
 
   <section id="conductor" class="wrap chapter">
-    <h2>The conductor</h2>
+    <h2>{h.conductor}</h2>
     <div class="body">
-      <p class="big">A conductor works through light.</p>
-      <p>
-        Entanglement is about correlations, and so is music. A conductor coordinates the musicians of
-        an orchestra, and does it through light: the musicians have to see the baton. In a pitch-dark
-        room, nobody would see the conductor's commands, and they would mean nothing.
-      </p>
-      <p>
-        In our performances the light is the conductor. Pairs of photons are measured, one by Alice and
-        one by Bob, and the results tell the musicians what to play. That is why we call the experiment
-        the quantum conductor. The question Bell asked is whether any ordinary conductor could do the
-        same job.
-      </p>
+      {de ? (
+        <>
+          <p class="big">Ein Dirigent arbeitet mit Licht.</p>
+          <p>
+            Bei der Verschränkung geht es um Korrelationen, in der Musik ebenso. Ein Dirigent stimmt
+            die Musiker:innen eines Orchesters aufeinander ab, und das über das Licht: Sie müssen den
+            Taktstock sehen. In einem stockdunklen Saal würde niemand seine Zeichen erkennen, sie wären
+            bedeutungslos.
+          </p>
+          <p>
+            In unseren Aufführungen ist das Licht selbst der Dirigent. Photonenpaare werden gemessen,
+            ein Photon bei Alice, eines bei Bob, und die Ergebnisse sagen den Musiker:innen, was sie
+            spielen. Deshalb nennen wir das Experiment den Quanten-Dirigenten. Bell stellte die Frage,
+            ob irgendein gewöhnlicher Dirigent dasselbe leisten könnte.
+          </p>
+        </>
+      ) : (
+        <>
+          <p class="big">A conductor works through light.</p>
+          <p>
+            Entanglement is about correlations, and so is music. A conductor coordinates the musicians of
+            an orchestra, and does it through light: the musicians have to see the baton. In a pitch-dark
+            room, nobody would see the conductor's commands, and they would mean nothing.
+          </p>
+          <p>
+            In our performances the light is the conductor. Pairs of photons are measured, one by Alice and
+            one by Bob, and the results tell the musicians what to play. That is why we call the experiment
+            the quantum conductor. The question Bell asked is whether any ordinary conductor could do the
+            same job.
+          </p>
+        </>
+      )}
     </div>
   </section>
 
   <section id="bell" class="wrap chapter">
-    <h2>Bell's test</h2>
+    <h2>{h.bell}</h2>
     <div class="body">
-      <p class="big">In 1964 John Bell turned the argument into a number you can measure.</p>
-      <p>
-        Picture an ordinary conductor who wants two musicians to play in a correlated way, but who
-        cannot know what they will be asked. Before the music starts, the conductor hands each of them
-        an instruction card. Alice may be asked about volume or about timbre, and so may Bob; the card
-        says what to play in either case. Two rules hold, as in any classical world: the card is written
-        in advance, whether or not a question is ever asked, and what Alice is asked cannot change
-        Bob's card.
-      </p>
-      <p>
-        Now score the four combinations of questions. Loud and wooden count as +1, soft and metallic as
-        −1, and a combination counts +1 when both play alike and −1 when they don't. Add three of the
-        scores and subtract the fourth. Write any cards you like.
-      </p>
+      {de ? (
+        <>
+          <p class="big">1964 machte John Bell aus der Streitfrage eine Zahl, die sich messen lässt.</p>
+          <p>
+            Man denke sich einen gewöhnlichen Dirigenten, der Alice und Bob aufeinander abgestimmt
+            spielen lassen will, aber nicht wissen kann, was die beiden gefragt werden. Bevor die Musik
+            beginnt, drückt er jedem eine Anweisungskarte in die Hand. Alice kann nach der Lautstärke
+            oder nach der Klangfarbe gefragt werden, Bob ebenso; auf der Karte steht, was in beiden
+            Fällen zu spielen ist. Dabei gelten zwei Regeln, wie in jeder klassischen Welt: Die Karte
+            ist im Voraus geschrieben, ob die Frage je gestellt wird oder nicht. Und was Alice gefragt
+            wird, kann Bobs Karte nicht verändern.
+          </p>
+          <p>
+            Nun wird gezählt, und zwar für alle vier Kombinationen von Fragen. Laut und hölzern zählen
+            +1, leise und metallisch −1; eine Kombination bringt +1, wenn beide gleich spielen, und −1,
+            wenn nicht. Drei der Werte werden addiert, der vierte abgezogen. Die Karten können Sie
+            beliebig ausfüllen.
+          </p>
+        </>
+      ) : (
+        <>
+          <p class="big">In 1964 John Bell turned the argument into a number you can measure.</p>
+          <p>
+            Picture an ordinary conductor who wants two musicians to play in a correlated way, but who
+            cannot know what they will be asked. Before the music starts, the conductor hands each of them
+            an instruction card. Alice may be asked about volume or about timbre, and so may Bob; the card
+            says what to play in either case. Two rules hold, as in any classical world: the card is written
+            in advance, whether or not a question is ever asked, and what Alice is asked cannot change
+            Bob's card.
+          </p>
+          <p>
+            Now score the four combinations of questions. Loud and wooden count as +1, soft and metallic as
+            −1, and a combination counts +1 when both play alike and −1 when they don't. Add three of the
+            scores and subtract the fourth. Write any cards you like.
+          </p>
+        </>
+      )}
       <ConductorCards />
-      <p>
-        Whatever the cards say, the total is +2 or −2. In a performance each musician is asked only one
-        question per round, chosen at random, so the audience hears one of the four combinations at a
-        time and the scores are averaged over many rounds. An average of numbers that are each +2 or −2
-        can never be larger than 2. No conductor who hands out instructions in advance, human or
-        computer, gets above 2.
-      </p>
-      <p>Bell's test is this game, played with photons instead of musicians:</p>
-      <ol class="steps">
-        <li>Alice chooses at random between two measurement settings, <span class="alice">a<sub>1</sub></span> or <span class="alice">a<sub>2</sub></span>. Bob chooses between <span class="bob">b<sub>1</sub></span> and <span class="bob">b<sub>2</sub></span>.</li>
-        <li>Each gets a result, +1 or −1.</li>
-        <li>Over many pairs, they work out how strongly their results agree for each of the four combinations of settings. Each of these correlations, E, lies between −1 (always opposite) and +1 (always the same).</li>
-        <li>Three of the four are added and the fourth is subtracted. The result is the Bell value, <span class="formula">S = |E<sub>11</sub> + E<sub>12</sub> + E<sub>21</sub> − E<sub>22</sub>|</span>.</li>
-      </ol>
-      <p>
-        If the photons carried hidden instructions, S could never be larger than 2. Entangled photons
-        can reach 2√2, about 2.83. Our experiment reaches about 2.4 to 2.6 on stage. Experiments that
-        settled the question beyond doubt were awarded the Nobel Prize in Physics in 2022.
-      </p>
-      <p class="aside">
-        One of them, the loophole-free Bell test by Anton Zeilinger's group in Vienna
-        (<a href="https://link.aps.org/doi/10.1103/PhysRevLett.115.250401">Giustina et al., Physical
-        Review Letters, 2015</a>), counts our <a href="/people/#johannes-kofler">Johannes Kofler</a> among
-        its authors.
-      </p>
+      {de ? (
+        <>
+          <p>
+            Was auch immer auf den Karten steht, die Summe ist +2 oder −2. In einer Aufführung bekommen
+            beide pro Runde nur eine Frage gestellt, zufällig ausgewählt. Das Publikum hört also immer
+            nur eine der vier Kombinationen, und die Werte werden über viele Runden gemittelt. Ein
+            Mittelwert aus Zahlen, die jeweils +2 oder −2 sind, kann nie größer als 2 sein. Kein
+            Dirigent, der seine Anweisungen im Voraus verteilt, ob Mensch oder Computer, kommt über 2
+            hinaus.
+          </p>
+          <p>Der Bell-Test ist genau dieses Spiel, nur mit Photonen statt Musiker:innen:</p>
+          <ol class="steps">
+            <li>Alice wählt zufällig zwischen zwei Messeinstellungen, <span class="alice">a<sub>1</sub></span> oder <span class="alice">a<sub>2</sub></span>. Bob wählt zwischen <span class="bob">b<sub>1</sub></span> und <span class="bob">b<sub>2</sub></span>.</li>
+            <li>Beide erhalten ein Ergebnis, +1 oder −1.</li>
+            <li>Über viele Paare ermitteln sie für jede der vier Kombinationen von Einstellungen, wie stark ihre Ergebnisse übereinstimmen. Jede dieser Korrelationen E liegt zwischen −1 (immer entgegengesetzt) und +1 (immer gleich).</li>
+            <li>Drei der vier werden addiert, die vierte abgezogen. Das ergibt den Bell-Wert, <span class="formula">S = |E<sub>11</sub> + E<sub>12</sub> + E<sub>21</sub> − E<sub>22</sub>|</span>.</li>
+          </ol>
+          <p>
+            Trügen die Photonen verborgene Anweisungen in sich, könnte S nie größer als 2 werden.
+            Verschränkte Photonen kommen bis 2√2, also etwa {num(lang, 2.83)}. Unser Experiment erreicht
+            auf der Bühne etwa {num(lang, 2.4, 1)} bis {num(lang, 2.6, 1)}. Die Experimente, die die
+            Frage zweifelsfrei entschieden haben, wurden 2022 mit dem Nobelpreis für Physik ausgezeichnet.
+          </p>
+          <p class="aside">
+            Zu den Autor:innen eines davon, des schlupflochfreien Bell-Tests der Gruppe um Anton
+            Zeilinger in Wien (<a href="https://link.aps.org/doi/10.1103/PhysRevLett.115.250401">Giustina
+            et al., Physical Review Letters, 2015</a>), gehört auch unser <a href={localize(lang, '/people/#johannes-kofler')}>Johannes Kofler</a>.
+          </p>
+        </>
+      ) : (
+        <>
+          <p>
+            Whatever the cards say, the total is +2 or −2. In a performance each musician is asked only one
+            question per round, chosen at random, so the audience hears one of the four combinations at a
+            time and the scores are averaged over many rounds. An average of numbers that are each +2 or −2
+            can never be larger than 2. No conductor who hands out instructions in advance, human or
+            computer, gets above 2.
+          </p>
+          <p>Bell's test is this game, played with photons instead of musicians:</p>
+          <ol class="steps">
+            <li>Alice chooses at random between two measurement settings, <span class="alice">a<sub>1</sub></span> or <span class="alice">a<sub>2</sub></span>. Bob chooses between <span class="bob">b<sub>1</sub></span> and <span class="bob">b<sub>2</sub></span>.</li>
+            <li>Each gets a result, +1 or −1.</li>
+            <li>Over many pairs, they work out how strongly their results agree for each of the four combinations of settings. Each of these correlations, E, lies between −1 (always opposite) and +1 (always the same).</li>
+            <li>Three of the four are added and the fourth is subtracted. The result is the Bell value, <span class="formula">S = |E<sub>11</sub> + E<sub>12</sub> + E<sub>21</sub> − E<sub>22</sub>|</span>.</li>
+          </ol>
+          <p>
+            If the photons carried hidden instructions, S could never be larger than 2. Entangled photons
+            can reach 2√2, about 2.83. Our experiment reaches about 2.4 to 2.6 on stage. Experiments that
+            settled the question beyond doubt were awarded the Nobel Prize in Physics in 2022.
+          </p>
+          <p class="aside">
+            One of them, the loophole-free Bell test by Anton Zeilinger's group in Vienna
+            (<a href="https://link.aps.org/doi/10.1103/PhysRevLett.115.250401">Giustina et al., Physical
+            Review Letters, 2015</a>), counts our <a href="/people/#johannes-kofler">Johannes Kofler</a> among
+            its authors.
+          </p>
+        </>
+      )}
       <details>
-        <summary class="ui">The same argument in symbols, all sixteen cases</summary>
+        <summary class="ui">{de ? 'Dasselbe Argument in Formeln, mit allen sechzehn Fällen' : 'The same argument in symbols, all sixteen cases'}</summary>
         <div class="details-body">
-          <p>
-            Suppose every pair carries a fixed answer for every setting: A<sub>1</sub> and A<sub>2</sub>
-            for Alice, B<sub>1</sub> and B<sub>2</sub> for Bob, each +1 or −1. Then for every single
-            pair, A<sub>1</sub>(B<sub>1</sub> + B<sub>2</sub>) + A<sub>2</sub>(B<sub>1</sub> − B<sub>2</sub>)
-            is either +2 or −2. Either B<sub>1</sub> and B<sub>2</sub> are equal, and the second bracket
-            is zero, or they differ, and the first one is. The table checks all sixteen cases.
-          </p>
+          {de ? (
+            <p>
+              Angenommen, jedes Paar trägt für jede Einstellung eine feste Antwort mit sich:
+              A<sub>1</sub> und A<sub>2</sub> für Alice, B<sub>1</sub> und B<sub>2</sub> für Bob,
+              jeweils +1 oder −1. Dann ist für jedes einzelne Paar
+              A<sub>1</sub>(B<sub>1</sub> + B<sub>2</sub>) + A<sub>2</sub>(B<sub>1</sub> − B<sub>2</sub>)
+              entweder +2 oder −2. Entweder sind B<sub>1</sub> und B<sub>2</sub> gleich, dann ist die
+              zweite Klammer null, oder sie sind verschieden, dann ist es die erste. Die Tabelle prüft
+              alle sechzehn Fälle.
+            </p>
+          ) : (
+            <p>
+              Suppose every pair carries a fixed answer for every setting: A<sub>1</sub> and A<sub>2</sub>
+              for Alice, B<sub>1</sub> and B<sub>2</sub> for Bob, each +1 or −1. Then for every single
+              pair, A<sub>1</sub>(B<sub>1</sub> + B<sub>2</sub>) + A<sub>2</sub>(B<sub>1</sub> − B<sub>2</sub>)
+              is either +2 or −2. Either B<sub>1</sub> and B<sub>2</sub> are equal, and the second bracket
+              is zero, or they differ, and the first one is. The table checks all sixteen cases.
+            </p>
+          )}
           <ClassicalProof />
-          <p>
-            The average of numbers that are each +2 or −2 cannot be larger than 2. That average is
-            exactly the S above. So any conductor that sends instructions in advance, whether a human
-            or a classical computer, is stuck at 2.
-          </p>
+          {de ? (
+            <p>
+              Der Mittelwert von Zahlen, die jeweils +2 oder −2 sind, kann nicht größer als 2 sein. Und
+              genau dieser Mittelwert ist das S von oben. Jeder Dirigent, der Anweisungen im Voraus
+              verschickt, ob Mensch oder klassischer Computer, bleibt also bei 2 stecken.
+            </p>
+          ) : (
+            <p>
+              The average of numbers that are each +2 or −2 cannot be larger than 2. That average is
+              exactly the S above. So any conductor that sends instructions in advance, whether a human
+              or a classical computer, is stuck at 2.
+            </p>
+          )}
         </div>
       </details>
       <details>
-        <summary class="ui">Why we measure 2.4 to 2.6, not 2.83</summary>
+        <summary class="ui">
+          {de
+            ? `Warum wir ${num(lang, 2.4, 1)} bis ${num(lang, 2.6, 1)} messen und nicht ${num(lang, 2.83)}`
+            : 'Why we measure 2.4 to 2.6, not 2.83'}
+        </summary>
         <div class="details-body">
-          <p>
-            2√2 is the value for a perfect source, perfect optics and perfect detectors. Ours is a
-            portable setup that is flown to venues and aligned in a few hours. Slight imperfections in
-            the entangled state, differences between detectors, occasional coincidences between
-            unrelated photons and slow drifts of the polarisation all pull the value down. What
-            matters is that it stays clearly above 2.
-          </p>
+          {de ? (
+            <p>
+              2√2 gilt für eine perfekte Quelle, perfekte Optik und perfekte Detektoren. Unser Aufbau
+              dagegen ist transportabel: Er wird zu den Spielorten geflogen und dort in wenigen Stunden
+              justiert. Kleine Unvollkommenheiten im verschränkten Zustand, Unterschiede zwischen den
+              Detektoren, gelegentliche Koinzidenzen zwischen Photonen, die gar nicht zusammengehören,
+              und ein langsames Driften der Polarisation drücken den Wert. Entscheidend ist, dass er
+              deutlich über 2 bleibt.
+            </p>
+          ) : (
+            <p>
+              2√2 is the value for a perfect source, perfect optics and perfect detectors. Ours is a
+              portable setup that is flown to venues and aligned in a few hours. Slight imperfections in
+              the entangled state, differences between detectors, occasional coincidences between
+              unrelated photons and slow drifts of the polarisation all pull the value down. What
+              matters is that it stays clearly above 2.
+            </p>
+          )}
         </div>
       </details>
     </div>
   </section>
 
   <section id="try" class="wrap chapter lab-chapter">
-    <h2>Run it yourself</h2>
+    <h2>{h.try}</h2>
     <div class="body wide">
-      <p>
-        Here are Alice and Bob, each choosing a setting at random for every pair. Watch the four
-        correlations fill in and the Bell value settle. With a handful of pairs it jumps around wildly:
-        the piece <a href="/pieces/indeterminate-apparatus/"><em>Indeterminate Apparatus</em></a> uses
-        exactly that noise as its tempo. Then switch to a classical source.
-      </p>
+      {de ? (
+        <p>
+          Hier sind Alice und Bob; für jedes Paar wählen beide zufällig eine Einstellung. Nach und nach
+          füllen sich die vier Korrelationen, und der Bell-Wert pendelt sich ein. Bei einer Handvoll
+          Paaren springt er noch wild hin und her: Das Stück <a href={localize(lang, '/pieces/indeterminate-apparatus/')}><em>Indeterminate Apparatus</em></a> macht
+          genau dieses Rauschen zu seinem Tempo. Danach lohnt sich ein Wechsel zur klassischen Quelle.
+        </p>
+      ) : (
+        <p>
+          Here are Alice and Bob, each choosing a setting at random for every pair. Watch the four
+          correlations fill in and the Bell value settle. With a handful of pairs it jumps around wildly:
+          the piece <a href="/pieces/indeterminate-apparatus/"><em>Indeterminate Apparatus</em></a> uses
+          exactly that noise as its tempo. Then switch to a classical source.
+        </p>
+      )}
       <BellLab measured={measured} />
       <p class="measured-list ui dim">
-        Measured at our shows:{' '}
+        {de ? 'Gemessen bei unseren Auftritten:' : 'Measured at our shows:'}{' '}
         {measured.map((m, i) => (
           <>
-            <a href={`/shows/${m.id}/`}>{m.label}</a> <span class="num">{m.value.toFixed(2)}</span>{i < measured.length - 1 ? '; ' : '.'}
+            <a href={localize(lang, `/shows/${m.id}/`)}>{m.label}</a> <span class="num">{num(lang, m.value)}</span>{i < measured.length - 1 ? '; ' : '.'}
           </>
         ))}
       </p>
@@ -241,32 +463,62 @@ const lineage = [
   </section>
 
   <section id="pairs" class="wrap chapter">
-    <h2>Making the pairs</h2>
+    <h2>{h.pairs}</h2>
     <div class="body wide">
-      <p class="big narrow">Shine a violet laser through a special crystal, and very rarely one photon splits into two.</p>
+      {de ? (
+        <p class="big narrow">Schickt man violettes Laserlicht durch einen besonderen Kristall, zerfällt ganz selten ein Photon in zwei.</p>
+      ) : (
+        <p class="big narrow">Shine a violet laser through a special crystal, and very rarely one photon splits into two.</p>
+      )}
       <ConesDiagram />
       <div class="two">
-        <p>
-          The pump is a 405 nm violet laser. It passes through two thin crystals of beta barium borate,
-          set at right angles to each other. In a process called spontaneous parametric
-          down-conversion, about one pump photon in a hundred billion splits into two photons with half
-          its energy and twice its wavelength, 810 nm: infrared, invisible to the eye.
-        </p>
-        <p>
-          Energy and momentum are conserved, so the two photons leave on opposite sides of a cone around
-          the laser beam. The first crystal makes horizontally polarised pairs, the second vertically
-          polarised ones, on almost the same cone. For a pair taken from where the cones overlap, there
-          is no way to tell which crystal made it, and that is what entangles them:{' '}
-          <span class="formula nowrap">(|HH⟩ + |VV⟩)/√2</span>.
-        </p>
+        {de ? (
+          <>
+            <p>
+              Als Pumpe dient ein violetter Laser mit 405 nm. Sein Strahl durchquert zwei dünne Kristalle
+              aus Beta-Bariumborat (BBO), die im rechten Winkel zueinander stehen. Bei der spontanen
+              parametrischen Fluoreszenz (SPDC) zerfällt etwa eines von hundert Milliarden Pumpphotonen in
+              zwei Photonen mit halber Energie und doppelter Wellenlänge, 810 nm: Infrarot, für das Auge
+              unsichtbar.
+            </p>
+            <p>
+              Weil Energie und Impuls erhalten bleiben, fliegen die beiden Photonen auf gegenüberliegenden
+              Seiten eines Kegels um den Laserstrahl davon. Der erste Kristall erzeugt horizontal
+              polarisierte Paare, der zweite vertikal polarisierte, auf fast demselben Kegel. Stammt ein
+              Paar aus dem Bereich, in dem sich die Kegel überlappen, lässt sich nicht mehr sagen, aus
+              welchem Kristall es kommt, und genau das macht die beiden Photonen zu einem verschränkten
+              Paar:{' '}<span class="formula nowrap">(|HH⟩ + |VV⟩)/√2</span>.
+            </p>
+          </>
+        ) : (
+          <>
+            <p>
+              The pump is a 405 nm violet laser. It passes through two thin crystals of beta barium borate,
+              set at right angles to each other. In a process called spontaneous parametric
+              down-conversion, about one pump photon in a hundred billion splits into two photons with half
+              its energy and twice its wavelength, 810 nm: infrared, invisible to the eye.
+            </p>
+            <p>
+              Energy and momentum are conserved, so the two photons leave on opposite sides of a cone around
+              the laser beam. The first crystal makes horizontally polarised pairs, the second vertically
+              polarised ones, on almost the same cone. For a pair taken from where the cones overlap, there
+              is no way to tell which crystal made it, and that is what entangles them:{' '}
+              <span class="formula nowrap">(|HH⟩ + |VV⟩)/√2</span>.
+            </p>
+          </>
+        )}
       </div>
     </div>
   </section>
 
   <section id="measuring" class="wrap chapter">
-    <h2>Measuring</h2>
+    <h2>{h.measuring}</h2>
     <div class="body">
-      <p class="big">About twice a second, the experiment makes one musical decision.</p>
+      <p class="big">
+        {de
+          ? 'Etwa zweimal pro Sekunde trifft das Experiment eine musikalische Entscheidung.'
+          : 'About twice a second, the experiment makes one musical decision.'}
+      </p>
     </div>
     <div class="body wide stepped">
       <SetupSteps />
@@ -279,16 +531,29 @@ const lineage = [
         src={setupBeams}
         alt="The breadboard from above, with the red and blue paths of the two photons drawn in, and an inset of the laser module."
         credit="Benjamin Orthner"
-        caption="The experiment from above. Red: the photon to Alice. Blue: the photon to Bob."
+        caption={de
+          ? 'Das Experiment von oben. Rot: der Weg des Photons zu Alice. Blau: der Weg zu Bob.'
+          : 'The experiment from above. Red: the photon to Alice. Blue: the photon to Bob.'}
         sizes="(min-width: 1000px) 60vw, 100vw"
       />
     </div>
     <div class="m-side">
       <figure class="loop">
-        <video src="/media/loops/setting-choice-mount.mp4" muted loop playsinline autoplay preload="metadata" aria-label="A red motorised mount turning a half-wave plate, close up." data-loop></video>
-        <figcaption class="ui">A half-wave plate turning to a new setting. <span class="credit">Video: The Sound of Entanglement</span></figcaption>
+        <video
+          src="/media/loops/setting-choice-mount.mp4"
+          muted loop playsinline autoplay preload="metadata"
+          aria-label={de ? 'Eine rote motorisierte Halterung dreht eine Halbwellenplatte, in Nahaufnahme.' : 'A red motorised mount turning a half-wave plate, close up.'}
+          data-loop
+        ></video>
+        <figcaption class="ui">{de ? 'Eine Halbwellenplatte dreht sich auf eine neue Einstellung.' : 'A half-wave plate turning to a new setting.'} <span class="credit">Video: The Sound of Entanglement</span></figcaption>
       </figure>
-      <AudioPlayer src="/media/audio/wave-plate-clicks.mp3" title="The click of a measurement" note="The motors turning, recorded with a contact microphone. In 8 Rooms these clicks are the metronome." />
+      <AudioPlayer
+        src="/media/audio/wave-plate-clicks.mp3"
+        title={de ? 'Das Klicken einer Messung' : 'The click of a measurement'}
+        note={de
+          ? 'Die drehenden Motoren, aufgenommen mit einem Kontaktmikrofon. In 8 Rooms geben diese Klicks das Metronom vor.'
+          : 'The motors turning, recorded with a contact microphone. In 8 Rooms these clicks are the metronome.'}
+      />
     </div>
   </div>
 
@@ -297,31 +562,58 @@ const lineage = [
       src={caseTop}
       alt="The complete experiment inside its glass case, lit by an LED strip."
       credit="Benjamin Orthner"
-      caption="The whole experiment fits on a 60 × 60 cm breadboard in a glass case, and travels by plane."
+      caption={de
+        ? 'Das ganze Experiment passt auf eine Grundplatte von 60 × 60 cm in einer Glasvitrine und reist im Flugzeug mit.'
+        : 'The whole experiment fits on a 60 × 60 cm breadboard in a glass case, and travels by plane.'}
       sizes="100vw"
       class="case-photo"
     />
   </div>
 
   <section id="limits" class="wrap chapter">
-    <h2>What it does not show</h2>
+    <h2>{h.limits}</h2>
     <div class="body">
-      <p>
-        Our setup is built for the stage, not to settle the question of hidden variables. Alice and Bob
-        are about thirty centimetres apart, the settings are chosen by a computer, and not every photon
-        is detected. In principle these gaps, called loopholes, would still leave room for a classical
-        explanation of our own numbers. They have all been closed in dedicated experiments since 2015.
-        We use a phenomenon that is established, and make it audible.
-      </p>
-      <p>
-        Nothing travels between Alice and Bob, and no message can be sent with entangled photons. The
-        correlations only appear when the two lists of results are brought together and compared, which
-        is what happens, live, in the music.
-      </p>
-      <p class="more">
-        The full description is in our paper, <a href="https://arxiv.org/abs/2509.08892">"The Sound of
-        Entanglement" (arXiv:2509.08892)</a>. For how each piece uses the results, see <a href="/pieces/">the pieces</a>.
-      </p>
+      {de ? (
+        <>
+          <p>
+            Unser Aufbau ist für die Bühne gebaut, nicht dafür, die Frage nach verborgenen Variablen zu
+            entscheiden. Alice und Bob sind nur etwa dreißig Zentimeter voneinander entfernt, die
+            Einstellungen wählt ein Computer, und nicht jedes Photon wird nachgewiesen. Im Prinzip
+            ließen diese Lücken, die sogenannten Schlupflöcher, für unsere eigenen Messwerte noch eine
+            klassische Erklärung zu. In eigens dafür gebauten Experimenten sind sie seit 2015 alle
+            geschlossen worden. Wir nutzen ein gesichertes Phänomen und machen es hörbar.
+          </p>
+          <p>
+            Zwischen Alice und Bob wird nichts übertragen, und mit verschränkten Photonen lässt sich
+            keine Nachricht senden. Die Korrelationen zeigen sich erst, wenn die beiden Ergebnislisten
+            zusammengeführt und verglichen werden, und genau das geschieht, live, in der Musik.
+          </p>
+          <p class="more">
+            Die ausführliche Beschreibung steht in unserem (englischsprachigen) Paper <a href="https://arxiv.org/abs/2509.08892">„The Sound of
+            Entanglement“ (arXiv:2509.08892)</a>. Wie die einzelnen Stücke die Messergebnisse nutzen,
+            steht bei den <a href={localize(lang, '/pieces/')}>Stücken</a>.
+          </p>
+        </>
+      ) : (
+        <>
+          <p>
+            Our setup is built for the stage, not to settle the question of hidden variables. Alice and Bob
+            are about thirty centimetres apart, the settings are chosen by a computer, and not every photon
+            is detected. In principle these gaps, called loopholes, would still leave room for a classical
+            explanation of our own numbers. They have all been closed in dedicated experiments since 2015.
+            We use a phenomenon that is established, and make it audible.
+          </p>
+          <p>
+            Nothing travels between Alice and Bob, and no message can be sent with entangled photons. The
+            correlations only appear when the two lists of results are brought together and compared, which
+            is what happens, live, in the music.
+          </p>
+          <p class="more">
+            The full description is in our paper, <a href="https://arxiv.org/abs/2509.08892">"The Sound of
+            Entanglement" (arXiv:2509.08892)</a>. For how each piece uses the results, see <a href="/pieces/">the pieces</a>.
+          </p>
+        </>
+      )}
     </div>
   </section>
 </Base>

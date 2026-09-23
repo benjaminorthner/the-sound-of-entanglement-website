@@ -5,7 +5,8 @@
  */
 import { Image } from 'astro:assets';
 import type { Supporter } from './data';
-import { logoHeight } from './data';
+import { logoHeight, supporterText } from './data';
+import { getLang } from '../../i18n';
 
 interface Props {
   supporter: Supporter;
@@ -15,7 +16,8 @@ interface Props {
   max?: number;
 }
 const { supporter, area = 9000, min = 22, max = 64 } = Astro.props;
-const { name, url, logo, scale } = supporter.data;
+const { url, logo, scale } = supporter.data;
+const { name } = supporterText(supporter, getLang(Astro));
 const h = logo ? logoHeight(logo.width, logo.height, scale, area, min, max) : 0;
 const Tag = url ? 'a' : 'span';
 ---

@@ -8,159 +8,275 @@ import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Photo from '../components/Photo.astro';
 import { year } from '../lib/format';
+import { getLang, localize } from '../i18n';
+import { localizeAll } from '../i18n/content';
 
 import lecture from '../assets/photos/2024-bruqner-linz/lecture-before-3000.jpg';
 import stage from '../assets/photos/2025-alpbach/wide-stage.jpg';
 import peering from '../assets/photos/2025-alpbach/audience-peering.jpg';
 
+const lang = getLang(Astro);
+const de = lang === 'de';
 const CONTACT = 'clemenswenger@mac.com';
 const now = new Date();
 
-const played = (await getCollection('shows', (s) => !s.data.draft && s.data.kind !== 'talk' && s.data.date < now && !s.id.includes('test')))
-  .sort((a, b) => +a.data.date - +b.data.date);
-
-const pieces = (await getCollection('pieces', (p) => p.data.status === 'repertoire')).sort(
-  (a, b) => a.data.order - b.data.order,
+// German audience texts carry their own noun ("mehr als 3.000 Menschen"), English ones don't ("over 3 000").
+const played = await localizeAll(
+  'shows',
+  (await getCollection('shows', (s) => !s.data.draft && s.data.kind !== 'talk' && s.data.date < now && !s.id.includes('test')))
+    .sort((a, b) => +a.data.date - +b.data.date),
+  lang,
 );
-const needs: Record<string, string> = {
-  bruqner: 'Needs two organs that are tuned to each other and can be played together, like those of the Mariendom Linz, and two organists.',
-  '8-rooms': 'With the band The Uncertain Question: Clemens Wenger on synthesizer, Manu Mayr on electric bass, Judith Schwarz on drums. It has also been played as a duo without drums.',
-  'indeterminate-apparatus': 'With the band as a trio: Clemens Wenger on synthesizers and the VoQoder, Manu Mayr on electric bass, Judith Schwarz on drums.',
-};
 
-const mailSubject = encodeURIComponent('Booking enquiry: The Sound of Entanglement');
+const pieces = await localizeAll(
+  'pieces',
+  (await getCollection('pieces', (p) => p.data.status === 'repertoire')).sort((a, b) => a.data.order - b.data.order),
+  lang,
+);
+const needs: Record<string, string> = de
+  ? {
+      bruqner: 'Braucht zwei Orgeln, die aufeinander gestimmt sind und sich gemeinsam spielen lassen, wie jene im Mariendom Linz, und zwei Organist:innen.',
+      '8-rooms': 'Mit der Band The Uncertain Question: Clemens Wenger am Synthesizer, Manu Mayr am E-Bass, Judith Schwarz am Schlagzeug. Auch schon als Duo ohne Schlagzeug gespielt.',
+      'indeterminate-apparatus': 'Mit der Band im Trio: Clemens Wenger an Synthesizern und VoQoder, Manu Mayr am E-Bass, Judith Schwarz am Schlagzeug.',
+    }
+  : {
+      bruqner: 'Needs two organs that are tuned to each other and can be played together, like those of the Mariendom Linz, and two organists.',
+      '8-rooms': 'With the band The Uncertain Question: Clemens Wenger on synthesizer, Manu Mayr on electric bass, Judith Schwarz on drums. It has also been played as a duo without drums.',
+      'indeterminate-apparatus': 'With the band as a trio: Clemens Wenger on synthesizers and the VoQoder, Manu Mayr on electric bass, Judith Schwarz on drums.',
+    };
+
+const mailSubject = encodeURIComponent(de ? 'Buchungsanfrage: The Sound of Entanglement' : 'Booking enquiry: The Sound of Entanglement');
 ---
 <Base
-  title="Booking"
-  description="Book The Sound of Entanglement: a live Bell experiment, a band and a physics lecture for festivals, conferences, universities and concert series."
+  title={de ? 'Buchung' : 'Booking'}
+  description={de
+    ? 'The Sound of Entanglement buchen: ein Bell-Experiment live, eine Band und ein Physikvortrag für Festivals, Konferenzen, Universitäten und Konzertreihen.'
+    : 'Book The Sound of Entanglement: a live Bell experiment, a band and a physics lecture for festivals, conferences, universities and concert series.'}
 >
   <header class="wrap intro">
-    <h1>Booking</h1>
-    <p class="lede">
-      We bring the experiment, the music and the physics. A laser, a crystal and four single-photon
-      detectors travel with us in a glass case, and for the length of a performance they conduct a band,
-      two organs or a room full of people.
-    </p>
+    <h1>{de ? 'Buchung' : 'Booking'}</h1>
+    {de ? (
+      <p class="lede">
+        Wir bringen das Experiment, die Musik und die Physik mit. Ein Laser, ein Kristall und vier
+        Einzelphotonendetektoren reisen in einem Glaskasten mit, und für die Dauer einer Aufführung dirigieren
+        sie eine Band, zwei Orgeln oder einen ganzen Saal.
+      </p>
+    ) : (
+      <p class="lede">
+        We bring the experiment, the music and the physics. A laser, a crystal and four single-photon
+        detectors travel with us in a glass case, and for the length of a performance they conduct a band,
+        two organs or a room full of people.
+      </p>
+    )}
     <p class="ui cta">
-      <a class="primary" href={`mailto:${CONTACT}?subject=${mailSubject}`}>Write to us</a>
-      <span class="dim">In English or German.</span>
+      <a class="primary" href={`mailto:${CONTACT}?subject=${mailSubject}`}>{de ? 'Schreiben Sie uns' : 'Write to us'}</a>
+      <span class="dim">{de ? 'Auf Deutsch oder Englisch.' : 'In English or German.'}</span>
     </p>
   </header>
 
   <Photo
     src={lecture}
-    alt="The lecture before the premiere: two speakers in front of more than 3 000 people sitting on the floor of the Mariendom Linz, the organ at the far end."
+    alt={de
+      ? 'Der Vortrag vor der Uraufführung: zwei Vortragende vor mehr als 3.000 Menschen, die im Mariendom Linz auf dem Boden sitzen, am anderen Ende die Orgel.'
+      : 'The lecture before the premiere: two speakers in front of more than 3 000 people sitting on the floor of the Mariendom Linz, the organ at the far end.'}
     credit="Florian Voggeneder / Ars Electronica"
-    caption="The lecture before the premiere of BruQner, Mariendom Linz, 4 September 2024."
+    caption={de
+      ? 'Der Vortrag vor der Uraufführung von BruQner, Mariendom Linz, 4. September 2024.'
+      : 'The lecture before the premiere of BruQner, Mariendom Linz, 4 September 2024.'}
     bleed
     loading="eager"
     ratio="21 / 9"
   />
 
   <section class="wrap block" aria-labelledby="formats-h">
-    <h2 id="formats-h">Formats</h2>
-    <dl class="formats">
-      <div class="format">
-        <dt>
-          <span class="name">Lecture-performance</span>
-          <span class="len ui dim">about 45 to 60 minutes</span>
-        </dt>
-        <dd>
-          <p>
-            Our usual format. A short, accessible physics lecture of 20 to 25 minutes explains entanglement and
-            how the experiment is used to make music. Then about 20 minutes of live audiovisual performance,
-            conducted by the photons, and questions afterwards. In English or German.
-          </p>
-          <p class="dim">Played at the Mariendom Linz, Johns Hopkins University, the European Forum Alpbach, CIVA and JKU Linz.</p>
-        </dd>
-      </div>
-      <div class="format">
-        <dt>
-          <span class="name">Sets through an evening</span>
-          <span class="len ui dim">sets of about 15 minutes</span>
-        </dt>
-        <dd>
-          <p>
-            Without a lecture, for balls, receptions and festivals where people come and go. At the Vienna Ball
-            of Sciences we played six sets between 21:30 and two in the morning, with an information screen
-            explaining the project and the team answering questions at the experiment between sets.
-          </p>
-        </dd>
-      </div>
-      <div class="format">
-        <dt>
-          <span class="name">Talk</span>
-          <span class="len ui dim">conference or festival slot</span>
-        </dt>
-        <dd>
-          <p>
-            A talk about the project for physicists, musicians or a general audience, with audio and video from
-            the performances. Where the experiment can't travel, we show a demonstration with simulated data
-            that has the same statistics, as at the symposium on quantum computing and music in Palermo.
-          </p>
-        </dd>
-      </div>
-      <div class="format">
-        <dt>
-          <span class="name">Film and exhibition</span>
-          <span class="len ui dim">18-minute documentary</span>
-        </dt>
-        <dd>
-          <p>
-            The documentary <em>BruQner – The Sound of Entanglement</em> (weitblickfilm, 2025) and material from
-            the project for exhibitions, as in the Austrian Pavilion at EXPO 2025 in Osaka.{' '}
-            Screening and exhibition rights on request.
-          </p>
-        </dd>
-      </div>
-    </dl>
+    <h2 id="formats-h">{de ? 'Formate' : 'Formats'}</h2>
+    {de ? (
+      <dl class="formats">
+        <div class="format">
+          <dt>
+            <span class="name">Vortrag mit Performance</span>
+            <span class="len ui dim">etwa 45 bis 60 Minuten</span>
+          </dt>
+          <dd>
+            <p>
+              Unser übliches Format. Ein kurzer, allgemein verständlicher Physikvortrag von 20 bis 25 Minuten
+              erklärt Verschränkung und wie das Experiment Musik macht. Danach folgen rund 20 Minuten
+              audiovisuelle Live-Performance, dirigiert von den Photonen, und im Anschluss Zeit für Fragen. Auf
+              Deutsch oder Englisch.
+            </p>
+            <p class="dim">Gespielt im Mariendom Linz, an der Johns Hopkins University, beim Europäischen Forum Alpbach, beim CIVA Festival und an der JKU Linz.</p>
+          </dd>
+        </div>
+        <div class="format">
+          <dt>
+            <span class="name">Sets über den Abend verteilt</span>
+            <span class="len ui dim">jeweils etwa 15 Minuten</span>
+          </dt>
+          <dd>
+            <p>
+              Ohne Vortrag, für Bälle, Empfänge und Festivals, bei denen das Publikum kommt und geht. Beim Wiener
+              Ball der Wissenschaften haben wir zwischen 21:30 und zwei Uhr früh sechs Sets gespielt. Ein
+              Infoscreen erklärte das Projekt, und zwischen den Sets beantwortete das Team am Experiment Fragen.
+            </p>
+          </dd>
+        </div>
+        <div class="format">
+          <dt>
+            <span class="name">Vortrag</span>
+            <span class="len ui dim">für Konferenzen und Festivals</span>
+          </dt>
+          <dd>
+            <p>
+              Ein Vortrag über das Projekt, für Physiker:innen, Musiker:innen oder ein breites Publikum, mit Audio
+              und Video aus den Aufführungen. Wo das Experiment nicht mitreisen kann, zeigen wir eine
+              Demonstration mit simulierten Daten, die dieselbe Statistik haben, wie beim Symposium über
+              Quantencomputing und Musik in Palermo.
+            </p>
+          </dd>
+        </div>
+        <div class="format">
+          <dt>
+            <span class="name">Film und Ausstellung</span>
+            <span class="len ui dim">Dokumentarfilm, 18 Minuten</span>
+          </dt>
+          <dd>
+            <p>
+              Der Dokumentarfilm <em>BruQner – The Sound of Entanglement</em> (weitblickfilm, 2025) und Material
+              aus dem Projekt für Ausstellungen, wie im Österreich-Pavillon der EXPO 2025 in Osaka.{' '}
+              Vorführ- und Ausstellungsrechte auf Anfrage.
+            </p>
+          </dd>
+        </div>
+      </dl>
+    ) : (
+      <dl class="formats">
+        <div class="format">
+          <dt>
+            <span class="name">Lecture-performance</span>
+            <span class="len ui dim">about 45 to 60 minutes</span>
+          </dt>
+          <dd>
+            <p>
+              Our usual format. A short, accessible physics lecture of 20 to 25 minutes explains entanglement and
+              how the experiment is used to make music. Then about 20 minutes of live audiovisual performance,
+              conducted by the photons, and questions afterwards. In English or German.
+            </p>
+            <p class="dim">Played at the Mariendom Linz, Johns Hopkins University, the European Forum Alpbach, CIVA and JKU Linz.</p>
+          </dd>
+        </div>
+        <div class="format">
+          <dt>
+            <span class="name">Sets through an evening</span>
+            <span class="len ui dim">sets of about 15 minutes</span>
+          </dt>
+          <dd>
+            <p>
+              Without a lecture, for balls, receptions and festivals where people come and go. At the Vienna Ball
+              of Sciences we played six sets between 21:30 and two in the morning, with an information screen
+              explaining the project and the team answering questions at the experiment between sets.
+            </p>
+          </dd>
+        </div>
+        <div class="format">
+          <dt>
+            <span class="name">Talk</span>
+            <span class="len ui dim">conference or festival slot</span>
+          </dt>
+          <dd>
+            <p>
+              A talk about the project for physicists, musicians or a general audience, with audio and video from
+              the performances. Where the experiment can't travel, we show a demonstration with simulated data
+              that has the same statistics, as at the symposium on quantum computing and music in Palermo.
+            </p>
+          </dd>
+        </div>
+        <div class="format">
+          <dt>
+            <span class="name">Film and exhibition</span>
+            <span class="len ui dim">18-minute documentary</span>
+          </dt>
+          <dd>
+            <p>
+              The documentary <em>BruQner – The Sound of Entanglement</em> (weitblickfilm, 2025) and material from
+              the project for exhibitions, as in the Austrian Pavilion at EXPO 2025 in Osaka.{' '}
+              Screening and exhibition rights on request.
+            </p>
+          </dd>
+        </div>
+      </dl>
+    )}
   </section>
 
   <section class="wrap block pieces" aria-labelledby="pieces-h">
-    <h2 id="pieces-h">What we can play</h2>
+    <h2 id="pieces-h">{de ? 'Was wir spielen können' : 'What we can play'}</h2>
     <ul class="piece-list">
       {pieces.map((p) => (
         <li>
-          <a class="piece-name" href={`/pieces/${p.id}/`}><em>{p.data.title}</em></a>
+          <a class="piece-name" href={localize(lang, `/pieces/${p.id}/`)}><em>{p.data.title}</em></a>
           <span class="year ui dim">{p.data.year}</span>
           <p>{needs[p.id] ?? p.data.forces}</p>
         </li>
       ))}
     </ul>
-    <p class="note dim">
-      Every performance is different: the photon pairs measured that evening decide what is played. The Bell
-      value measured at each show is listed with the <a href="/shows/">shows</a>.
-    </p>
+    {de ? (
+      <p class="note dim">
+        Keine Aufführung gleicht der anderen: Die Photonenpaare, die an diesem Abend gemessen werden, entscheiden,
+        was gespielt wird. Den Bell-Wert jedes Abends finden Sie bei den <a href={localize(lang, '/shows/')}>Auftritten</a>.
+      </p>
+    ) : (
+      <p class="note dim">
+        Every performance is different: the photon pairs measured that evening decide what is played. The Bell
+        value measured at each show is listed with the <a href="/shows/">shows</a>.
+      </p>
+    )}
   </section>
 
   <section class="wrap after" aria-labelledby="after-h">
     <div class="after-photo">
       <Photo
         src={peering}
-        alt="After the performance, members of the audience lean over the open case to look at the optics of the experiment."
+        alt={de
+          ? 'Nach der Aufführung beugen sich Besucher:innen über den geöffneten Kasten, um die Optik des Experiments anzusehen.'
+          : 'After the performance, members of the audience lean over the open case to look at the optics of the experiment.'}
         credit="© EFA / Luiza Puiu"
-        caption="After the performance at the European Forum Alpbach, 26 August 2025."
+        caption={de
+          ? 'Nach der Aufführung beim Europäischen Forum Alpbach, 26. August 2025.'
+          : 'After the performance at the European Forum Alpbach, 26 August 2025.'}
         sizes="(min-width: 900px) 55vw, 100vw"
       />
     </div>
     <div class="after-text">
-      <h2 id="after-h">After the show</h2>
-      <p>
-        The experiment is not a prop. After the performance the case is opened, and the audience can come up,
-        look at the laser, the crystal and the detectors, and ask the physicists who built it. In Alpbach, at CIVA
-        and at JKU, people gathered round the open case once the music had stopped.
-      </p>
+      {de ? (
+        <>
+          <h2 id="after-h">Nach der Aufführung</h2>
+          <p>
+            Das Experiment ist keine Requisite. Nach der Aufführung wird der Kasten geöffnet: Das Publikum kann
+            herankommen, sich Laser, Kristall und Detektoren ansehen und die Physiker:innen fragen, die das Experiment
+            gebaut haben. In Alpbach, beim CIVA Festival und an der JKU drängten sich die Leute um den offenen
+            Kasten, sobald die Musik verklungen war.
+          </p>
+        </>
+      ) : (
+        <>
+          <h2 id="after-h">After the show</h2>
+          <p>
+            The experiment is not a prop. After the performance the case is opened, and the audience can come up,
+            look at the laser, the crystal and the detectors, and ask the physicists who built it. In Alpbach, at CIVA
+            and at JKU, people gathered round the open case once the music had stopped.
+          </p>
+        </>
+      )}
     </div>
   </section>
 
   <section class="wrap block" aria-labelledby="played-h">
-    <h2 id="played-h">Where we've played</h2>
+    <h2 id="played-h">{de ? 'Wo wir schon gespielt haben' : "Where we've played"}</h2>
     <ul class="played">
       {played.map((s) => (
         <li>
           <span class="y num dim">{year(s.data.date)}</span>
-          <a href={`/shows/${s.id}/`}>{s.data.title}</a>
-          <span class="where dim">{s.data.venue === s.data.city ? s.data.city : `${s.data.venue}, ${s.data.city}`}{s.data.audience && `, ${s.data.audience} people`}</span>
+          <a href={localize(lang, `/shows/${s.id}/`)}>{s.data.title}</a>
+          <span class="where dim">{s.data.venue === s.data.city ? s.data.city : `${s.data.venue}, ${s.data.city}`}{s.data.audience && (de ? `, ${s.data.audience}` : `, ${s.data.audience} people`)}</span>
         </li>
       ))}
     </ul>
@@ -168,86 +284,173 @@ const mailSubject = encodeURIComponent('Booking enquiry: The Sound of Entangleme
 
   <section class="wrap block tech" aria-labelledby="tech-h">
     <div class="tech-head">
-      <h2 id="tech-h">What we need from you</h2>
-      <p class="dim">
-        Every venue is different and we adapt: so far we have played in two churches, a ballroom, a cinema,
-        theatres and a congress centre. As a starting point, based on our shows so far:
-      </p>
+      <h2 id="tech-h">{de ? 'Was wir von Ihnen brauchen' : 'What we need from you'}</h2>
+      {de ? (
+        <p class="dim">
+          Jeder Ort ist anders, und wir passen uns an: Bisher haben wir in zwei Kirchen, einem Ballsaal, einem
+          Kino, in Theatern und in einem Kongresszentrum gespielt. Als Ausgangspunkt, nach unseren bisherigen
+          Auftritten:
+        </p>
+      ) : (
+        <p class="dim">
+          Every venue is different and we adapt: so far we have played in two churches, a ballroom, a cinema,
+          theatres and a congress centre. As a starting point, based on our shows so far:
+        </p>
+      )}
       <Photo
         src={stage}
-        alt="The trio and the lit experiment case on a stage in purple light, white-line visuals projected above."
+        alt={de
+          ? 'Das Trio und der beleuchtete Kasten mit dem Experiment auf einer Bühne in violettem Licht, darüber projizierte Visuals aus weißen Linien.'
+          : 'The trio and the lit experiment case on a stage in purple light, white-line visuals projected above.'}
         credit="© EFA / Luiza Puiu"
-        caption="Stage set-up at the European Forum Alpbach."
+        caption={de ? 'Bühnenaufbau beim Europäischen Forum Alpbach.' : 'Stage set-up at the European Forum Alpbach.'}
         sizes="(min-width: 900px) 35vw, 100vw"
       />
     </div>
-    <dl class="needs">
-      <div>
-        <dt>Time</dt>
-        <dd>
-          2 to 4 hours on site to set up and align the experiment, then 30 to 60 minutes of sound check. About an
-          hour to pack up afterwards.
-        </dd>
-      </div>
-      <div>
-        <dt>The experiment</dt>
-        <dd>
-          A stable table for the glass case (the optics sit on a 60 × 60 cm breadboard), central on stage or in
-          the room so that people can see it. Table size and height.
-        </dd>
-      </div>
-      <div>
-        <dt>Stage</dt>
-        <dd>About 6 × 4 m for the band and the experiment, slightly raised.</dd>
-      </div>
-      <div>
-        <dt>Sound</dt>
-        <dd>
-          A PA suited to the room, with subwoofer; two side-fill monitors; microphones and stands for the
-          drums, one microphone for announcements; DI boxes (six stereo, two mono).
-        </dd>
-      </div>
-      <div>
-        <dt>Visuals</dt>
-        <dd>
-          The visuals run live from the experiment and are projected behind the performers.{' '}
-          A projector and screen suited to the room (two projectors in larger halls), and a room that can be darkened.{' '}
-          Haze is used only where the venue's fire regulations allow it.
-        </dd>
-      </div>
-      <div>
-        <dt>Light</dt>
-        <dd>Dimmable warm-white stage light and dimmable room light.</dd>
-      </div>
-      <div>
-        <dt>Power</dt>
-        <dd>Separate power on stage for the music, the experiment and the visuals.</dd>
-      </div>
-      <div>
-        <dt>Network</dt>
-        <dd>
-          None needed: we bring our own router. The experiment, the music and the visuals talk over a private
-          network, cabled where possible, because thousands of phones make ordinary WiFi unusable.
-        </dd>
-      </div>
-      <div>
-        <dt>Travel</dt>
-        <dd>
-          The experiment travels in its own case, by car or by plane: it has been flown to Washington DC.{' '}
-          Team size on tour depending on the format.
-        </dd>
-      </div>
-    </dl>
+    {de ? (
+      <dl class="needs">
+        <div>
+          <dt>Zeit</dt>
+          <dd>
+            2 bis 4 Stunden vor Ort, um das Experiment aufzubauen und zu justieren, danach 30 bis 60 Minuten
+            Soundcheck. Für den Abbau etwa eine Stunde.
+          </dd>
+        </div>
+        <div>
+          <dt>Experiment</dt>
+          <dd>
+            Ein stabiler Tisch für den Glaskasten (die Optik steht auf einer Lochrasterplatte von 60 × 60 cm),
+            zentral auf der Bühne oder im Raum, damit das Publikum es sehen kann. Größe und Höhe des Tisches nach
+            Absprache.
+          </dd>
+        </div>
+        <div>
+          <dt>Bühne</dt>
+          <dd>Etwa 6 × 4 m für Band und Experiment, leicht erhöht.</dd>
+        </div>
+        <div>
+          <dt>Ton</dt>
+          <dd>
+            Eine dem Raum angemessene PA mit Subwoofer; zwei Sidefill-Monitore; Mikrofone und Stative für das
+            Schlagzeug, ein Mikrofon für Ansagen; DI-Boxen (sechs Stereo, zwei Mono).
+          </dd>
+        </div>
+        <div>
+          <dt>Visuals</dt>
+          <dd>
+            Die Visuals entstehen live aus dem Experiment und werden hinter den Musiker:innen projiziert.{' '}
+            Dafür braucht es einen Projektor und eine Leinwand passend zum Raum (in größeren Sälen zwei
+            Projektoren) und einen Raum, der sich abdunkeln lässt.{' '}
+            Nebel setzen wir nur ein, wo die Brandschutzvorschriften des Hauses es erlauben.
+          </dd>
+        </div>
+        <div>
+          <dt>Licht</dt>
+          <dd>Dimmbares warmweißes Bühnenlicht und dimmbares Saallicht.</dd>
+        </div>
+        <div>
+          <dt>Strom</dt>
+          <dd>Getrennte Stromkreise auf der Bühne für Musik, Experiment und Visuals.</dd>
+        </div>
+        <div>
+          <dt>Netzwerk</dt>
+          <dd>
+            Nicht nötig: Wir bringen einen eigenen Router mit. Experiment, Musik und Visuals kommunizieren über ein
+            privates Netzwerk, wo möglich per Kabel, denn Tausende Handys machen gewöhnliches WLAN unbrauchbar.
+          </dd>
+        </div>
+        <div>
+          <dt>Anreise</dt>
+          <dd>
+            Das Experiment reist in einem eigenen Case, mit dem Auto oder im Flugzeug: Es war schon in Washington
+            DC.{' '}
+            Wie groß das Team auf Tour ist, hängt vom Format ab.
+          </dd>
+        </div>
+      </dl>
+    ) : (
+      <dl class="needs">
+        <div>
+          <dt>Time</dt>
+          <dd>
+            2 to 4 hours on site to set up and align the experiment, then 30 to 60 minutes of sound check. About an
+            hour to pack up afterwards.
+          </dd>
+        </div>
+        <div>
+          <dt>The experiment</dt>
+          <dd>
+            A stable table for the glass case (the optics sit on a 60 × 60 cm breadboard), central on stage or in
+            the room so that people can see it. Table size and height.
+          </dd>
+        </div>
+        <div>
+          <dt>Stage</dt>
+          <dd>About 6 × 4 m for the band and the experiment, slightly raised.</dd>
+        </div>
+        <div>
+          <dt>Sound</dt>
+          <dd>
+            A PA suited to the room, with subwoofer; two side-fill monitors; microphones and stands for the
+            drums, one microphone for announcements; DI boxes (six stereo, two mono).
+          </dd>
+        </div>
+        <div>
+          <dt>Visuals</dt>
+          <dd>
+            The visuals run live from the experiment and are projected behind the performers.{' '}
+            A projector and screen suited to the room (two projectors in larger halls), and a room that can be darkened.{' '}
+            Haze is used only where the venue's fire regulations allow it.
+          </dd>
+        </div>
+        <div>
+          <dt>Light</dt>
+          <dd>Dimmable warm-white stage light and dimmable room light.</dd>
+        </div>
+        <div>
+          <dt>Power</dt>
+          <dd>Separate power on stage for the music, the experiment and the visuals.</dd>
+        </div>
+        <div>
+          <dt>Network</dt>
+          <dd>
+            None needed: we bring our own router. The experiment, the music and the visuals talk over a private
+            network, cabled where possible, because thousands of phones make ordinary WiFi unusable.
+          </dd>
+        </div>
+        <div>
+          <dt>Travel</dt>
+          <dd>
+            The experiment travels in its own case, by car or by plane: it has been flown to Washington DC.{' '}
+            Team size on tour depending on the format.
+          </dd>
+        </div>
+      </dl>
+    )}
   </section>
 
   <section class="wrap contact" aria-labelledby="contact-h">
-    <h2 id="contact-h">Get in touch</h2>
-    <p>
-      Tell us the date, the venue, the audience and the format you have in mind, and we'll get back to you.
-      Fees depend on the format, the line-up and travel.
-    </p>
+    {de ? (
+      <>
+        <h2 id="contact-h">Kontakt</h2>
+        <p>
+          Nennen Sie uns Datum, Ort, Publikum und das Format, an das Sie denken, und wir melden uns. Das Honorar
+          richtet sich nach Format, Besetzung und Reiseaufwand.
+        </p>
+      </>
+    ) : (
+      <>
+        <h2 id="contact-h">Get in touch</h2>
+        <p>
+          Tell us the date, the venue, the audience and the format you have in mind, and we'll get back to you.
+          Fees depend on the format, the line-up and travel.
+        </p>
+      </>
+    )}
     <p class="mail"><a href={`mailto:${CONTACT}?subject=${mailSubject}`}>{CONTACT}</a></p>
-    <p class="dim small">Clemens Wenger, musical direction, on behalf of the team.</p>
+    <p class="dim small">
+      {de ? 'Clemens Wenger, musikalische Leitung, für das Team.' : 'Clemens Wenger, musical direction, on behalf of the team.'}
+    </p>
   </section>
 </Base>
 

@@ -13,7 +13,10 @@ interface Props {
   size?: 'hero' | 'small';
   playable?: boolean;
 }
+import { getLang } from '../../i18n';
+
 const { size = 'hero', playable = false } = Astro.props;
+const de = getLang(Astro) === 'de';
 const id = `vinyl-${Math.random().toString(36).slice(2, 8)}`;
 ---
 <div class:list={['vinyl', size, { playable }]} data-vinyl>
@@ -31,7 +34,7 @@ const id = `vinyl-${Math.random().toString(36).slice(2, 8)}`;
           <text class="arc band"><textPath href={`#${id}-bottom`} startOffset="50%" text-anchor="middle">The Uncertain Question</textPath></text>
           <circle cx="89" cy="100" r="17" class="ring alice" />
           <circle cx="111" cy="100" r="17" class="ring bob" />
-          <text x="100" y="138" class="soon" text-anchor="middle">coming soon</text>
+          <text x="100" y="138" class="soon" text-anchor="middle">{de ? 'erscheint bald' : 'coming soon'}</text>
           <circle cx="100" cy="100" r="3.2" class="hole" />
         </svg>
       </div>
@@ -51,8 +54,14 @@ const id = `vinyl-${Math.random().toString(36).slice(2, 8)}`;
   </div>
   {playable && (
     <div class="listen">
-      <button type="button" class="play ui" aria-pressed="false" data-play>Listen: The Uncertain Question live, 2025</button>
-      <p class="note ui dim">A live recording from the Vienna Ball of Sciences, not from the album.</p>
+      <button type="button" class="play ui" aria-pressed="false" data-play>
+        {de ? 'Anhören: The Uncertain Question live, 2025' : 'Listen: The Uncertain Question live, 2025'}
+      </button>
+      <p class="note ui dim">
+        {de
+          ? 'Ein Live-Mitschnitt vom Wiener Ball der Wissenschaften, nicht vom Album.'
+          : 'A live recording from the Vienna Ball of Sciences, not from the album.'}
+      </p>
       <audio preload="none" src="/media/audio/tuq-ball-2025-excerpt.mp3"></audio>
     </div>
   )}
@@ -69,12 +78,12 @@ const id = `vinyl-${Math.random().toString(36).slice(2, 8)}`;
     const btn = el.querySelector<HTMLButtonElement>('[data-play]');
     const audio = el.querySelector('audio');
     if (!btn || !audio) return;
-    const label = btn.textContent ?? '';
+    const label = btn.textContent?.trim() ?? '';
     btn.addEventListener('click', () => (audio.paused ? audio.play() : audio.pause()));
     audio.addEventListener('play', () => {
       el.classList.add('is-playing');
       btn.setAttribute('aria-pressed', 'true');
-      btn.textContent = 'Pause';
+      btn.textContent = 'Pause'; // same word in both languages
     });
     audio.addEventListener('pause', () => {
       el.classList.remove('is-playing');

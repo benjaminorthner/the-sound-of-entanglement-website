@@ -3,9 +3,13 @@
 import type { CollectionEntry } from 'astro:content';
 import BellScale from '../BellScale.astro';
 import { formatRange } from '../../lib/format';
+import { getLang, localize } from '../../i18n';
 
+/** Pass the shows already localized (localizeAll) on German pages. */
 interface Props { shows: CollectionEntry<'shows'>[] }
 const { shows } = Astro.props;
+const lang = getLang(Astro);
+const de = lang === 'de';
 const now = new Date();
 ---
 <ol class="performances">
@@ -13,14 +17,14 @@ const now = new Date();
     const upcoming = s.data.date >= now;
     return (
       <li>
-        <p class="date ui num">{formatRange(s.data.date, s.data.endDate)}</p>
+        <p class="date ui num">{formatRange(s.data.date, s.data.endDate, lang)}</p>
         <div class="where">
-          <a href={`/shows/${s.id}/`}>{s.data.venue}, {s.data.city}</a>
+          <a href={localize(lang, `/shows/${s.id}/`)}>{s.data.venue}, {s.data.city}</a>
           <p class="event dim">
             {s.data.title}
-            {s.data.premiere && ', premiere'}
+            {s.data.premiere && (de ? ', Uraufführung' : ', premiere')}
             {s.data.kind === 'talk' && s.data.format && `. ${s.data.format}`}
-            {upcoming && '. Upcoming'}
+            {upcoming && (de ? '. Demnächst' : '. Upcoming')}
           </p>
         </div>
         <div class="bell">

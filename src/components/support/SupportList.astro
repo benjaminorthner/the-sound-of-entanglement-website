@@ -3,7 +3,10 @@
  * The full list of supporters with roles and grant numbers, for /people/#support.
  */
 import Logo from './Logo.astro';
-import { GROUPS, supportersByGroup } from './data';
+import { GROUPS, groupTitle, supporterText, supportersByGroup } from './data';
+import { getLang } from '../../i18n';
+
+const lang = getLang(Astro);
 
 const by = await supportersByGroup();
 const listed = GROUPS.filter((g) => g.id !== 'thanks');
@@ -11,15 +14,15 @@ const listed = GROUPS.filter((g) => g.id !== 'thanks');
 <div class="support-list">
   {listed.map((g) => (
     <section class="group" aria-labelledby={`support-${g.id}`}>
-      <h3 id={`support-${g.id}`} class="group-h">{g.title}</h3>
+      <h3 id={`support-${g.id}`} class="group-h">{groupTitle(g, lang)}</h3>
       <ul>
-        {by[g.id].map((s) => (
+        {by[g.id].map((s) => ({ s, ...supporterText(s, lang) })).map(({ s, name, role, note }) => (
           <li>
             <div class="mark">{s.data.logo ? <Logo supporter={s} area={6400} min={18} max={48} /> : null}</div>
             <div class="text">
-              <p class="name">{s.data.url ? <a href={s.data.url}>{s.data.name}</a> : s.data.name}</p>
-              {s.data.role && <p class="role dim">{s.data.role}</p>}
-              {s.data.note && <p class="note dim">{s.data.note}</p>}
+              <p class="name">{s.data.url ? <a href={s.data.url}>{name}</a> : name}</p>
+              {role && <p class="role dim">{role}</p>}
+              {note && <p class="note dim">{note}</p>}
             </div>
           </li>
         ))}
@@ -28,10 +31,10 @@ const listed = GROUPS.filter((g) => g.id !== 'thanks');
   ))}
   {by.thanks.length > 0 && (
     <p class="thanks">
-      <span class="ui dim">Thanks to </span>
-      {by.thanks.map((t, i) => (
+      <span class="ui dim">{lang === 'de' ? 'Wir danken ' : 'Thanks to '}</span>
+      {by.thanks.map((t) => supporterText(t, lang)).map((t, i) => (
         <>
-          {t.data.name}{t.data.role && <span class="dim"> ({t.data.role})</span>}{i < by.thanks.length - 1 ? ', ' : '.'}
+          {t.name}{t.role && <span class="dim"> ({t.role})</span>}{i < by.thanks.length - 1 ? ', ' : '.'}
         </>
       ))}
     </p>

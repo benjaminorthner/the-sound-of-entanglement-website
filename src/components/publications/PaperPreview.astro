@@ -12,6 +12,7 @@
  */
 import { getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
+import { getLang, pick } from '../../i18n';
 
 interface Props {
   pdfUrl: string;
@@ -30,14 +31,27 @@ const pages = await Promise.all(
     }),
 );
 const shown = pages.length;
+const lang = getLang(Astro);
+const tx = {
+  label: {
+    en: shown < totalPages ? `Preview of the paper, first ${shown} of ${totalPages} pages` : `Preview of the paper, ${totalPages} pages`,
+    de: shown < totalPages ? `Vorschau des Papers, die ersten ${shown} von ${totalPages} Seiten` : `Vorschau des Papers, ${totalPages} Seiten`,
+  },
+  role: { en: 'page preview', de: 'Seitenvorschau' },
+  prev: { en: 'Previous page', de: 'Vorherige Seite' },
+  next: { en: 'Next page', de: 'Nächste Seite' },
+  of: { en: 'of', de: 'von' },
+};
+const t = (k: keyof typeof tx) => pick(lang, tx[k]);
+const sheetLabel = (n: number) => (lang === 'de' ? `Seite ${n}. Öffnet das PDF auf dieser Seite.` : `Page ${n}. Opens the PDF at this page.`);
 ---
 <div
   class="paper-object"
   data-paper
   data-pdf={pdfUrl}
   role="region"
-  aria-roledescription="page preview"
-  aria-label={shown < totalPages ? `Preview of the paper, first ${shown} of ${totalPages} pages` : `Preview of the paper, ${totalPages} pages`}
+  aria-roledescription={t('role')}
+  aria-label={t('label')}
 >
   <div class="stack" tabindex="0" aria-describedby="paper-help">
     {pages.map(({ n, img }, i) => (
@@ -45,7 +59,7 @@ const shown = pages.length;
         class="sheet"
         href={`${pdfUrl}#page=${n}`}
         data-sheet={i}
-        aria-label={`Page ${n}. Opens the PDF at this page.`}
+        aria-label={sheetLabel(n)}
         aria-hidden={i === 0 ? undefined : 'true'}
         tabindex={i === 0 ? undefined : -1}
         style={`--i: ${i}`}
@@ -66,16 +80,18 @@ const shown = pages.length;
   </div>
 
   <div class="controls ui">
-    <button type="button" data-prev aria-label="Previous page" disabled>
+    <button type="button" data-prev aria-label={t('prev')} disabled>
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 L8 12 L15 19" /></svg>
     </button>
-    <p class="count num" aria-live="polite"><span data-current>1</span> <span class="dim">of {totalPages}</span></p>
-    <button type="button" data-next aria-label="Next page">
+    <p class="count num" aria-live="polite"><span data-current>1</span> <span class="dim">{t('of')} {totalPages}</span></p>
+    <button type="button" data-next aria-label={t('next')}>
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5 L16 12 L9 19" /></svg>
     </button>
   </div>
   <p id="paper-help" class="help ui dim">
-    Arrow keys turn the pages.{shown < totalPages && <> The preview shows the first {shown} pages; the rest are in the <a href={pdfUrl}>PDF</a>.</>}
+    {lang === 'de'
+      ? <>Mit den Pfeiltasten wird geblättert.{shown < totalPages && <> Die Vorschau zeigt die ersten {shown} Seiten, den Rest gibt es im <a href={pdfUrl}>PDF</a>.</>}</>
+      : <>Arrow keys turn the pages.{shown < totalPages && <> The preview shows the first {shown} pages; the rest are in the <a href={pdfUrl}>PDF</a>.</>}</>}
   </p>
 </div>
 
