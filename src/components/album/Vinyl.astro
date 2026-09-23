@@ -1,0 +1,180 @@
+---
+/**
+ * A spinning record for the album "Sounds of Entanglement". The label is
+ * deliberately plain, like a white test pressing: the artwork does not exist
+ * yet, and the label says "coming soon". The two hairline rings are the
+ * Alice/Bob motif of the 2024 visuals.
+ *
+ * `playable` adds a tonearm and a play button for a live recording of the
+ * band. That recording is from the Vienna Ball of Sciences 2025, not from
+ * the album, and is labelled so.
+ */
+interface Props {
+  size?: 'hero' | 'small';
+  playable?: boolean;
+}
+const { size = 'hero', playable = false } = Astro.props;
+const id = `vinyl-${Math.random().toString(36).slice(2, 8)}`;
+---
+<div class:list={['vinyl', size, { playable }]} data-vinyl>
+  <div class="deck" aria-hidden="true">
+    <div class="disc">
+      <div class="spin">
+        <svg class="label" viewBox="0 0 200 200">
+          <defs>
+            <path id={`${id}-top`} d="M 30 100 A 70 70 0 0 1 170 100" />
+            <path id={`${id}-bottom`} d="M 22 100 A 78 78 0 0 0 178 100" />
+          </defs>
+          <circle cx="100" cy="100" r="99" class="paper" />
+          <circle cx="100" cy="100" r="93" class="edge" />
+          <text class="arc title"><textPath href={`#${id}-top`} startOffset="50%" text-anchor="middle">Sounds of Entanglement</textPath></text>
+          <text class="arc band"><textPath href={`#${id}-bottom`} startOffset="50%" text-anchor="middle">The Uncertain Question</textPath></text>
+          <circle cx="89" cy="100" r="17" class="ring alice" />
+          <circle cx="111" cy="100" r="17" class="ring bob" />
+          <text x="100" y="138" class="soon" text-anchor="middle">coming soon</text>
+          <circle cx="100" cy="100" r="3.2" class="hole" />
+        </svg>
+      </div>
+      <div class="sheen"></div>
+    </div>
+    {playable && (
+      <svg class="arm" viewBox="0 0 112 100">
+        <!-- deck coordinates: the record is centred at (50, 50) with radius 50 -->
+        <circle cx="104" cy="8" r="3.4" class="pivot" />
+        <g class="arm-rot">
+          <line x1="104" y1="3" x2="104" y2="0.5" class="rod weight" />
+          <path d="M 104 8 L 102.2 52 L 100 60" class="rod" />
+          <rect x="98.4" y="59" width="3.4" height="5.2" rx="0.6" transform="rotate(14 100 61.5)" class="head" />
+        </g>
+      </svg>
+    )}
+  </div>
+  {playable && (
+    <div class="listen">
+      <button type="button" class="play ui" aria-pressed="false" data-play>Listen: The Uncertain Question live, 2025</button>
+      <p class="note ui dim">A live recording from the Vienna Ball of Sciences, not from the album.</p>
+      <audio preload="none" src="/media/audio/tuq-ball-2025-excerpt.mp3"></audio>
+    </div>
+  )}
+</div>
+
+<script>
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll<HTMLElement>('[data-vinyl]').forEach((el) => {
+    // spin only while on screen
+    const io = new IntersectionObserver(([e]) => el.classList.toggle('offscreen', !e.isIntersecting));
+    io.observe(el);
+    if (reduced) el.classList.add('still');
+
+    const btn = el.querySelector<HTMLButtonElement>('[data-play]');
+    const audio = el.querySelector('audio');
+    if (!btn || !audio) return;
+    const label = btn.textContent ?? '';
+    btn.addEventListener('click', () => (audio.paused ? audio.play() : audio.pause()));
+    audio.addEventListener('play', () => {
+      el.classList.add('is-playing');
+      btn.setAttribute('aria-pressed', 'true');
+      btn.textContent = 'Pause';
+    });
+    audio.addEventListener('pause', () => {
+      el.classList.remove('is-playing');
+      btn.setAttribute('aria-pressed', 'false');
+      btn.textContent = label;
+    });
+  });
+</script>
+
+<style>
+  .vinyl { --d: min(100%, 560px); }
+  .vinyl.small { --d: min(100%, 300px); }
+  .deck { position: relative; width: var(--d); }
+  .playable .deck { width: calc(var(--d) * 1.12); max-width: 100%; }
+  .playable .disc { width: calc(100% / 1.12); }
+
+  .disc {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    /* rim, then fine grooves; a lead-in and a run-out band without grooves */
+    background:
+      radial-gradient(circle, transparent 0 36.5%, #0b0b0b 36.5% 38.5%, transparent 38.5% 94%, #0e0e0e 94% 97.2%, #1c1b1a 97.2% 97.8%, #080808 97.8%),
+      repeating-radial-gradient(circle, #151515 0 0.7px, #060606 0.9px 1.6px, #101010 1.8px 2.6px);
+    box-shadow: 0 30px 80px rgb(0 0 0 / 0.6), inset 0 0 0 1px rgb(235 231 223 / 0.06);
+  }
+  .spin {
+    position: absolute;
+    inset: 32.5%;
+    animation: spin 5.4s linear infinite;
+  }
+  .label { width: 100%; height: 100%; display: block; }
+  .paper { fill: var(--paper); }
+  .edge { fill: none; stroke: rgb(0 0 0 / 0.14); stroke-width: 0.6; }
+  .arc { font-family: var(--font-display); fill: #1b1a18; }
+  .title { font-size: 13.5px; font-weight: 600; letter-spacing: 0.04em; }
+  .band { font-size: 10.5px; font-weight: 400; letter-spacing: 0.05em; }
+  .ring { fill: none; stroke-width: 1.1; }
+  .ring.alice { stroke: #d65f5f; }
+  .ring.bob { stroke: #6f6fd8; }
+  .soon { font-family: var(--font-display); font-size: 10px; fill: #5d5952; letter-spacing: 0.04em; }
+  .hole { fill: #000; }
+
+  /* a reflection that stays roughly where the light is while the record turns */
+  .sheen {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      rgb(235 231 223 / 0.11) 28deg,
+      rgb(235 231 223 / 0.02) 58deg,
+      transparent 90deg,
+      transparent 180deg,
+      rgb(235 231 223 / 0.08) 208deg,
+      rgb(235 231 223 / 0.015) 238deg,
+      transparent 270deg
+    );
+    -webkit-mask: radial-gradient(circle, transparent 0 38%, #000 40% 94%, transparent 95%);
+    mask: radial-gradient(circle, transparent 0 38%, #000 40% 94%, transparent 95%);
+    animation: sway 14s ease-in-out infinite alternate;
+    pointer-events: none;
+  }
+
+  /* tonearm: rests beside the record, swings onto it while the recording plays */
+  .arm {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+  /* at rest the stylus sits just beside the record; playing swings it onto the outer grooves */
+  .arm-rot { transform-origin: 104px 8px; transform: rotate(-4deg); transition: transform 1.4s ease; }
+  .is-playing .arm-rot { transform: rotate(10deg); }
+  .rod { fill: none; stroke: var(--ash); stroke-width: 0.7; stroke-linecap: round; stroke-linejoin: round; }
+  .weight { stroke-width: 2.4; stroke: #3a3835; }
+  .pivot { fill: #1c1b1a; stroke: var(--ash); stroke-width: 0.5; }
+  .head { fill: var(--ash); }
+
+  .offscreen .spin, .offscreen .sheen { animation-play-state: paused; }
+  .still .spin, .still .sheen { animation: none; }
+  .still .arm-rot { transition: none; }
+
+  .listen { margin-top: 1.75rem; }
+  .play {
+    background: none;
+    border: 1px solid var(--graphite);
+    border-radius: 999px;
+    padding: 0.55rem 1.1rem;
+    color: var(--paper);
+    cursor: pointer;
+    font-size: 0.9375rem;
+  }
+  .play:hover { border-color: var(--ash); }
+  .note { margin: 0.6rem 0 0; font-size: 0.8125rem; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes sway { from { transform: rotate(-10deg); } to { transform: rotate(10deg); } }
+</style>

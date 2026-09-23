@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Photo from '../../components/Photo.astro';
 import AudioPlayer from '../../components/AudioPlayer.astro';
+import Vinyl from '../../components/album/Vinyl.astro';
 import { formatDate } from '../../lib/format';
 
 const pieces = (await getCollection('pieces')).sort((a, b) => a.data.order - b.data.order);
@@ -96,13 +97,16 @@ const premiereOf = (id: string) =>
   </section>
 
   <section class="wrap grid album" aria-labelledby="album">
+    <div class="album-record"><Vinyl size="small" /></div>
     <div class="album-text">
       <h2 id="album"><em>Sounds of Entanglement</em></h2>
       <p>
-        The band has recorded its first album: music conducted by pairs of entangled photons, captured as a live performance with the experiment.
-        It is not released yet. There will be a vinyl edition.
+        The band’s first album: music conducted by pairs of entangled photons, recorded live with the
+        experiment in the studio.
       </p>
+      <p class="status">Recorded. Not released yet. Vinyl and digital.</p>
       <p class="dim ui">The Uncertain Question: Clemens Wenger, Manu Mayr and Judith Schwarz.</p>
+      <p class="ui album-more"><a href="/album/">About the album</a></p>
     </div>
   </section>
 </Base>
@@ -183,12 +187,17 @@ const premiereOf = (id: string) =>
     padding-block: clamp(4rem, 9vw, 7rem);
     border-top: 1px solid var(--graphite);
   }
-  .album-text { grid-column: 6 / span 7; }
+  .album { align-items: center; row-gap: 2.5rem; }
+  .album-record { grid-column: 2 / span 4; }
+  .album-text { grid-column: 7 / span 6; }
+  .album .status { font-size: var(--step-1); font-weight: 300; margin-top: 1.25rem; }
+  .album-more { margin-top: 1.25rem; font-size: 1rem; }
+  .album-more a { text-decoration-color: var(--smoke); }
   .album h2 { font-size: var(--step-3); margin-bottom: 1.25rem; }
   .album h2 em { font-style: normal; }
 
   @media (max-width: 900px) {
-    .image, .text, .flip .image, .flip .text, .exp-head, .exp-list, .album-text, .statement h2, .statement-text { grid-column: 1 / -1; grid-row: auto; }
+    .image, .text, .flip .image, .flip .text, .exp-head, .exp-list, .album-text, .album-record, .statement h2, .statement-text { grid-column: 1 / -1; grid-row: auto; }
     .idea { grid-template-columns: 1fr; }
   }
 </style>

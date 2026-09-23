@@ -39,6 +39,11 @@ clear what was confirmed. Answers from Benjamin (23 Sept 2026) are in
 - [x] "Indeterminate Apparatus": *final title of that piece.*
 
 ## Rights and credits
+- [ ] Album studio photos (`src/assets/photos/2026-album-studio/`): who took
+      them? Credited "The Sound of Entanglement" for now. Also: who is the
+      bass player in `bass-and-keys.jpg`, and may studio name and recording
+      date (plan: Tonstudio Huppmann, 1 May 2026) be published? The site says
+      only "recorded in 2026" / "recorded".
 *Use everything below for now.* Credits stay mandatory, and the list remains
 open for final clearance before launch.
 - [ ] Ars Electronica Flickr photos: licence (*use for now*)
