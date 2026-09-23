@@ -39,8 +39,19 @@ const isCurrent = (href: string) => path === href || path.startsWith(href);
     const open = toggle.getAttribute('aria-expanded') !== 'true';
     toggle.setAttribute('aria-expanded', String(open));
     header.classList.toggle('open', open);
+    document.documentElement.classList.toggle('menu-open', open);
     toggle.textContent = open ? 'Close' : 'Menu';
   });
+  // Close the menu with Escape, after following a link, or when widening past the breakpoint.
+  const close = () => {
+    toggle.setAttribute('aria-expanded', 'false');
+    header.classList.remove('open');
+    document.documentElement.classList.remove('menu-open');
+    toggle.textContent = 'Menu';
+  };
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && header.classList.contains('open')) { close(); toggle.focus(); } });
+  header.querySelectorAll('nav a').forEach((a) => a.addEventListener('click', close));
+  matchMedia('(min-width: 861px)').addEventListener('change', (m) => m.matches && close());
   const onScroll = () => header.classList.toggle('scrolled', window.scrollY > 24);
   onScroll();
   window.addEventListener('scroll', onScroll, { passive: true });
@@ -66,11 +77,22 @@ const isCurrent = (href: string) => path === href || path.startsWith(href);
   }
   .site-header.scrolled::before,
   .site-header.open::before { opacity: 0; }
-  .site-header.scrolled,
-  .site-header.open {
+  /* The frosted bar is a pseudo-element: a backdrop-filter on the header itself
+     would make it the containing block of the fixed mobile menu, which would
+     then collapse to the header's height and spill over the page. */
+  .site-header::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
     background: rgb(0 0 0 / 0.86);
     backdrop-filter: blur(8px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
   }
+  .site-header.scrolled::after,
+  .site-header.open::after { opacity: 1; }
   .bar {
     height: 100%;
     display: flex;
@@ -118,7 +140,8 @@ const isCurrent = (href: string) => path === href || path.startsWith(href);
       background: var(--black);
       padding: 2rem var(--gutter);
     }
-    .open nav { display: block; }
+    .open nav { display: block; overflow-y: auto; z-index: 60; }
+    :global(html.menu-open) { overflow: hidden; }
     ul { flex-direction: column; gap: 0.25rem; }
     nav a { font-size: var(--step-2); font-weight: 300; color: var(--paper); display: block; }
   }
