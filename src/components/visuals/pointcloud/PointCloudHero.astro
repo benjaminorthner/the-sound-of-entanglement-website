@@ -70,9 +70,8 @@ const stops = [
         <p class="lede">Pairs of entangled photons conduct a live audiovisual performance.</p>
         <p class="readout">
           <span class="live-only">
-            This is a 3D scan of the experiment. Each flash is a photon pair measured at the premiere in the
-            Mariendom Linz on 4 September 2024, replayed at the pace it happened: pair{' '}
-            <span class="num" data-pair>0</span>, measured at <span class="num" data-clock>23:00:10</span>.
+            A 3D scan of the experiment, replaying photon pairs measured at the premiere in the Mariendom Linz on
+            4 September 2024.
           </span>
           <span class="static-only">The experiment we take on stage: a Bell test in a glass case.</span>
         </p>
@@ -80,23 +79,45 @@ const stops = [
       {stops.map((s, i) => (
         <div class:list={['stop', `stop-${i + 1}`]} data-stop={i + 1} id={`hero-${s.id}`}>
           <p>{s.text}</p>
-          {s.id === 'detectors' && (
-            <p class="bell live-only">
-              <span data-s>The Bell value is still settling.</span>{' '}
-              A classical conductor can't go above 2.
-            </p>
-          )}
         </div>
       ))}
     </div>
+
+    <div class="labels" data-labels aria-hidden="true"></div>
+
+    <aside class="instrument live-only waiting" aria-label="The pair being drawn" data-instrument>
+      <p class="pair ui">
+        Pair <span class="num" data-pair>–</span>, measured at <span class="num" data-clock>–</span>
+      </p>
+      <dl class="sides">
+        <div class="side">
+          <dt class="ui">Alice</dt>
+          <dd><span class="ui dim">setting</span> <span class="num" data-a-set>–</span></dd>
+          <dd class="num result" data-a-out>–</dd>
+        </div>
+        <div class="side">
+          <dt class="ui">Bob</dt>
+          <dd><span class="ui dim">setting</span> <span class="num" data-b-set>–</span></dd>
+          <dd class="num result" data-b-out>–</dd>
+        </div>
+      </dl>
+      <p class="agree ui" data-agree>&nbsp;</p>
+      <p class="bell ui">
+        <span data-s>Bell value: still settling</span><span class="dim">, classical limit 2</span>
+      </p>
+      <p class="note ui dim">
+        The count follows the recording at its real pace. One pair at a time is drawn, slowed down; the others
+        pass unseen.
+      </p>
+    </aside>
 
     <p class="scroll-hint ui live-only" aria-hidden="true">Scroll to follow the light</p>
   </div>
 </section>
 
 <script>
-  import type { PointCloudScene } from './scene';
-  import { decodeExcerpt, Replay, RunningS, clock, type Excerpt } from '../../../lib/replay';
+  import type { PointCloudScene, DetectInfo } from './scene';
+  import { decodeExcerpt, Replay, RunningS, clock, type Excerpt, type ReplayEvent } from '../../../lib/replay';
   import premiere from '../../../data/bruqner_premiere_2024-09-04.json';
 
   (window as unknown as { __heroBoot?: boolean }).__heroBoot = true;
@@ -106,9 +127,17 @@ const stops = [
   if (live) {
     const canvas = hero.querySelector<HTMLCanvasElement>('canvas')!;
     const stops = [...hero.querySelectorAll<HTMLElement>('[data-stop]')];
-    const pairEl = hero.querySelector('[data-pair]')!;
-    const clockEl = hero.querySelector('[data-clock]')!;
-    const sEl = hero.querySelector('[data-s]')!;
+    const $ = (sel: string) => hero.querySelector<HTMLElement>(sel)!;
+    const el = {
+      pair: $('[data-pair]'),
+      clock: $('[data-clock]'),
+      aSet: $('[data-a-set]'),
+      bSet: $('[data-b-set]'),
+      aOut: $('[data-a-out]'),
+      bOut: $('[data-b-out]'),
+      agree: $('[data-agree]'),
+      s: $('[data-s]'),
+    };
     const COUNT = 3; // stops after the first
 
     /** Scroll progress through the pinned hero, 0..COUNT, with holds at each stop. */
@@ -134,6 +163,8 @@ const stops = [
     let scene: PointCloudScene | undefined;
     let visible = true;
     const running = new RunningS();
+    let latest: ReplayEvent | undefined;
+    let replay: Replay | undefined;
 
     const onScroll = () => {
       const p = progress();
@@ -144,31 +175,69 @@ const stops = [
     addEventListener('resize', onScroll);
     onScroll();
 
+    const setRunning = () => {
+      const on = visible && !document.hidden;
+      scene?.setRunning(on);
+      if (!replay) return;
+      if (on && !replay.running) replay.start();
+      if (!on && replay.running) replay.stop();
+    };
     new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
-      scene?.setRunning(visible && !document.hidden);
+      setRunning();
     }).observe(hero);
-    document.addEventListener('visibilitychange', () => scene?.setRunning(visible && !document.hidden));
+    document.addEventListener('visibilitychange', setRunning);
+
+    const showS = () => {
+      el.s.textContent =
+        running.n < 60
+          ? `Bell value: still settling (${running.n} pairs)`
+          : `S = ${running.S.toFixed(2)} from ${running.n.toLocaleString('en')} pairs`;
+    };
+    const sign = (x: number) => (x === 1 ? '+1' : '−1');
+    const onDetect = ({ e, colours }: DetectInfo) => {
+      el.pair.textContent = String(e.n + 1);
+      el.clock.textContent = clock(e);
+      el.aSet.textContent = String(e.a + 1);
+      el.bSet.textContent = String(e.b + 1);
+      el.aOut.textContent = sign(e.A);
+      el.bOut.textContent = sign(e.B);
+      el.aOut.style.color = colours[0];
+      el.bOut.style.color = colours[1];
+      el.agree.textContent = e.A === e.B ? 'Same result' : 'Different results';
+      $('[data-instrument]').classList.remove('waiting');
+      showS();
+    };
 
     // Dynamic import so a failure to load three.js is caught below and the
     // static hero takes over, instead of leaving a half-initialised page.
     import('./scene')
-      .then(({ createScene }) => createScene(canvas, '/media/setup-pointcloud.bin'))
-      .then((s) => {
+      .then(({ createScene }) =>
+        createScene(canvas, '/media/setup-pointcloud-hd.bin', { overlay: $('[data-labels]'), onDetect }),
+      )
+      .then(async (s) => {
         scene = s;
         onScroll();
         const events = decodeExcerpt(premiere as Excerpt);
-        const replay = new Replay(events, (e) => {
+        // The recording runs at its real pace; the counter and S follow it.
+        replay = new Replay(events, (e) => {
           running.add(e);
-          pairEl.textContent = String(e.n + 1);
-          clockEl.textContent = clock(e);
-          sEl.textContent =
-            running.n < 60
-              ? `The Bell value is still settling (${running.n} pairs so far).`
-              : `Bell value so far: S = ${running.S.toFixed(2)}, from ${running.n.toLocaleString('en')} pairs.`;
-          if (visible) scene?.pulse(e);
+          latest = e;
+          if (running.n % 5 === 0) showS();
         });
-        setTimeout(() => replay.start(), 1800);
+        await s.ready;
+        setRunning();
+        // Draw the most recent pair whenever the previous drawing has finished.
+        let drawn = -1;
+        for (;;) {
+          const e = latest && latest.n !== drawn ? latest : undefined;
+          if (!e) {
+            await new Promise((r) => setTimeout(r, 120));
+            continue;
+          }
+          drawn = e.n;
+          await s.play(e);
+        }
       })
       .catch((err) => {
         console.error('Point-cloud hero failed, showing the static version.', err);
@@ -234,8 +303,52 @@ const stops = [
   .readout { margin-top: 1.5rem; color: var(--ash); font-size: 1rem; line-height: 1.55; max-width: 30rem; }
   .readout .num { color: var(--paper); }
   .live-only { display: none; }
-  .bell { margin-top: 1rem; font-size: 1rem; color: var(--ash); }
-  .bell .num { color: var(--paper); }
+  .labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .labels :global(.pc-label) {
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-family: var(--font-display);
+    font-size: 0.9375rem;
+    letter-spacing: 0.02em;
+    opacity: 0;
+    text-shadow: 0 0 12px rgb(0 0 0 / 0.9);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* The pair currently being drawn, like the readout of an instrument. */
+  .instrument {
+    position: absolute;
+    z-index: 1;
+    right: var(--gutter);
+    bottom: 2.25rem;
+    width: 17.5rem;
+    margin: 0;
+    color: var(--ash);
+    font-size: 0.875rem;
+  }
+  .instrument::before {
+    content: '';
+    position: absolute;
+    inset: -3rem -2rem -2rem -3rem;
+    z-index: -1;
+    background: radial-gradient(closest-side, rgb(0 0 0 / 0.82), rgb(0 0 0 / 0.55) 60%, transparent);
+    pointer-events: none;
+  }
+  .instrument { transition: opacity 0.6s; }
+  .instrument.waiting { opacity: 0; }
+  .instrument p { margin: 0; }
+  .instrument .num { color: var(--paper); }
+  .pair { padding-bottom: 0.6rem; border-bottom: 1px solid var(--graphite); }
+  .sides { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin: 0.75rem 0 0.4rem; }
+  .side { display: grid; gap: 0.1rem; margin: 0; }
+  .side dt { color: var(--paper); font-size: 0.875rem; }
+  .side dd { margin: 0; }
+  .result { font-family: var(--font-display); font-size: 1.75rem; font-weight: 300; line-height: 1.1; }
+  .agree { color: var(--paper); min-height: 1.4em; }
+  .bell { margin-top: 0.6rem !important; padding-top: 0.6rem; border-top: 1px solid var(--graphite); }
+  .bell [data-s] { color: var(--paper); font-variant-numeric: tabular-nums; }
+  .note { margin-top: 0.75rem !important; font-size: 0.75rem; line-height: 1.45; }
 
   /* Live version: a pinned stage with the scan and one stop visible at a time. */
   :global(html[data-hero='live']) .hero { height: 320vh; }
@@ -255,7 +368,8 @@ const stops = [
   :global(html[data-hero='live']) .fallback,
   :global(html[data-hero='live']) .static-only { display: none; }
   :global(html[data-hero='live']) .live-only { display: inline; }
-  :global(html[data-hero='live']) p.live-only { display: block; }
+  :global(html[data-hero='live']) p.live-only,
+  :global(html[data-hero='live']) aside.live-only { display: block; }
   :global(html[data-hero='live']) .copy {
     position: absolute;
     inset: 0;
@@ -303,6 +417,31 @@ const stops = [
       right: var(--gutter);
     }
     :global(html[data-hero='live']) .stop-0 { bottom: 4.5rem; }
+    .instrument {
+      left: var(--gutter);
+      right: var(--gutter);
+      top: calc(var(--header-h) + 0.25rem);
+      bottom: auto;
+      width: auto;
+      font-size: 0.8125rem;
+    }
+    .instrument .pair, .instrument .note { display: none; }
+    .instrument::before {
+      inset: calc(-1 * var(--header-h) - 0.5rem) calc(-1 * var(--gutter)) -2.5rem;
+      background: linear-gradient(rgb(0 0 0 / 0.85) 55%, transparent);
+    }
+    :global(html[data-hero='live']) aside.instrument {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0.1rem 1.25rem;
+    }
+    .sides { display: contents; }
+    .side { display: flex; align-items: baseline; gap: 0.4rem; }
+    .side dd:first-of-type { display: none; }
+    .result { font-size: 1.125rem; }
+    .agree { min-height: 0; }
+    .bell { flex-basis: 100%; margin-top: 0.2rem !important; padding-top: 0; border-top: 0; }
     .stop p { font-size: 1.1875rem; }
     .readout { font-size: 0.875rem; }
   }
