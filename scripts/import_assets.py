@@ -37,6 +37,8 @@ ROOTS = {
     "HDRIVE": r"H:\My Drive\TU Wien\Project Works\TSOE",
     "PAPER": r"D:\Programming\The-Sound-of-Entanglement",
     "THESIS": r"D:\Programming\Master-Thesis",
+    # one-off folders Benjamin dropped into Downloads (e.g. osaka/, palermo/)
+    "DOWNLOADS": r"C:\Users\benja\Downloads",
 }
 MAX_SIDE = 2400
 

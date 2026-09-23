@@ -11,6 +11,20 @@ summary: 'Investigating the Sound of Entanglement: a talk and music demonstratio
 links:
 - label: Programme
   url: https://2025.isqcmc.org/program.html
+cover:
+  src: ../../assets/photos/2025-palermo/at-the-poster.jpg
+  alt: Clemens Wenger and Benjamin Orthner next to the ISQCMC 2025 poster on a terrace in Palermo.
+  credit: The Sound of Entanglement
+gallery:
+- src: ../../assets/photos/2025-palermo/music-demonstration.jpg
+  alt: 'The music demonstration: a vaulted hall, the audience in front of a projection screen.'
+  credit: The Sound of Entanglement
+- src: ../../assets/photos/2025-palermo/talk-palazzo-steri.jpg
+  alt: The talk in a painted hall with a wooden ceiling, a QR code to the paper on the screen.
+  credit: The Sound of Entanglement
+- src: ../../assets/photos/2025-palermo/gelato.jpg
+  alt: Clemens Wenger and Benjamin Orthner with gelato after the symposium.
+  credit: The Sound of Entanglement
 ---
 
 > Quantum entanglement gives rise to correlations that no classical mechanism

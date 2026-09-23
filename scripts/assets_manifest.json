@@ -575,5 +575,37 @@
  {
   "src": "HDRIVE/Presentations/DPG Tagung/Photos/dpg_presentation_photo_5.jpeg",
   "dest": "src/assets/photos/2025-dpg/talk-5.jpg"
+ },
+ {
+  "src": "DOWNLOADS/osaka/IMG_7881.jpg",
+  "dest": "src/assets/photos/2025-osaka/austrian-pavilion.jpg"
+ },
+ {
+  "src": "DOWNLOADS/osaka/IMG_7884.jpg",
+  "dest": "src/assets/photos/2025-osaka/pavilion-hall.jpg"
+ },
+ {
+  "src": "DOWNLOADS/osaka/IMG_7895.jpg",
+  "dest": "src/assets/photos/2025-osaka/panorama-screens.jpg"
+ },
+ {
+  "src": "DOWNLOADS/osaka/IMG_7899.jpg",
+  "dest": "src/assets/photos/2025-osaka/kiosk-the-sound-of-entanglement.jpg"
+ },
+ {
+  "src": "DOWNLOADS/palermo/IMG_5204.jpg",
+  "dest": "src/assets/photos/2025-palermo/at-the-poster.jpg"
+ },
+ {
+  "src": "DOWNLOADS/palermo/PXL_20251028_105210323.jpg",
+  "dest": "src/assets/photos/2025-palermo/music-demonstration.jpg"
+ },
+ {
+  "src": "DOWNLOADS/palermo/PXL_20251029_113214123.jpg",
+  "dest": "src/assets/photos/2025-palermo/talk-palazzo-steri.jpg"
+ },
+ {
+  "src": "DOWNLOADS/palermo/signal-2025-10-29-160041.jpeg",
+  "dest": "src/assets/photos/2025-palermo/gelato.jpg"
  }
 ]
