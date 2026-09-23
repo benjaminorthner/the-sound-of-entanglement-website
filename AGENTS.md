@@ -67,6 +67,10 @@ public/media/         audio, video loops, point cloud of the setup
 - **Never copy private material** (invoices, budgets, CVs, call sheets, emails)
   from the source drives.
 - Copy assets into the repo selectively via `scripts/import_assets.py`: resized, with descriptive names.
+- In page code, read an imported image's properties only through `meta()` from `src/lib/image.ts`
+  (reading `img.src` or `img.width` directly makes Astro ship the full-size original), and
+  size photos with `ladder()` / `QUALITY` so every component reuses the same files.
+  Every deployment is stored in full on Vercel, so build size adds up.
 - To add a show, piece, person or publication, follow `docs/content-guide.md`.
 - Copy is written in sentence case, plain and precise, in the team's voice. No hype.
 - Accessibility: keyboard navigation, visible focus, `prefers-reduced-motion`
