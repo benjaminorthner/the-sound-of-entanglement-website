@@ -76,16 +76,20 @@ Dark, high-contrast, with light only where something is happening: projected
 light in haze, the lit case, the white-line screen. Most of the best images are
 90% black. That suits a dark site, but crops must keep the light shapes intact.
 
-## Landing hero: sound
+## Landing hero: sound and fast forward
 
-The point-cloud hero (`src/components/visuals/pointcloud/`) has an optional
-sound, off by default and switched on with the "Sound" / „Ton" button next to
-the readout (`sound.ts`, Web Audio, no files). It is a sonification sketch of
-the pairs being drawn, not a recording of a piece, and the page says so:
+Two small toggles sit next to the readout of the point-cloud hero
+(`src/components/visuals/pointcloud/`). Both are off by default.
 
-- When both detectors click, each side strikes an FM bell: Alice left, Bob
-  right and an octave higher. The note is the measured outcome (+1 = D,
-  −1 = E), so equal outcomes sound as octaves and different ones as a seventh
-  or a ninth. The setting makes the bell brighter (first) or darker (second).
-- A soft motor click when a wave plate turns to a new setting.
-- Sound pauses when the hero is off screen or the tab is hidden.
+**Sound** („Ton", `sound.ts`, Web Audio, no files). Deliberately **not
+music**: the pieces are Clemens Wenger's, and nothing on the landing page may
+pass for them (Benjamin, Sept 2026). It is a quiet room tone so a site about
+sound isn't silent: slowly breathing filtered noise, left and right, a little
+air on top, no pitches. When both detectors click, two faint ticks (Alice
+left, Bob right) and the room opens up for a moment. Keep it subtle; an
+earlier version with bells tuned to the outcomes was too prominent and too
+music-like.
+
+**Fast forward** („Vorspulen"): the recording replays 20 times faster and the
+pairs fly 6 times faster, many at once (up to 10 in flight). The ±1 labels
+are hidden in fast forward.

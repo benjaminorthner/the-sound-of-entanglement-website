@@ -158,8 +158,11 @@ export interface DetectInfo {
 export interface PointCloudScene {
   /** Scroll position along the camera path, 0..3. */
   setProgress(p: number): void;
-  /** Draw one measured pair; resolves when its animation has finished. */
+  /** Draw one measured pair. Resolves when the next pair may start: when
+   *  this one has finished, or after a short gap in fast forward. */
   play(e: ReplayEvent): Promise<void>;
+  /** Playback speed of the pairs: 1 = one slowed-down pair at a time. */
+  setSpeed(k: number): void;
   /** Resolves once the scan has settled and pairs can be drawn. */
   ready: Promise<void>;
   setRunning(on: boolean): void;
@@ -462,7 +465,9 @@ export async function createScene(
   const THREAD = 90;
   const RING = 72;
   const GLYPH = 40 + 14; // ring + fast-axis line, per plate
-  const SPARKS = 3 + THREAD + 2 * RING + 2 * GLYPH + 3;
+  const MAXP = 10; // pairs in flight at once (fast forward)
+  const SLOT = 3 + THREAD + 2 * RING + 3;
+  const SPARKS = MAXP * SLOT + 2 * GLYPH;
   const sPos = new Float32Array(SPARKS * 3);
   const sCol = new Float32Array(SPARKS * 3);
   const sA = new Float32Array(SPARKS);
@@ -517,7 +522,11 @@ export async function createScene(
     sA[i] = a;
     sSize[i] = size;
   };
-  const I = { heads: 0, thread: 3, rings: 3 + THREAD, glyphs: 3 + THREAD + 2 * RING, halos: 3 + THREAD + 2 * RING + 2 * GLYPH };
+  const slotIdx = (k: number) => {
+    const b = k * SLOT;
+    return { heads: b, thread: b + 3, rings: b + 3 + THREAD, halos: b + 3 + THREAD + 2 * RING };
+  };
+  const GLYPHS = MAXP * SLOT;
 
   /* --- ±1 labels --- */
   const labels = (['a', 'b'] as const).map((k) => {
@@ -542,18 +551,34 @@ export async function createScene(
   // in front of each arm, below the beam splitter and detectors
   const NAME_AT = [v(AXIS - 0.46, -0.9, -0.16), v(AXIS + 0.46, -0.9, -0.16)];
 
-  /* --- state of the pair being drawn --- */
+  /* --- the pairs being drawn: one at a time, or many in fast forward --- */
   interface Pair {
     e: ReplayEvent;
     t0: number;
+    /** playback speed; the pair's own clock runs k times faster */
+    k: number;
+    slot: number;
     pathA: Path;
     pathB: Path;
     colA: THREE.Color;
     colB: THREE.Color;
     detected: boolean;
+    rippled: boolean;
+    /** real ms after t0 when the next pair may start */
+    release: number;
+    released: boolean;
     done: () => void;
   }
-  let pair: Pair | null = null;
+  let pairs: Pair[] = [];
+  let speed = 1;
+  /** real ms between pairs in fast forward */
+  const FAST_GAP = 110;
+  const release = (pr: Pair) => {
+    if (!pr.released) {
+      pr.released = true;
+      pr.done();
+    }
+  };
   const plate = { a: 0, b: SETTING_ANGLE.b[0], aTo: 0, bTo: SETTING_ANGLE.b[0], click: 0 };
 
   /* --- camera --- */
@@ -687,20 +712,27 @@ export async function createScene(
     beamU.uPhB.value.set(-1, 1, 0);
     let labelA = 0;
     let labelB = 0;
+    let labelPair: Pair | undefined;
 
-    if (pair) {
-      const u = now - pair.t0;
-      const { e } = pair;
+    const pumpPath = new Path(PUMP);
+    for (const pr of pairs) {
+      const u = (now - pr.t0) * pr.k; // the pair's own clock, in normal-speed ms
+      const { e } = pr;
+      const I = slotIdx(pr.slot);
+      const newest = pr === pairs[pairs.length - 1];
       // pump pulse
       if (u >= 0 && u < T.pump) {
         const q = u / T.pump;
-        beamU.uPump.value = q;
-        put(I.heads + 2, new Path(PUMP).at(q, tmpA), COL.pump, 1, 0.08);
+        if (newest) beamU.uPump.value = q;
+        put(I.heads + 2, pumpPath.at(q, tmpA), COL.pump, 1, 0.08);
         put(I.halos + 2, tmpA, COL.pump, 0.3, 0.25);
       }
-      // birth flash at the crystal
+      // birth flash at the crystal, and a ripple across the board (not too often)
       const birth = u - T.pump;
-      if (birth >= 0 && cloudU.uRipple.value.z > birth / 1000 + 0.05) cloudU.uRipple.value.set(CRYSTAL.x, CRYSTAL.y, 0, 1);
+      if (birth >= 0 && !pr.rippled) {
+        pr.rippled = true;
+        if (pr.k === 1 || cloudU.uRipple.value.z > 1.4) cloudU.uRipple.value.set(CRYSTAL.x, CRYSTAL.y, 0, 1);
+      }
       if (birth > -60 && birth < 400) {
         const fl = Math.exp(-Math.pow(birth / 160, 2));
         put(I.heads + 2, CRYSTAL, COL.photon, fl, 0.12);
@@ -711,11 +743,13 @@ export async function createScene(
         const q = Math.min(1, (u - T.pump) / T.flight);
         const eq = q < 0.5 ? 2 * q * q : 1 - Math.pow(-2 * q + 2, 2) / 2; // ease in-out
         const wake = u < T.pump + T.flight ? 1 : Math.max(0, 1 - (u - T.pump - T.flight) / 350);
-        beamU.uPhA.value.set(eq, e.A, wake);
-        beamU.uPhB.value.set(eq, e.B, wake);
+        if (newest) {
+          beamU.uPhA.value.set(eq, e.A, wake);
+          beamU.uPhB.value.set(eq, e.B, wake);
+        }
         if (q < 1) {
-          pair.pathA.at(eq, tmpA);
-          pair.pathB.at(eq, tmpB);
+          pr.pathA.at(eq, tmpA);
+          pr.pathB.at(eq, tmpB);
           const tint = Math.min(1, q * 3);
           put(I.heads, tmpA, COL.photon, tint, 0.07);
           put(I.heads + 1, tmpB, COL.photon, tint, 0.07);
@@ -734,45 +768,51 @@ export async function createScene(
       }
       // detection: both at the same instant
       const since = u - (T.pump + T.flight);
-      if (since >= 0 && !pair.detected) {
-        pair.detected = true;
-        const dA = (e.A === 1 ? ALICE.plus : ALICE.minus)[1];
-        const dB = (e.B === 1 ? BOB.plus : BOB.minus)[1];
+      const dA = (e.A === 1 ? ALICE.plus : ALICE.minus)[1];
+      const dB = (e.B === 1 ? BOB.plus : BOB.minus)[1];
+      if (since >= 0 && !pr.detected) {
+        pr.detected = true;
         fa.set(dA.x, dA.y, 0.0035, 1);
         fb.set(dB.x, dB.y, 0.0035, 1);
-        cloudU.uColA.value.copy(pair.colA);
-        cloudU.uColB.value.copy(pair.colB);
-        opts.onDetect?.({ e, colours: [`#${pair.colA.getHexString()}`, `#${pair.colB.getHexString()}`] });
+        cloudU.uColA.value.copy(pr.colA);
+        cloudU.uColB.value.copy(pr.colB);
+        opts.onDetect?.({ e, colours: [`#${pr.colA.getHexString()}`, `#${pr.colB.getHexString()}`] });
       }
       if (since >= 0 && since < T.after + 300) {
         const r = since / (T.after * 0.8);
-        const dA = (e.A === 1 ? ALICE.plus : ALICE.minus)[1];
-        const dB = (e.B === 1 ? BOB.plus : BOB.minus)[1];
         const ringAlpha = Math.max(0, 1 - r) * 0.8;
         const radius = 0.012 + 0.09 * (1 - Math.pow(1 - Math.min(1, r), 3));
         for (let j = 0; j < RING; j++) {
           const ang = (j / RING) * Math.PI * 2;
           tmpA.set(dA.x + Math.cos(ang) * radius, dA.y + Math.sin(ang) * radius, dA.z);
           tmpB.set(dB.x + Math.cos(ang) * radius, dB.y + Math.sin(ang) * radius, dB.z);
-          put(I.rings + j, tmpA, pair.colA, ringAlpha, 0.018);
-          put(I.rings + RING + j, tmpB, pair.colB, ringAlpha, 0.018);
+          put(I.rings + j, tmpA, pr.colA, ringAlpha, 0.018);
+          put(I.rings + RING + j, tmpB, pr.colB, ringAlpha, 0.018);
         }
         // the click itself
         const pop = Math.exp(-since / 180);
-        put(I.heads, dA, pair.colA, pop, 0.1);
-        put(I.heads + 1, dB, pair.colB, pop, 0.1);
-        put(I.halos, dA, pair.colA, 0.5 * Math.exp(-since / 600), 0.35);
-        put(I.halos + 1, dB, pair.colB, 0.5 * Math.exp(-since / 600), 0.35);
-        labelA = labelB = since < T.after ? Math.min(1, since / 120) : Math.max(0, 1 - (since - T.after) / 300);
+        put(I.heads, dA, pr.colA, pop, 0.1);
+        put(I.heads + 1, dB, pr.colB, pop, 0.1);
+        put(I.halos, dA, pr.colA, 0.5 * Math.exp(-since / 600), 0.35);
+        put(I.halos + 1, dB, pr.colB, 0.5 * Math.exp(-since / 600), 0.35);
+        // the ±1 labels only at normal speed; in fast forward they would flicker
+        if (newest && pr.k === 1) {
+          labelA = labelB = since < T.after ? Math.min(1, since / 120) : Math.max(0, 1 - (since - T.after) / 300);
+          labelPair = pr;
+        }
       }
-      project((e.A === 1 ? ALICE.plus : ALICE.minus)[1], labels[0], e.A === 1 ? '+1' : '−1', pair.colA, labelA);
-      project((e.B === 1 ? BOB.plus : BOB.minus)[1], labels[1], e.B === 1 ? '+1' : '−1', pair.colB, labelB);
-
-      if (u >= CYCLE) {
-        const done = pair.done;
-        pair = null;
-        done();
-      }
+      if (now - pr.t0 >= pr.release) release(pr);
+    }
+    // finished pairs leave
+    pairs = pairs.filter((pr) => {
+      const over = (now - pr.t0) * pr.k >= CYCLE;
+      if (over) release(pr);
+      return !over;
+    });
+    if (labelPair) {
+      const lp = labelPair;
+      project((lp.e.A === 1 ? ALICE.plus : ALICE.minus)[1], labels[0], lp.e.A === 1 ? '+1' : '−1', lp.colA, labelA);
+      project((lp.e.B === 1 ? BOB.plus : BOB.minus)[1], labels[1], lp.e.B === 1 ? '+1' : '−1', lp.colB, labelB);
     } else {
       labels.forEach((l) => l && (l.style.opacity = '0'));
     }
@@ -796,8 +836,8 @@ export async function createScene(
         put(base + 40 + j, tmpA, COL.photon, al, 0.009);
       }
     };
-    glyph(I.glyphs, ALICE.hwp, plate.a);
-    glyph(I.glyphs + GLYPH, BOB.hwp, plate.b);
+    glyph(GLYPHS, ALICE.hwp, plate.a);
+    glyph(GLYPHS + GLYPH, BOB.hwp, plate.b);
 
     sgeo.attributes.position.needsUpdate = true;
     sgeo.attributes.color.needsUpdate = true;
@@ -814,22 +854,37 @@ export async function createScene(
     setProgress(p) {
       progress = p;
     },
+    setSpeed(k) {
+      speed = k;
+    },
     play(e) {
       return new Promise<void>((resolve) => {
         const [colA, colB] = outcomeColours(e);
         plate.aTo = SETTING_ANGLE.a[e.a];
         plate.bTo = SETTING_ANGLE.b[e.b];
         plate.click = 1;
-        pair = {
+        const used = new Set(pairs.map((pr) => pr.slot));
+        let slot = [...Array(MAXP).keys()].find((k) => !used.has(k));
+        if (slot === undefined) {
+          const oldest = pairs.shift()!;
+          release(oldest);
+          slot = oldest.slot;
+        }
+        pairs.push({
           e,
-          t0: performance.now() + T.turn,
+          t0: performance.now() + T.turn / speed,
+          k: speed,
+          slot,
           pathA: fullPath(ALICE, e.A),
           pathB: fullPath(BOB, e.B),
           colA,
           colB,
           detected: false,
+          rippled: false,
+          release: speed === 1 ? Infinity : FAST_GAP - T.turn / speed,
+          released: false,
           done: resolve,
-        };
+        });
       });
     },
     setRunning(on) {
@@ -837,7 +892,7 @@ export async function createScene(
       running = on;
       if (on && !raf) {
         const pause = performance.now() - last;
-        if (pair) pair.t0 += pause; // resume the pair where it was
+        for (const pr of pairs) pr.t0 += pause; // resume the pairs where they were
         last = performance.now();
         raf = requestAnimationFrame(frame);
       }
