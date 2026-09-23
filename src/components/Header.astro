@@ -1,24 +1,29 @@
 ---
 import Wordmark from './Wordmark.astro';
+import { getLang, useT, localize, alternates } from '../i18n';
 
+const lang = getLang(Astro);
+const t = useT(lang);
 const nav = [
-  { href: '/pieces/', label: 'Pieces' },
-  { href: '/shows/', label: 'Shows' },
-  { href: '/physics/', label: 'Physics' },
-  { href: '/people/', label: 'People' },
-  { href: '/publications/', label: 'Papers and press' },
-  { href: '/booking/', label: 'Booking' },
-];
+  { href: '/pieces/', label: t('nav.pieces') },
+  { href: '/shows/', label: t('nav.shows') },
+  { href: '/physics/', label: t('nav.physics') },
+  { href: '/people/', label: t('nav.people') },
+  { href: '/publications/', label: t('nav.publications') },
+  { href: '/booking/', label: t('nav.booking') },
+].map((i) => ({ ...i, href: localize(lang, i.href) }));
 const path = Astro.url.pathname;
-const isCurrent = (href: string) => path === href || path.startsWith(href);
+const isCurrent = (href: string) => path === href || (href !== '/de/' && path.startsWith(href));
+const other = lang === 'de' ? 'en' : 'de';
+const otherHref = alternates(path)[other];
 ---
 <header class="site-header" data-header>
   <div class="wrap bar">
-    <a class="home" href="/"><Wordmark /></a>
-    <button class="menu-toggle ui" aria-expanded="false" aria-controls="site-nav" data-menu-toggle>
-      Menu
+    <a class="home" href={localize(lang, '/')}><Wordmark /></a>
+    <button class="menu-toggle ui" aria-expanded="false" aria-controls="site-nav" data-menu-toggle data-open={t('nav.menu')} data-close={t('nav.close')}>
+      {t('nav.menu')}
     </button>
-    <nav id="site-nav" aria-label="Main">
+    <nav id="site-nav" aria-label={t('nav.main')}>
       <ul>
         {nav.map((item) => (
           <li>
@@ -27,6 +32,9 @@ const isCurrent = (href: string) => path === href || path.startsWith(href);
             </a>
           </li>
         ))}
+        <li class="lang">
+          <a class="ui" href={otherHref} hreflang={other} lang={other} aria-label={t('lang.switchLabel')}>{t('lang.switch')}</a>
+        </li>
       </ul>
     </nav>
   </div>
@@ -40,14 +48,14 @@ const isCurrent = (href: string) => path === href || path.startsWith(href);
     toggle.setAttribute('aria-expanded', String(open));
     header.classList.toggle('open', open);
     document.documentElement.classList.toggle('menu-open', open);
-    toggle.textContent = open ? 'Close' : 'Menu';
+    toggle.textContent = (open ? toggle.dataset.close : toggle.dataset.open) ?? '';
   });
   // Close the menu with Escape, after following a link, or when widening past the breakpoint.
   const close = () => {
     toggle.setAttribute('aria-expanded', 'false');
     header.classList.remove('open');
     document.documentElement.classList.remove('menu-open');
-    toggle.textContent = 'Menu';
+    toggle.textContent = toggle.dataset.open ?? '';
   };
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && header.classList.contains('open')) { close(); toggle.focus(); } });
   header.querySelectorAll('nav a').forEach((a) => a.addEventListener('click', close));
@@ -122,6 +130,9 @@ const isCurrent = (href: string) => path === href || path.startsWith(href);
     text-decoration: underline;
     text-decoration-color: var(--graphite);
   }
+  .lang { padding-left: clamp(1rem, 2.4vw, 2.25rem); border-left: 1px solid var(--graphite); }
+  .lang a { color: var(--smoke); }
+  .lang a:hover { color: var(--paper); }
   .menu-toggle {
     display: none;
     background: none;
@@ -132,7 +143,10 @@ const isCurrent = (href: string) => path === href || path.startsWith(href);
     cursor: pointer;
   }
   @media (max-width: 860px) {
-    .menu-toggle { display: block; }
+    .lang { padding-left: clamp(1rem, 2.4vw, 2.25rem); border-left: 1px solid var(--graphite); }
+  .lang a { color: var(--smoke); }
+  .lang a:hover { color: var(--paper); }
+  .menu-toggle { display: block; }
     nav {
       display: none;
       position: fixed;
@@ -144,5 +158,7 @@ const isCurrent = (href: string) => path === href || path.startsWith(href);
     :global(html.menu-open) { overflow: hidden; }
     ul { flex-direction: column; gap: 0.25rem; }
     nav a { font-size: var(--step-2); font-weight: 300; color: var(--paper); display: block; }
+    .lang { border-left: 0; padding-left: 0; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--graphite); }
+    .lang a { font-size: var(--step-1); color: var(--ash); }
   }
 </style>

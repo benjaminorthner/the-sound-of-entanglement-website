@@ -1,0 +1,6 @@
+---
+import Piece from '../../../views/pieces/Piece.astro';
+import { piecePaths } from '../../../views/pieces/paths';
+export const getStaticPaths = piecePaths;
+---
+<Piece {...Astro.props} />

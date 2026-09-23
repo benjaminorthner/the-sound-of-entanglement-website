@@ -9,9 +9,11 @@ interface Props {
   note?: string;
 }
 const { src, title, note } = Astro.props;
+import { getLang, useT } from '../i18n';
+const t = useT(getLang(Astro));
 ---
 <div class="player" data-audio>
-  <button class="toggle" aria-label={`Play ${title}`} data-label={title}>
+  <button class="toggle" aria-label={`${t('audio.play')}: ${title}`} data-label={title} data-play={t('audio.play')} data-pause={t('audio.pause')}>
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path class="icon-play" d="M8 5 L19 12 L8 19 Z" />
       <g class="icon-pause"><rect x="7" y="5" width="3.5" height="14" /><rect x="13.5" y="5" width="3.5" height="14" /></g>
@@ -40,8 +42,8 @@ const { src, title, note } = Astro.props;
         audio.play();
       } else audio.pause();
     });
-    audio.addEventListener('play', () => { p.classList.add('playing'); btn.setAttribute('aria-label', `Pause ${btn.dataset.label}`); });
-    audio.addEventListener('pause', () => { p.classList.remove('playing'); btn.setAttribute('aria-label', `Play ${btn.dataset.label}`); });
+    audio.addEventListener('play', () => { p.classList.add('playing'); btn.setAttribute('aria-label', `${btn.dataset.pause}: ${btn.dataset.label}`); });
+    audio.addEventListener('pause', () => { p.classList.remove('playing'); btn.setAttribute('aria-label', `${btn.dataset.play}: ${btn.dataset.label}`); });
     audio.addEventListener('timeupdate', () => {
       fill.style.transform = `scaleX(${audio.duration ? audio.currentTime / audio.duration : 0})`;
       time.textContent = fmt(audio.currentTime);

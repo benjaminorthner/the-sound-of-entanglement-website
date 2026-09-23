@@ -27,6 +27,9 @@ interface Props {
   live?: boolean;
 }
 const { value, label, compact = false, sigma, marks = [], live = false } = Astro.props;
+import { getLang, useT, num } from '../i18n';
+const lang = getLang(Astro);
+const t = useT(lang);
 
 const QMAX = 2 * Math.SQRT2;
 const pct = (v: number) => (Math.max(0, Math.min(v, QMAX)) / QMAX) * 100;
@@ -35,9 +38,8 @@ const quantum = value !== undefined && value > 2;
 const described =
   value === undefined
     ? ''
-    : `Bell value S = ${value.toFixed(2)}${label ? `, ${label}` : ''}. ` +
-      (quantum ? 'Above the classical limit of 2, which only entangled photons can reach. ' : 'At or below the classical limit of 2. ') +
-      'The quantum maximum is 2√2, about 2.83.';
+    : `${t('bell.value')} S = ${num(lang, value)}${label ? `, ${label}` : ''}. ` +
+      (quantum ? t('bell.above') : t('bell.atOrBelow')) + ' ' + t('bell.max');
 ---
 <div
   class:list={['bell-scale', { compact, quantum }]}
@@ -49,8 +51,8 @@ const described =
   {value !== undefined && !live && <p class="visually-hidden">{described}</p>}
   <div class="scale" aria-hidden="true">
     <div class="numbers ui num">
-      <span class="n two">{!compact && <span class="word">classical limit </span>}2</span>
-      <span class="n max">2√2{!compact && <span class="word"> maximum</span>}</span>
+      <span class="n two">{!compact && <span class="word">{t('bell.classicalLimit')} </span>}2</span>
+      <span class="n max">2√2{!compact && <span class="word"> {t('bell.maximum')}</span>}</span>
     </div>
     <div class="track">
       <span class="beyond"></span>
@@ -63,7 +65,7 @@ const described =
   </div>
   {value !== undefined && !live && (
     <p class="value num" aria-hidden="true">
-      S = {value.toFixed(2)}{label && <span class="label dim"> {label}</span>}
+      S = {num(lang, value)}{label && <span class="label dim"> {label}</span>}
     </p>
   )}
 </div>

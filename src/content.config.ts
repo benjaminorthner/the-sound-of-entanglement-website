@@ -130,4 +130,26 @@ const supporters = defineCollection({
     }),
 });
 
-export const collections = { shows, pieces, people, publications, supporters };
+/**
+ * German versions. One file per entry, same id as the English entry, e.g.
+ * src/content/de/shows/2025-10-03-civa.md. Every field is optional: whatever
+ * is set replaces the English text on /de/ pages; the Markdown body replaces
+ * the English body. Facts (dates, venues, Bell values, photos) stay in the
+ * English entry. Photo alt texts and captions: src/i18n/photos.de.ts.
+ */
+const str = z.string().optional();
+const strs = z.array(z.string()).optional();
+const showsDe = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/de/shows' }),
+  schema: z.object({ title: str, venue: str, city: str, country: str, format: str, summary: str, lineup: strs, lecture: strs, audience: str }),
+});
+const piecesDe = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/de/pieces' }),
+  schema: z.object({ title: str, forces: str, summary: str, mapping: str, audio: z.array(z.object({ title: str, note: str })).optional() }),
+});
+const peopleDe = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/de/people' }),
+  schema: z.object({ role: str, affiliation: str }),
+});
+
+export const collections = { showsDe, piecesDe, peopleDe, shows, pieces, people, publications, supporters };

@@ -5,6 +5,13 @@ import { defineConfig } from 'astro/config';
 export default defineConfig({
   // Absolute URLs for share previews (og:image). Change when soundofentanglement.com points here.
   site: 'https://the-sound-of-entanglement.vercel.app',
+  // English is the default at /, German lives under /de/. No automatic
+  // redirects or browser-language detection: visitors switch by hand.
+  i18n: {
+    defaultLocale: 'en',
+    locales: ['en', 'de'],
+    routing: { prefixDefaultLocale: false, redirectToDefaultLocale: false },
+  },
   vite: {
     // Pre-bundle three.js up front so the dev server never serves a stale
     // optimised copy (which breaks the landing hero).

@@ -1,0 +1,184 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Photo from '../components/Photo.astro';
+import Person from '../components/people/Person.astro';
+import SupportList from '../components/support/SupportList.astro';
+
+import teamOnStage from '../assets/photos/2025-alpbach/team-on-stage.jpg';
+import organConsole from '../assets/photos/2024-bruqner-linz/organist-console.jpg';
+
+const people = (await getCollection('people')).sort((a, b) => a.data.order - b.data.order);
+const team = people.filter((p) => p.data.group === 'team');
+const musicians = people.filter((p) => p.data.group === 'musicians');
+const organists = await Promise.all(
+  people.filter((p) => p.data.group === 'organists').map(async (p) => ({ p, Content: (await render(p)).Content })),
+);
+
+const contributions = [
+  { who: 'Philipp Haslinger, Johannes Kofler, Clemens Wenger', what: 'conceived the concept, with the help of Enar de Dios Rodríguez, Richard Küng and Martin Ringbauer' },
+  { who: 'Benjamin Orthner, Martin Ringbauer, Philipp Haslinger', what: 'designed the Bell experiment' },
+  { who: 'Benjamin Orthner', what: 'built it, under the supervision of Philipp Haslinger, and developed the live link between the experiment and the music and visuals' },
+  { who: 'Clemens Wenger', what: 'developed the artistic concept and designed the live performances' },
+  { who: 'Enar de Dios Rodríguez', what: 'created the artistic concept of the live visuals' },
+  { who: 'Alexander Ploier', what: 'coordinated the paper and produced the documentary' },
+];
+
+const credits = [
+  { what: 'Documentary BruQner – The Sound of Entanglement', who: 'weitblickfilm. Director Deniz Lindenberg, executive producer Alexander Ploier, cinematography Florian Lindenberg, on-location sound Michael Alexa, audio post-production Peter Priemer (Low fidelity)' },
+  { what: 'Perger Präludium, extended version at the end of BruQner', who: 'Franz Neuhofer' },
+  { what: '8 Rooms, live at the Vienna Ball of Sciences (film)', who: 'Film by Lisa Truttmann, live recording by Christian Hölzel, edited by Clemens Wenger' },
+];
+---
+<Base title="People" description="The physicists, composer, visual artist and musicians behind The Sound of Entanglement.">
+  <header class="wrap intro">
+    <h1>People</h1>
+    <p class="lede">
+      Experimental and theoretical physicists from Vienna, Linz and Innsbruck, a composer, a visual
+      artist, a band, and two cathedral organists.
+    </p>
+  </header>
+
+  <Photo
+    src={teamOnStage}
+    alt="Seven members of the team stand arm in arm on stage in front of a screen showing their portraits."
+    credit="© EFA / Luiza Puiu"
+    caption="On stage after the performance at the European Forum Alpbach, 26 August 2025."
+    bleed
+    loading="eager"
+    ratio="21 / 9"
+  />
+
+  <section class="wrap group" aria-labelledby="team-h">
+    <h2 id="team-h" class="group-title">The team</h2>
+    <div class="spread">
+      {team.map((p) => <Person person={p} />)}
+    </div>
+  </section>
+
+  <section class="wrap group" aria-labelledby="band-h">
+    <h2 id="band-h" class="group-title">The band</h2>
+    <p class="group-note">
+      Since 2025 the pieces are played by a band: Clemens Wenger on keys, with Manu Mayr and Judith
+      Schwarz. Together they are called The Uncertain Question.
+    </p>
+    <div class="spread">
+      {musicians.map((p) => <Person person={p} />)}
+    </div>
+  </section>
+
+  <section class="wrap group organists" aria-labelledby="organ-h">
+    <div class="organ-photo">
+      <Photo
+        src={organConsole}
+        alt="An organist seen from behind at the lit console of a cathedral organ."
+        credit="Florian Voggeneder / Ars Electronica"
+        caption="At the console during BruQner, Mariendom Linz."
+        sizes="(min-width: 900px) 50vw, 100vw"
+      />
+    </div>
+    <div class="organ-text">
+      <h2 id="organ-h" class="group-title">The organists</h2>
+      <p class="group-note">
+        <em>BruQner</em> was played on the two organs of the Mariendom in Linz, about thirty metres
+        apart, one for Alice and one for Bob.
+      </p>
+      {organists.map(({ p, Content }) => (
+        <div class="organist">
+          <h3>{p.data.name}</h3>
+          <p class="role">{p.data.role}</p>
+          <div class="bio dim"><Content /></div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="wrap group who" aria-labelledby="who-h">
+    <h2 id="who-h" class="group-title">Who did what</h2>
+    <dl>
+      {contributions.map((c) => (
+        <div class="row">
+          <dt>{c.who}</dt>
+          <dd>{c.what}</dd>
+        </div>
+      ))}
+    </dl>
+    <p class="source dim ui">From the author contributions of the paper, arXiv:2509.08892.</p>
+
+    <h3 class="sub">Also</h3>
+    <dl>
+      {credits.map((c) => (
+        <div class="row">
+          <dt>{c.what}</dt>
+          <dd>{c.who}</dd>
+        </div>
+      ))}
+    </dl>
+  </section>
+
+  <section class="wrap group" id="support" aria-labelledby="support-h">
+    <h2 id="support-h" class="group-title">Support and funding</h2>
+    <p class="support-intro dim">
+      The project depends on research institutions, funding bodies, festivals and hosts. These are the ones
+      that made the experiment, the music and the performances possible, with the grants as they are credited in
+      the paper.
+    </p>
+    <SupportList />
+  </section>
+</Base>
+
+<style>
+  .intro { padding-block: clamp(4rem, 12vw, 9rem) clamp(2.5rem, 6vw, 4rem); }
+  .lede { font-size: var(--step-1); line-height: 1.5; margin-top: 1.5rem; max-width: 40ch; }
+
+  .group { padding-top: clamp(4rem, 9vw, 7rem); }
+  .group-title { font-size: var(--step-2); color: var(--ash); margin-bottom: 2.5rem; }
+  .group-note { max-width: var(--measure); margin: -1rem 0 3rem; }
+
+  /* Two columns, the right one set lower, so portraits step down the page */
+  .spread {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    row-gap: clamp(4rem, 8vw, 7rem);
+  }
+  .spread > :global(.person:nth-child(odd)) { grid-column: 1 / span 6; }
+  .spread > :global(.person:nth-child(even)) { grid-column: 7 / span 6; margin-top: clamp(4rem, 10vw, 9rem); }
+
+  .organists {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    align-items: end;
+  }
+  .organ-photo { grid-column: 1 / span 6; }
+  .organ-text { grid-column: 8 / span 5; }
+  .organist { border-top: 1px solid var(--graphite); padding-top: 1.25rem; margin-top: 1.5rem; }
+  .organist h3 { font-size: var(--step-2); font-weight: 300; }
+  .organist .role { font-family: var(--font-display); font-size: 1rem; margin: 0.4rem 0 0.6rem; }
+  .organist .bio { font-size: 1rem; }
+
+  dl { margin: 0; border-top: 1px solid var(--graphite); }
+  .row {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--graphite);
+  }
+  dt { grid-column: 1 / span 5; font-family: var(--font-display); font-size: 1rem; line-height: 1.5; }
+  dd { grid-column: 6 / span 7; margin: 0; font-size: 1.0625rem; color: var(--ash); }
+  .source { margin-top: 1rem; font-size: 0.8125rem; }
+  .support-intro { max-width: 62ch; margin-bottom: 3rem; font-size: 1.0625rem; }
+  #support { scroll-margin-top: calc(var(--header-h) + 1rem); }
+  .sub { font-size: var(--step-1); color: var(--ash); margin: 4rem 0 1.5rem; }
+
+  @media (max-width: 900px) {
+    .spread > :global(.person:nth-child(odd)),
+    .spread > :global(.person:nth-child(even)) { grid-column: 1 / -1; margin-top: 0; }
+    .organ-photo, .organ-text { grid-column: 1 / -1; }
+    .organ-text { margin-top: 2rem; }
+    dt, dd { grid-column: 1 / -1; }
+    dd { margin-top: 0.3rem; }
+  }
+</style>

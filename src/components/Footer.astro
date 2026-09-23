@@ -3,36 +3,41 @@ import { getCollection } from 'astro:content';
 import Wordmark from './Wordmark.astro';
 import { formatDate } from '../lib/format';
 import FooterLogos from './support/FooterLogos.astro';
+import { getLang, useT, localize } from '../i18n';
+import { localized } from '../i18n/content';
 
 const now = new Date();
 const next = (await getCollection('shows', (s) => !s.data.draft && s.data.kind === 'performance' && s.data.date >= now))
   .sort((a, b) => +a.data.date - +b.data.date)[0];
+const lang = getLang(Astro);
+const t = useT(lang);
+const nextCity = next ? (await localized('shows', next, lang)).data.city : '';
 ---
 <footer class="site-footer">
   <div class="wrap grid">
     <div class="about">
       <Wordmark />
-      <p class="dim">Pairs of entangled photons conduct a live audiovisual performance.</p>
+      <p class="dim">{t('site.tagline')}</p>
       {next && (
         <p class="next ui">
-          Next: <a href={`/shows/${next.id}/`}>{formatDate(next.data.date)}, {next.data.city}</a>
+          {t('footer.next')}: <a href={localize(lang, `/shows/${next.id}/`)}>{formatDate(next.data.date, lang)}, {nextCity}</a>
         </p>
       )}
     </div>
     <div class="contact">
-      <h2 class="ui label">Contact</h2>
+      <h2 class="ui label">{t('footer.contact')}</h2>
       <p><a href="mailto:clemenswenger@mac.com">clemenswenger@mac.com</a></p>
-      <p><a href="/booking/">Booking and technical needs</a></p>
+      <p><a href={localize(lang, '/booking/')}>{t('footer.booking')}</a></p>
       <p><a href="https://www.youtube.com/@BruQnerTheSoundofEntanglement">YouTube</a></p>
     </div>
   </div>
   <div class="wrap partners">
-    <h2 class="ui label">With the support of</h2>
+    <h2 class="ui label">{t('footer.support')}</h2>
     <FooterLogos />
-    <p class="ui"><a href="/people/#support">Full list of supporters and grants</a></p>
+    <p class="ui"><a href={localize(lang, '/people/#support')}>{t('footer.allSupporters')}</a></p>
   </div>
   <div class="wrap small ui dim">
-    <p>Photographs are credited where they appear. The measurements shown on this site come from the performance logs of the experiment.</p>
+    <p>{t('footer.small')}</p>
   </div>
 </footer>
 

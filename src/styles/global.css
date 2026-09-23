@@ -125,3 +125,6 @@ hr { border: 0; border-top: 1px solid var(--graphite); margin: 0; }
 /* The data colours as text accents, used only where a value belongs to a station */
 .alice { color: var(--alice); }
 .bob { color: var(--bob); }
+
+/* German: long compounds need hyphenation in running text */
+:lang(de) p, :lang(de) li, :lang(de) dd { hyphens: auto; -webkit-hyphens: auto; }

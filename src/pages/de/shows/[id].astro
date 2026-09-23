@@ -1,0 +1,6 @@
+---
+import Show from '../../../views/shows/Show.astro';
+import { showPaths } from '../../../views/shows/paths';
+export const getStaticPaths = showPaths;
+---
+<Show {...Astro.props} />

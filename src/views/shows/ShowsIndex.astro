@@ -1,0 +1,169 @@
+---
+import Base from '../../layouts/Base.astro';
+import TimelineEntry from '../../components/shows/TimelineEntry.astro';
+import { publicShows, isUpcoming, place, pieceOf } from '../../components/shows/data';
+import { formatRange, year } from '../../lib/format';
+
+const shows = await publicShows();
+const now = new Date();
+
+const upcoming = shows.filter((s) => s.data.kind === 'performance' && isUpcoming(s, now));
+const past = shows
+  .filter((s) => s.data.kind === 'performance' && !isUpcoming(s, now))
+  .sort((a, b) => +b.data.date - +a.data.date);
+const other = shows
+  .filter((s) => s.data.kind !== 'performance')
+  .sort((a, b) => +b.data.date - +a.data.date);
+
+const years = [...new Set(past.map((s) => year(s.data.date)))];
+const byYear = years.map((y) => ({ y, list: past.filter((s) => year(s.data.date) === y) }));
+
+const upcomingPieces = await Promise.all(upcoming.map(pieceOf));
+---
+<Base title="Shows" description="Upcoming and past performances of The Sound of Entanglement, with the Bell value measured at each.">
+  <section class="wrap intro">
+    <h1>Shows</h1>
+    <p class="lede">
+      Every performance runs the experiment live. Each one has its own Bell value, measured from the photon
+      pairs that conducted it that night. Above 2, no classical conductor could have done it.
+    </p>
+  </section>
+
+  {upcoming.length > 0 && (
+    <section class="wrap upcoming" aria-labelledby="next">
+      <h2 id="next" class="next-head"><span class="live-dot" aria-hidden="true"></span>{upcoming.length > 1 ? 'Upcoming shows' : 'Next show'}</h2>
+      {upcoming.map((s, i) => (
+        <a class="next" href={`/shows/${s.id}/`}>
+          <p class="next-date num">{formatRange(s.data.date, s.data.endDate)}</p>
+          <p class="countdown ui" data-countdown={s.data.date.toISOString()}></p>
+          <p class="next-where">{s.data.venue}, {place(s)}</p>
+          <p class="next-what dim">
+            {s.data.title}.{' '}
+            {upcomingPieces[i] ? <em>{upcomingPieces[i]!.data.title}</em> : 'Programme, venue and time to follow.'}
+          </p>
+        </a>
+      ))}
+    </section>
+  )}
+
+  <section class="wrap past" aria-labelledby="past">
+    <h2 id="past" class="visually-hidden">Past performances</h2>
+    {byYear.map(({ y, list }) => (
+      <div class="year">
+        <h3 class="year-label num">{y}</h3>
+        {list.map((s) => <TimelineEntry show={s} />)}
+      </div>
+    ))}
+  </section>
+
+  <section class="wrap other" aria-labelledby="talks">
+    <div class="other-head">
+      <h2 id="talks">Talks and exhibitions</h2>
+      <p class="dim">Where the project was presented without a live performance.</p>
+    </div>
+    <ul class="talks">
+      {other.map((s) => (
+        <li>
+          <span class="t-date ui num dim">{formatRange(s.data.date, s.data.endDate)}</span>
+          <a class="t-title" href={`/shows/${s.id}/`}>{s.data.title}</a>
+          <span class="t-where dim">{s.data.venue === s.data.title ? place(s) : `${s.data.venue}, ${place(s)}`}</span>
+          <span class="t-kind ui dim">
+            {s.data.kind === 'exhibition' ? 'Exhibition' : s.data.lecture.length ? s.data.lecture.join(', ') : 'Talk'}
+          </span>
+        </li>
+      ))}
+    </ul>
+  </section>
+</Base>
+
+<script>
+  // Written at view time, not build time, so it never goes stale.
+  document.querySelectorAll<HTMLElement>('[data-countdown]').forEach((el) => {
+    const day = 86_400_000;
+    const start = new Date(el.dataset.countdown!).setUTCHours(0, 0, 0, 0);
+    const today = new Date().setUTCHours(0, 0, 0, 0);
+    const d = Math.round((start - today) / day);
+    el.textContent = d > 1 ? `In ${d} days` : d === 1 ? 'Tomorrow' : d === 0 ? 'Today' : '';
+  });
+</script>
+
+<style>
+  .intro { padding-top: clamp(4rem, 10vw, 8rem); padding-bottom: clamp(2rem, 5vw, 4rem); }
+  .lede { margin-top: 1.5rem; font-size: var(--step-1); line-height: 1.45; max-width: 40ch; color: var(--ash); }
+
+  .label { color: var(--ash); font-weight: 400; font-size: var(--step--1); margin-bottom: 1rem; }
+  .upcoming { padding-bottom: clamp(3rem, 7vw, 6rem); }
+  .next-head {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: var(--step-2);
+    font-weight: 300;
+    margin-bottom: 1.25rem;
+  }
+  /* a small ring, the project's sign for something live */
+  .live-dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    border: 1.5px solid var(--photon);
+    box-shadow: 0 0 10px rgb(255 255 179 / 0.6);
+    animation: breathe 2.4s ease-in-out infinite;
+  }
+  @keyframes breathe { 50% { box-shadow: 0 0 2px rgb(255 255 179 / 0.2); opacity: 0.6; } }
+  @media (prefers-reduced-motion: reduce) { .live-dot { animation: none; } }
+  .countdown { margin: 0.9rem 0 0; font-size: 1rem; color: var(--photon); }
+  .countdown:empty { display: none; }
+  .next {
+    display: block;
+    text-decoration: none;
+    padding-block: 1.5rem 0;
+    border-top: 1px solid var(--paper);
+  }
+  .next-date {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: var(--step-5);
+    line-height: 1;
+    margin: 0;
+    max-width: none;
+  }
+  .next:hover .next-date { color: var(--photon); }
+  .next-where { font-size: var(--step-1); margin: 1rem 0 0; }
+  .next-what { margin: 0.25rem 0 0; }
+
+  .year { position: relative; }
+  .year + .year { margin-top: clamp(3rem, 6vw, 5rem); }
+  .year-label {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: var(--step-4);
+    line-height: 1;
+    color: var(--smoke);
+    margin: 0 0 1rem;
+  }
+
+  .other { padding-top: clamp(5rem, 10vw, 8rem); }
+  .other-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem 2rem; margin-bottom: 1.5rem; }
+  .other-head h2 { font-size: var(--step-3); }
+  .other-head p { margin: 0; }
+  .talks { list-style: none; margin: 0; padding: 0; }
+  .talks li {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    padding-block: 1rem;
+    border-top: 1px solid var(--graphite);
+    align-items: baseline;
+    font-size: 1.0625rem;
+  }
+  .t-date { grid-column: 1 / span 2; font-size: 0.9375rem; }
+  .t-title { grid-column: 3 / span 4; text-decoration: none; }
+  .t-title:hover { text-decoration: underline; text-decoration-color: var(--graphite); }
+  .t-where { grid-column: 7 / span 3; font-size: 1rem; }
+  .t-kind { grid-column: 10 / span 3; font-size: 0.9375rem; }
+  @media (max-width: 860px) {
+    .talks li { grid-template-columns: 1fr; row-gap: 0.2rem; }
+    .t-date, .t-title, .t-where, .t-kind { grid-column: 1; }
+  }
+</style>

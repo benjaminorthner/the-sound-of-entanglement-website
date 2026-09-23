@@ -4,6 +4,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
+import { getLang, useT, alternates } from '../i18n';
 
 interface Props {
   title?: string;
@@ -14,9 +15,11 @@ interface Props {
   image?: ImageMetadata;
   imageAlt?: string;
 }
+const lang = getLang(Astro);
+const t = useT(lang);
 const {
   title,
-  description = 'Pairs of entangled photons conduct a live audiovisual performance. An art–science project by musicians, artists and quantum physicists.',
+  description = t('site.description'),
   underHeader = false,
   image,
   imageAlt,
@@ -25,19 +28,28 @@ const site = Astro.site ?? new URL('https://the-sound-of-entanglement.vercel.app
 const og = image
   ? new URL((await getImage({ src: image, width: 1200, height: 630, fit: 'cover', format: 'jpg', quality: 80 })).src, site).href
   : new URL('/og/default.jpg', site).href;
-const ogAlt = image ? (imageAlt ?? '') : 'The Sound of Entanglement: the title over the optics of the experiment, with its two red rotation mounts.';
+const ogAlt = image
+  ? (imageAlt ?? '')
+  : lang === 'de'
+    ? 'The Sound of Entanglement: der Titel über der Optik des Experiments mit den beiden roten Drehhalterungen.'
+    : 'The Sound of Entanglement: the title over the optics of the experiment, with its two red rotation mounts.';
+const alt = alternates(Astro.url.pathname);
 const canonical = new URL(Astro.url.pathname, site).href;
 const fullTitle = title ? `${title} · The Sound of Entanglement` : 'The Sound of Entanglement';
 ---
 <!doctype html>
-<html lang="en">
+<html lang={lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="en" href={new URL(alt.en, site).href} />
+    <link rel="alternate" hreflang="de" href={new URL(alt.de, site).href} />
+    <link rel="alternate" hreflang="x-default" href={new URL(alt.en, site).href} />
     <meta property="og:type" content="website" />
+    <meta property="og:locale" content={lang === 'de' ? 'de_AT' : 'en_GB'} />
     <meta property="og:site_name" content="The Sound of Entanglement" />
     <meta property="og:url" content={canonical} />
     <meta property="og:title" content={fullTitle} />
@@ -60,7 +72,7 @@ const fullTitle = title ? `${title} · The Sound of Entanglement` : 'The Sound o
     />
   </head>
   <body>
-    <a class="skip ui" href="#main">Skip to content</a>
+    <a class="skip ui" href="#main">{t('skip')}</a>
     <Header />
     <main id="main" class:list={{ 'under-header': underHeader }}>
       <slot />
