@@ -112,8 +112,9 @@ const stops = [
 
     <div class="labels" data-labels aria-hidden="true"></div>
 
+    <div class="hud live-only">
     <p
-      class="tally ui live-only waiting"
+      class="tally ui waiting"
       data-tally
       data-lang={lang}
       data-settling={de ? 'S pendelt sich noch ein' : 'S still settling'}
@@ -125,6 +126,28 @@ const stops = [
       <span>Alice <span class="num" data-a-out>–</span>, Bob <span class="num" data-b-out>–</span>.</span>
       <span class="num" data-s>–</span>
     </p>
+    <button
+      type="button"
+      class="sound ui"
+      aria-pressed="false"
+      data-sound
+      title={de
+        ? 'Jedes Paar, das Sie sehen, erklingt als zwei Glocken, eine pro Detektor. Gleiche Ergebnisse klingen als Oktave, verschiedene nicht. Eine Skizze, keine Aufnahme eines Stücks.'
+        : 'Each pair you see is played as two bells, one per detector. Equal results sound as an octave, different ones do not. A sketch, not a recording of a piece.'}
+    >
+      <svg viewBox="0 0 20 20" aria-hidden="true">
+        <path class="spk" d="M3 8h3l4-3.5v11L6 12H3z" />
+        <path class="waves" d="M13 7.2a4 4 0 0 1 0 5.6M15.2 5a7 7 0 0 1 0 10" />
+        <path class="mute" d="M13.5 7.5l5 5M18.5 7.5l-5 5" />
+      </svg>
+      <span>{de ? 'Ton' : 'Sound'}</span>
+    </button>
+    <p class="sound-note ui" data-sound-note aria-live="polite">
+      {de
+        ? 'Jedes Paar erklingt als zwei Glocken, eine pro Detektor: gleiche Ergebnisse als Oktave.'
+        : 'Each pair plays as two bells, one per detector: equal results sound as an octave.'}
+    </p>
+    </div>
 
     <span class="scroll-hint live-only" aria-hidden="true"></span>
   </div>
@@ -132,6 +155,7 @@ const stops = [
 
 <script>
   import type { PointCloudScene, DetectInfo } from './scene';
+  import { HeroSound } from './sound';
   import { decodeExcerpt, Replay, RunningS, clock, type Excerpt, type ReplayEvent } from '../../../lib/replay';
   import premiere from '../../../data/bruqner_premiere_2024-09-04.json';
 
@@ -187,9 +211,24 @@ const stops = [
     addEventListener('resize', onScroll);
     onScroll();
 
+    const sound = new HeroSound();
+    const soundBtn = $('[data-sound]');
+    let noteTimer = 0;
+    soundBtn.addEventListener('click', async () => {
+      const on = !sound.on;
+      if (on) await sound.enable();
+      else sound.disable();
+      soundBtn.setAttribute('aria-pressed', String(on));
+      const hud = soundBtn.closest('.hud')!;
+      hud.classList.toggle('sounding', on);
+      clearTimeout(noteTimer);
+      if (on) noteTimer = setTimeout(() => hud.classList.remove('sounding'), 7000);
+    });
+
     const setRunning = () => {
       const on = visible && !document.hidden;
       scene?.setRunning(on);
+      sound.pause(!on);
       if (!replay) return;
       if (on && !replay.running) replay.start();
       if (!on && replay.running) replay.stop();
@@ -210,6 +249,7 @@ const stops = [
     };
     const sign = (x: number) => (x === 1 ? '+1' : '−1');
     const onDetect = ({ e, colours }: DetectInfo) => {
+      sound.detect(e);
       el.pair.textContent = String(e.n + 1);
       el.clock.textContent = clock(e);
       el.aOut.textContent = sign(e.A);
@@ -247,6 +287,7 @@ const stops = [
             continue;
           }
           drawn = e.n;
+          sound.turn(e);
           await s.play(e);
         }
       })
@@ -333,10 +374,49 @@ const stops = [
   }
 
   /* One quiet line: the pair being drawn and the running Bell value. */
-  .tally {
+  .hud {
     position: absolute;
     right: var(--gutter);
     bottom: 1.6rem;
+    align-items: center;
+    gap: 1.25rem;
+  }
+  :global(html[data-hero='live']) div.hud { display: flex; }
+  .sound {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.75rem 0.3rem 0.55rem;
+    border: 1px solid var(--graphite);
+    border-radius: 999px;
+    background: rgb(0 0 0 / 0.4);
+    color: var(--ash);
+    font-size: 0.8125rem;
+    cursor: pointer;
+  }
+  .sound:hover { color: var(--paper); border-color: var(--smoke); }
+  .sound svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round; }
+  .sound .spk { fill: currentColor; stroke: none; }
+  .sound .waves { display: none; }
+  .sound[aria-pressed='true'] { color: var(--paper); border-color: var(--smoke); }
+  .sound[aria-pressed='true'] .waves { display: inline; }
+  .sound[aria-pressed='true'] .mute { display: none; }
+  .sound-note {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 0.6rem);
+    margin: 0;
+    width: max-content;
+    max-width: min(36rem, calc(100vw - 2 * var(--gutter)));
+    color: var(--smoke);
+    font-size: 0.75rem;
+    text-align: right;
+    opacity: 0;
+    transition: opacity 0.6s;
+    pointer-events: none;
+  }
+  .hud.sounding .sound-note { opacity: 1; }
+  .tally {
     margin: 0;
     display: flex;
     gap: 0.9rem;
@@ -366,7 +446,7 @@ const stops = [
   :global(html[data-hero='live']) .static-only { display: none; }
   :global(html[data-hero='live']) .live-only { display: inline; }
   :global(html[data-hero='live']) p.live-only { display: block; }
-  :global(html[data-hero='live']) p.tally { display: flex; }
+  :global(html[data-hero='live']) .hud p.tally { display: flex; }
   :global(html[data-hero='live']) .copy {
     position: absolute;
     inset: 0;
@@ -428,7 +508,11 @@ const stops = [
       right: var(--gutter);
     }
     :global(html[data-hero='live']) .stop-0 { bottom: 4.5rem; }
-    .tally { left: var(--gutter); right: auto; bottom: 1rem; font-size: 0.75rem; opacity: calc(1 - var(--hint, 1)); }
+    .hud { left: var(--gutter); right: var(--gutter); bottom: 1rem; justify-content: space-between; }
+    .tally { font-size: 0.75rem; opacity: calc(1 - var(--hint, 1)); }
+    .sound-note { right: auto; left: 0; bottom: auto; top: 50%; translate: 0 -50%; max-width: calc(100% - 6.5rem); text-align: left; }
+    .hud.sounding .tally { opacity: 0; }
+    .stage:has(.hud.sounding) .scroll-hint { opacity: 0; }
     .tally-pair { display: none; }
     .stop p { font-size: 1.1875rem; }
     .readout { font-size: 0.875rem; }

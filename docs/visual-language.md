@@ -75,3 +75,17 @@ WebGL2 almost unchanged.
 Dark, high-contrast, with light only where something is happening: projected
 light in haze, the lit case, the white-line screen. Most of the best images are
 90% black. That suits a dark site, but crops must keep the light shapes intact.
+
+## Landing hero: sound
+
+The point-cloud hero (`src/components/visuals/pointcloud/`) has an optional
+sound, off by default and switched on with the "Sound" / „Ton" button next to
+the readout (`sound.ts`, Web Audio, no files). It is a sonification sketch of
+the pairs being drawn, not a recording of a piece, and the page says so:
+
+- When both detectors click, each side strikes an FM bell: Alice left, Bob
+  right and an octave higher. The note is the measured outcome (+1 = D,
+  −1 = E), so equal outcomes sound as octaves and different ones as a seventh
+  or a ninth. The setting makes the bell brighter (first) or darker (second).
+- A soft motor click when a wave plate turns to a new setting.
+- Sound pauses when the hero is off screen or the tab is hidden.
