@@ -29,7 +29,7 @@ const videoPoster = d.gallery[1]?.src ?? d.cover?.src;
 const video = videoInfo[show.id] ?? { title: piece ? `${piece.data.title}, film` : 'Film' };
 const isTalk = d.kind !== 'performance';
 ---
-<Base title={d.title} description={d.summary} underHeader={hasCover}>
+<Base title={d.title} description={d.summary} underHeader={hasCover} image={d.cover?.src} imageAlt={d.cover?.alt}>
   {hasCover && (
     <div class="cover">
       <Photo {...d.cover!} bleed loading="eager" sizes="100vw" />

@@ -41,7 +41,7 @@ const composers = d.composers.join(', ').replace(/, ([^,]*)$/, ' and $1');
 const LIGHT_FIGURES = ['bruqner-motifs', 'quantum-random-walk'];
 const isLight = (src: { src: string }) => LIGHT_FIGURES.some((f) => src.src.includes(f));
 ---
-<Base title={d.title} description={d.summary} underHeader={hasVisual}>
+<Base title={d.title} description={d.summary} underHeader={hasVisual} image={d.cover?.src} imageAlt={d.cover?.alt}>
   {d.visual === 'rings' && <Rings />}
   {d.visual === 'terrain' && <Terrain />}
   {d.visual === 'metronome' && <Metronome />}
