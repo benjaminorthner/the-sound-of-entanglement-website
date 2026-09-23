@@ -1,4 +1,5 @@
 ---
+import { meta, ladder, QUALITY } from '../lib/image';
 /**
  * A photo with its credit. Every image on the site goes through this so the
  * credit can't be forgotten. `bleed` makes it span the full viewport width.
@@ -25,11 +26,11 @@ const lang = getLang(Astro);
 const t = useT(lang);
 // Alt text belongs to the image: on German pages it comes from src/i18n/photos.de.ts
 // (English fallback). Captions are context and are translated by the caller.
-const alt = lang === 'de' ? (photosDe[photoKey(src.src)]?.alt ?? Astro.props.alt) : Astro.props.alt;
-const widths = [480, 800, 1200, 1600, 2000, 2400].filter((w) => w <= src.width);
+const alt = lang === 'de' ? (photosDe[photoKey(meta(src).src)]?.alt ?? Astro.props.alt) : Astro.props.alt;
+const widths = ladder(src);
 ---
 <figure class:list={['photo', { bleed }, Astro.props.class]} style={ratio ? `--ratio: ${ratio}` : undefined}>
-  <Image src={src} alt={alt} widths={widths} sizes={sizes} loading={loading} format="webp" quality={82} />
+  <Image src={src} alt={alt} widths={widths} sizes={sizes} loading={loading} format="webp" quality={QUALITY} />
   <figcaption class="ui">
     {caption && <span class="caption">{caption}</span>}
     <span class="credit">{credit.startsWith('©') ? credit : `${t('photo.credit')}: ${credit}`}</span>

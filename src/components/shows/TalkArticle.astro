@@ -82,7 +82,7 @@ const repertoire = piece
         <h2 class="label ui">{L({ en: 'Piece presented', de: 'Vorgestelltes Stück' })}</h2>
         <a class="piece" href={localize(lang, `/pieces/${piece.id}/`)}>
           {piece.data.cover && (
-            <Image src={piece.data.cover.src} alt="" widths={[400, 800]} sizes="(min-width: 860px) 25vw, 100vw" format="webp" quality={78} />
+            <Image src={piece.data.cover.src} alt="" widths={[480, 800]} sizes="(min-width: 860px) 25vw, 100vw" format="webp" quality={80} />
           )}
           <span class="piece-title"><em>{piece.data.title}</em>, {piece.data.year}</span>
           <span class="piece-forces dim">{piece.data.forces}</span>

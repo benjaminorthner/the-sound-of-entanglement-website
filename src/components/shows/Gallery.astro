@@ -1,4 +1,5 @@
 ---
+import { meta, ladder, QUALITY } from '../../lib/image';
 /**
  * Photo gallery with a lightbox.
  *
@@ -26,7 +27,7 @@ const t = useT(lang);
 const L = <T,>(v: { en: T; de: T }) => v[lang];
 const { items: source, label = L({ en: 'Photographs', de: 'Fotos' }) } = Astro.props;
 // German alt texts come from src/i18n/photos.de.ts, like everywhere else.
-const items = lang === 'de' ? source.map((it) => ({ ...it, alt: photosDe[photoKey(it.src.src)]?.alt ?? it.alt })) : source;
+const items = lang === 'de' ? source.map((it) => ({ ...it, alt: photosDe[photoKey(meta(it.src).src)]?.alt ?? it.alt })) : source;
 
 const SLIDES = 'From the slides';
 /** Group names as they are written in the show entries, in German. */
@@ -44,7 +45,7 @@ type Block = { kind: 'full' | 'pair' | 'masonry' | 'strip'; items: { it: Item; i
 type Group = { title?: string; blocks: Block[] };
 
 const creditLine = (c: string) => (c.startsWith('©') ? c : `${t('photo.credit')}: ${c}`);
-const landscape = (it: Item) => it.src.width >= it.src.height * 1.2;
+const landscape = (it: Item) => meta(it.src).width >= meta(it.src).height * 1.2;
 
 // Order: main set first, then named groups in order of first appearance.
 const named = [...new Set(items.filter((i) => i.caption).map((i) => i.caption!))];
@@ -81,7 +82,7 @@ for (const n of named) {
 const smallGallery = ordered.length <= 6;
 
 const large = await Promise.all(
-  ordered.map((it) => getImage({ src: it.src, width: Math.min(2400, it.src.width), format: 'webp', quality: 84 })),
+  ordered.map((it) => getImage({ src: it.src, width: Math.min(2000, meta(it.src).width), format: 'webp', quality: QUALITY })),
 );
 const credits = [...new Set(items.map((i) => i.credit))];
 const sizesFor = (k: Block['kind']) =>
@@ -106,10 +107,10 @@ const sizesFor = (k: Block['kind']) =>
                 <Image
                   src={it.src}
                   alt={it.alt}
-                  widths={[400, 800, 1200, 1600, 2000].filter((w) => w <= it.src.width)}
+                  widths={ladder(it.src)}
                   sizes={sizesFor(b.kind)}
                   format="webp"
-                  quality={80}
+                  quality={QUALITY}
                 />
               </button>
             </li>

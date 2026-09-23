@@ -1,4 +1,5 @@
 ---
+import { ladder, QUALITY } from '../../lib/image';
 /**
  * A person's portrait with its credit. Portraits come from different
  * photographers and palettes, so they are shown in greyscale for a common
@@ -16,12 +17,11 @@ interface Props {
 }
 const { src, alt, credit, sizes = '(min-width: 900px) 18vw, 70vw' } = Astro.props;
 const t = useT(getLang(Astro));
-const widths = [400, 700, 1000, 1400].filter((w) => w <= src.width);
-if (widths.length === 0) widths.push(src.width);
+const widths = ladder(src, 1600);
 ---
 <figure class="portrait">
   <div class="frame">
-    <Image src={src} alt={alt} widths={widths} sizes={sizes} format="webp" quality={80} />
+    <Image src={src} alt={alt} widths={widths} sizes={sizes} format="webp" quality={QUALITY} />
   </div>
   <figcaption class="ui">{credit.startsWith('©') ? credit : `${t('photo.credit')}: ${credit}`}</figcaption>
 </figure>

@@ -1,4 +1,5 @@
 ---
+import { meta } from '../../lib/image';
 import { render, type CollectionEntry } from 'astro:content';
 import Portrait from './Portrait.astro';
 import { getLang } from '../../i18n';
@@ -24,7 +25,7 @@ const altDe: Record<string, string> = {
   'judith-schwarz': 'Porträt von Judith Schwarz am Schlagzeug.',
 };
 const portraitAlt = (p: NonNullable<typeof d.portrait>) =>
-  lang === 'de' ? (photosDe[photoKey(p.src.src)]?.alt ?? altDe[person.id] ?? `Porträt von ${d.name}.`) : p.alt;
+  lang === 'de' ? (photosDe[photoKey(meta(p.src).src)]?.alt ?? altDe[person.id] ?? `Porträt von ${d.name}.`) : p.alt;
 const label = (l: string) => (lang === 'de' ? (linkDe[l] ?? l) : l);
 ---
 <article class="person" id={person.id}>

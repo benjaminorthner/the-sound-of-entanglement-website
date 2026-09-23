@@ -1,3 +1,4 @@
+import { meta } from '../../lib/image';
 /**
  * German alt texts for the cover and extra images of the piece entries
  * (src/content/pieces/*.md), keyed by image file name like
@@ -21,5 +22,5 @@ const altDe: Record<string, string> = {
 /** A piece image with its alt text in the page's language. */
 export function pieceImage<T extends { src: ImageMetadata; alt: string }>(lang: Lang, img: T): T {
   if (lang !== 'de') return img;
-  return { ...img, alt: altDe[photoKey(img.src.src)] ?? img.alt };
+  return { ...img, alt: altDe[photoKey(meta(img.src).src)] ?? img.alt };
 }
