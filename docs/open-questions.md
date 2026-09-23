@@ -51,8 +51,8 @@ open for final clearance before launch.
 - [x] weitblickfilm stills (*fine*)
 - [ ] Hi-res originals and credit for the Vienna Ball photos; hi-res CIVA
       photos from eSeL.at (*use what we have for now*)
-- [x] Visual-test photos (July 2024) and "Osaka" photos: photographer unknown *Benjamin Orthner took the studio photos and the 2024 test-performance photos.*
-      (*use for now*; credit "The Sound of Entanglement")
+- [x] "Osaka" folder photos (the 2024 test performances): *taken by Benjamin Orthner.*
+- [ ] Visual-test photos in the Mariendom (July 2024): photographer? (*use for now*)
 - [ ] Musician and organist bios and portraits; approval of team bios (*use
       the drafts for now*)
 - [x] BruQner audio: *use the available recordings where it makes sense*
