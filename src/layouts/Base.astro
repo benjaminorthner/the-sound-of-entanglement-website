@@ -26,6 +26,8 @@ const fullTitle = title ? `${title} · The Sound of Entanglement` : 'The Sound o
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta name="theme-color" content="#000000" />
+    {/* Preview phase: keep out of search engines until photo rights are cleared (docs/open-questions.md). Remove for launch, together with public/robots.txt. */}
+    <meta name="robots" content="noindex, nofollow" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
