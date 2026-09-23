@@ -659,5 +659,9 @@
  {
   "src": "DOWNLOADS/TOSE Washington/TSOE_Washington_Benny-8.jpg",
   "dest": "src/assets/photos/2025-washington/team-at-work.jpg"
+ },
+ {
+  "src": "DOWNLOADS/PXL_20250603_145550360.jpg",
+  "dest": "src/assets/photos/2025-millstatt/keys-screen-altar-wide.jpg"
  }
 ]

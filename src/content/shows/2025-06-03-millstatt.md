@@ -18,10 +18,13 @@ lecture:
 bell: 2.32
 summary: 8 Rooms in a baroque church in Carinthia, with the screen in front of the gilded altar.
 cover:
-  src: ../../assets/photos/2025-millstatt/keys-and-altar.jpg
-  alt: The keyboard and the projection screen in front of the gilded baroque altar.
+  src: ../../assets/photos/2025-millstatt/keys-screen-altar-wide.jpg
+  alt: Clemens Wenger at the keyboards in the Stiftskirche Millstatt, a white-line landscape on the screen in front of the gilded baroque altar, the experiment in its lit case on the right.
   credit: Benjamin Orthner
 gallery:
+- src: ../../assets/photos/2025-millstatt/keys-and-altar.jpg
+  alt: The keyboard and the projection screen in front of the gilded baroque altar.
+  credit: Benjamin Orthner
 - src: ../../assets/photos/2025-millstatt/altar-screen.jpg
   alt: The altar with the projection screen.
   credit: Benjamin Orthner
