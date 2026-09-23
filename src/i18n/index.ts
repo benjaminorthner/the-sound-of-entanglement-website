@@ -43,12 +43,14 @@ export function useT(lang: Lang) {
   return (key: UiKey): string => ui[lang][key] ?? ui.en[key];
 }
 
-/** Locale code for Intl APIs. */
+/** Locale code for dates (Austrian German: „Jänner"). */
 export const intlLocale = (lang: Lang) => (lang === 'de' ? 'de-AT' : 'en-GB');
+/** Locale code for numbers: de-AT groups thousands with a space, the site uses a dot (3.000). */
+export const numLocale = (lang: Lang) => (lang === 'de' ? 'de-DE' : 'en-GB');
 
 /** A number with the language's decimal separator, e.g. 2.45 / 2,45. */
 export function num(lang: Lang, x: number, digits = 2): string {
-  return x.toLocaleString(intlLocale(lang), { minimumFractionDigits: digits, maximumFractionDigits: digits });
+  return x.toLocaleString(numLocale(lang), { minimumFractionDigits: digits, maximumFractionDigits: digits });
 }
 
 /** Pick the string for the current language from an inline pair. */

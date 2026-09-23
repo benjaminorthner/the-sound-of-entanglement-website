@@ -26,6 +26,8 @@ The team's own German texts are the best reference for tone:
 - **Austrian German** (the project is Austrian): "Jänner", "heuer" only if
   natural, otherwise standard German. Dates like "4. September 2024".
 - **Decimal comma**: S = 2,45; 2√2 ≈ 2,83. Use `num(lang, x)` from `src/i18n`.
+- **Thousands with a dot**: „3.000 Menschen", „1.417 Paare". In code, format numbers with
+  `numLocale(lang)` (de-DE), not `intlLocale` (de-AT, which groups with a space; it is for dates).
 - **Quotation marks**: „…" (and ‚…' inside).
 - **Address**: avoid addressing the reader where possible. Where needed, use
   **„Sie"** (booking, contact, calls to action: „Schreiben Sie uns").

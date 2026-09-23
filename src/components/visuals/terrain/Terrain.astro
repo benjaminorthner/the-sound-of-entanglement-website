@@ -118,7 +118,7 @@ const de = lang === 'de';
       inRoom: (r: number) => `In Raum ${r}.`,
       finale: ' Jede Tür führt jetzt in Raum 9.',
       doors: (d: number, after: number) => ` ${d} ${d === 1 ? 'Tür' : 'Türen'} durchschritten; nach ${after} führt jede Tür in Raum 9.`,
-      pair: (clock: string, i: number, of: number) => `${clock}, Paar ${i.toLocaleString('de-AT')} von ${of.toLocaleString('de-AT')}. `,
+      pair: (clock: string, i: number, of: number) => `${clock}, Paar ${i.toLocaleString('de-DE')} von ${of.toLocaleString('de-DE')}. `,
       station: (name: string, setting: number, outcome: string) => `${name}: Einstellung ${setting}, ${outcome}.`,
       bellFew: 'Bell-Wert bisher: noch zu wenige Paare. Klassische Grenze: 2.',
       bell: (S: string, sg: string) => `Bell-Wert bisher: ${S} ± ${sg}. Klassische Grenze: 2.`,

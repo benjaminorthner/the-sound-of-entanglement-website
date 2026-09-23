@@ -8,7 +8,7 @@
  * `measured` lists values actually measured at shows, drawn on the same scale.
  */
 import BellScale from '../BellScale.astro';
-import { getLang, intlLocale } from '../../i18n';
+import { getLang, numLocale } from '../../i18n';
 
 interface Props {
   measured: { label: string; value: number }[];
@@ -59,7 +59,7 @@ const L = lang === 'de'
       resetQ: 'Entangled photons. Press run, or measure pairs one at a time.',
       resetC: 'Classical source: each pair carries hidden instructions for every setting. Press run.',
     };
-const client = { ...L, head: undefined, locale: intlLocale(lang) };
+const client = { ...L, head: undefined, locale: numLocale(lang) };
 ---
 <div class="lab" data-lab data-l={JSON.stringify(client)}>
   <div class="controls">
