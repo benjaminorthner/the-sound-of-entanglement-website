@@ -83,13 +83,13 @@ Two small toggles sit next to the readout of the point-cloud hero
 
 **Sound** („Ton", `sound.ts`, Web Audio, no files). Deliberately **not
 music**: the pieces are Clemens Wenger's, and nothing on the landing page may
-pass for them (Benjamin, Sept 2026). It is a quiet room tone so a site about
-sound isn't silent: slowly breathing filtered noise, left and right, a little
-air on top, no pitches. When both detectors click, two faint ticks (Alice
-left, Bob right) and the room opens up for a moment. Keep it subtle; an
-earlier version with bells tuned to the outcomes was too prominent and too
-music-like.
+pass for them (Benjamin, Sept 2026). A soft hum so a site about sound isn't
+silent: a low A (55 Hz) and a few natural overtones, each breathing slowly,
+slightly detuned left and right; no melody. At a detection, a faint high glint
+(an overtone of the same A), Alice left, Bob right, rate-limited. Tried and
+rejected: bells tuned to the outcomes (too prominent, too music-like) and
+filtered noise (sounded like white noise, unpleasant).
 
 **Fast forward** („Vorspulen"): the recording replays 20 times faster and the
 pairs fly 6 times faster, many at once (up to 10 in flight). The ±1 labels
-are hidden in fast forward.
+and the thread between the two photons of a pair are only drawn in slow mode.

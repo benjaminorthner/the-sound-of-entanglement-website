@@ -755,9 +755,10 @@ export async function createScene(
           put(I.heads + 1, tmpB, COL.photon, tint, 0.07);
           put(I.halos, tmpA, COL.photon, 0.22 * tint, 0.22);
           put(I.halos + 1, tmpB, COL.photon, 0.22 * tint, 0.22);
-          // the thread: the two photons belong to one state
+          // the thread: the two photons belong to one state (slow mode only;
+          // in fast forward the many threads read as clutter)
           const p = new THREE.Vector3();
-          for (let j = 0; j < THREAD; j++) {
+          for (let j = 0; j < (pr.k === 1 ? THREAD : 0); j++) {
             const r = j / (THREAD - 1);
             p.copy(tmpA).lerp(tmpB, r);
             p.z += Math.sin(r * Math.PI) * 0.035 + Math.sin(t * 3 + j) * 0.002;
