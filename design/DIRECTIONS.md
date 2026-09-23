@@ -147,3 +147,59 @@ component blue `#3f6fd8`, Elliptec yellow `#e6b422`, beam violet `#8a5cff`.
   beam path in D, and the dated show timeline.
 - **Motion?** In each direction the one moving thing is the data-driven hero.
   Nothing else animates on its own.
+
+---
+
+# Round 2: Direction E, "Apparatus and archive"
+
+Benjamin's feedback on round 1 (23 Sept 2026):
+- **Loved D's point cloud of the experiment and its camera moves**, but it
+  carried the whole page. Use it as the landing feature only; camera moves
+  can reappear elsewhere where they earn it.
+- **Loved A's photography**: `haze-over-case.jpg` and the Washington stage
+  (`jhu-landscape.jpg`). Those two stay. The site needs many more photos.
+- **C's Rooms terrain belongs on the 8 Rooms page.**
+- More pages: people, individual pieces, shows with galleries.
+
+E is built in the real stack (Astro, `src/`), with content collections, so
+its structure and content carry over whatever the final look becomes.
+
+## Tokens (see `src/styles/global.css`)
+
+- Ground `#000`. Text `--paper #ebe7df` (warm, like haze in tungsten light).
+  Secondary `--ash #99938a`. Hairlines `--graphite #2a2825`.
+- Data colours only for data or physics: Alice `#ff7d7d`, Bob `#8f8fff`,
+  photon `#ffffb3`, violet `#ffb3ff`, pump `#8a5cff` (405 nm).
+- Type: Josefin Sans (display, UI; the existing wordmark face) light 300 for
+  headings, 400 for UI, sentence case. Newsreader for reading text (19 px,
+  line-height 1.6, max 62ch). The spaced capitals are reserved for the wordmark.
+- 12-column grid, `--gutter` 16–56 px, max width 1440. Text is left-aligned.
+
+## Principles
+
+1. **One live visual per page, and it belongs to the page.** The point cloud
+   and camera moves are on the landing page. Each piece page gets its own
+   visual from its own real data: BruQner rings (premiere replay), 8 Rooms
+   terrain and room map (Ball-night replay), Indeterminate Apparatus Bell
+   metronome. Everything else is quiet.
+2. **Photographs carry the rest.** Photos are big, dark and credited, and
+   placed asymmetrically on the grid rather than in uniform card grids.
+   Captions say what, where and who.
+3. **Real data is labelled with where and when it was measured; simulated
+   data says it is simulated.**
+4. **No decoration.** Hairlines only where they separate information. No
+   entrance animations. Motion only in the live visuals and in response to
+   the visitor.
+5. **Content lives in `src/content/`.** Components never hard-code facts
+   that belong in content.
+
+## Pages
+
+| Route | Contents |
+|---|---|
+| `/` | Point-cloud hero with a pinned camera sequence (source → crystal → Alice & Bob → detectors), then photography-led sections: what this is, the three pieces, next show, recent shows, film, physics teaser, people teaser |
+| `/pieces/` and `/pieces/[id]/` | Pieces index; piece pages with their own live visual, text, images, audio, video, performances of that piece |
+| `/shows/` and `/shows/[id]/` | Upcoming, performances by year with covers, talks. Show pages with facts, text, Bell value, gallery with lightbox, video, links |
+| `/physics/` | A layered explainer with an interactive Bell test (the simulator: quantum vs classical), the setup, SPDC cones and the clicks |
+| `/people/` | The team, the musicians and the organists, with portraits and bios |
+| `/publications/` | The paper, talks, films and press |

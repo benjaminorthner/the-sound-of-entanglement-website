@@ -1,0 +1,127 @@
+/*
+ * Design tokens and base styles (direction E).
+ * Colour always encodes something: the four data colours (alice, bob,
+ * photon, pump) are reserved for measurement data and physics, never
+ * decoration. See docs/visual-language.md.
+ */
+:root {
+  /* ground and text */
+  --black: #000;
+  --paper: #ebe7df;      /* text: warm off-white, like haze in tungsten light */
+  --ash: #99938a;        /* secondary text */
+  --smoke: #5d5952;      /* tertiary text, captions on photos */
+  --graphite: #2a2825;   /* hairlines, like the breadboard */
+  --soot: #121110;       /* raised surfaces (rare) */
+
+  /* data colours, from the 2024 BruQner visuals */
+  --alice: #ff7d7d;
+  --bob: #8f8fff;
+  --photon: #ffffb3;
+  --violet: #ffb3ff;
+  --pump: #8a5cff;       /* 405 nm, the only visible light in the experiment */
+
+  /* type */
+  --font-display: 'Josefin Sans', system-ui, sans-serif;
+  --font-text: 'Newsreader', Georgia, serif;
+
+  --step--1: 0.875rem;
+  --step-0: 1.1875rem;   /* 19px body */
+  --step-1: 1.5rem;
+  --step-2: 1.875rem;
+  --step-3: clamp(2rem, 1.4rem + 2.2vw, 2.75rem);
+  --step-4: clamp(2.5rem, 1.6rem + 3.6vw, 4rem);
+  --step-5: clamp(3rem, 1.6rem + 5.6vw, 5.75rem);
+
+  /* layout */
+  --gutter: clamp(16px, 4vw, 56px);
+  --max: 1440px;
+  --measure: 62ch;
+  --header-h: 64px;
+
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  background: var(--black);
+  color: var(--paper);
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+body {
+  margin: 0;
+  background: var(--black);
+  font-family: var(--font-text);
+  font-size: var(--step-0);
+  line-height: 1.6;
+  font-optical-sizing: auto;
+  font-variant-numeric: lining-nums;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 300;
+  line-height: 1.1;
+  letter-spacing: -0.005em;
+  margin: 0;
+  text-wrap: balance;
+}
+h1 { font-size: var(--step-5); }
+h2 { font-size: var(--step-4); }
+h3 { font-size: var(--step-2); }
+h4 { font-size: var(--step-1); font-weight: 400; }
+
+p { margin: 0 0 1em; max-width: var(--measure); text-wrap: pretty; }
+em { font-style: italic; }
+
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+a:hover { text-decoration-color: var(--ash); }
+
+:focus-visible {
+  outline: 2px solid var(--paper);
+  outline-offset: 3px;
+}
+
+img, video, canvas, svg { display: block; max-width: 100%; }
+
+hr { border: 0; border-top: 1px solid var(--graphite); margin: 0; }
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Layout helpers */
+.wrap {
+  width: 100%;
+  max-width: var(--max);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+}
+.section { padding-block: clamp(4rem, 10vw, 9rem); }
+
+/* Small UI text: display face, sentence case, never all caps */
+.ui {
+  font-family: var(--font-display);
+  font-size: var(--step--1);
+  letter-spacing: 0.02em;
+}
+.dim { color: var(--ash); }
+.num { font-variant-numeric: tabular-nums lining-nums; }
+
+/* The data colours as text accents, used only where a value belongs to a station */
+.alice { color: var(--alice); }
+.bob { color: var(--bob); }

@@ -1,0 +1,93 @@
+---
+/**
+ * Minimal audio player: one button, a hairline progress bar and the time.
+ * Only one player on the page plays at a time.
+ */
+interface Props {
+  src: string;
+  title: string;
+  note?: string;
+}
+const { src, title, note } = Astro.props;
+---
+<div class="player" data-audio>
+  <button class="toggle" aria-label={`Play ${title}`} data-label={title}>
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path class="icon-play" d="M8 5 L19 12 L8 19 Z" />
+      <g class="icon-pause"><rect x="7" y="5" width="3.5" height="14" /><rect x="13.5" y="5" width="3.5" height="14" /></g>
+    </svg>
+  </button>
+  <div class="meta">
+    <p class="title">{title}</p>
+    {note && <p class="note dim">{note}</p>}
+    <div class="bar" aria-hidden="true"><span></span></div>
+  </div>
+  <span class="time ui dim num">0:00</span>
+  <audio preload="none" src={src}></audio>
+</div>
+
+<script>
+  const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+  const players = Array.from(document.querySelectorAll<HTMLElement>('[data-audio]'));
+  players.forEach((p) => {
+    const audio = p.querySelector('audio')!;
+    const btn = p.querySelector<HTMLButtonElement>('.toggle')!;
+    const fill = p.querySelector<HTMLElement>('.bar span')!;
+    const time = p.querySelector<HTMLElement>('.time')!;
+    btn.addEventListener('click', () => {
+      if (audio.paused) {
+        players.forEach((o) => o !== p && o.querySelector('audio')!.pause());
+        audio.play();
+      } else audio.pause();
+    });
+    audio.addEventListener('play', () => { p.classList.add('playing'); btn.setAttribute('aria-label', `Pause ${btn.dataset.label}`); });
+    audio.addEventListener('pause', () => { p.classList.remove('playing'); btn.setAttribute('aria-label', `Play ${btn.dataset.label}`); });
+    audio.addEventListener('timeupdate', () => {
+      fill.style.transform = `scaleX(${audio.duration ? audio.currentTime / audio.duration : 0})`;
+      time.textContent = fmt(audio.currentTime);
+    });
+    audio.addEventListener('loadedmetadata', () => { time.textContent = fmt(audio.duration); });
+    p.querySelector<HTMLElement>('.bar')!.addEventListener('click', (ev) => {
+      const r = (ev.currentTarget as HTMLElement).getBoundingClientRect();
+      if (audio.duration) audio.currentTime = ((ev.clientX - r.left) / r.width) * audio.duration;
+    });
+  });
+</script>
+
+<style>
+  .player {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    padding-block: 1rem;
+    border-top: 1px solid var(--graphite);
+  }
+  .toggle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--ash);
+    background: none;
+    color: var(--paper);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+  }
+  .toggle:hover { border-color: var(--paper); }
+  svg { width: 18px; height: 18px; fill: currentColor; }
+  .icon-pause { display: none; }
+  .playing .icon-pause { display: inline; }
+  .playing .icon-play { display: none; }
+  .title { margin: 0; font-size: 1rem; line-height: 1.35; }
+  .note { margin: 0.15rem 0 0; font-size: 0.875rem; line-height: 1.4; }
+  .bar { margin-top: 0.6rem; height: 9px; cursor: pointer; position: relative; }
+  .bar::before, .bar span {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; top: 4px;
+    height: 1px;
+    background: var(--graphite);
+  }
+  .bar span { background: var(--paper); transform-origin: left; transform: scaleX(0); }
+</style>

@@ -1,0 +1,25 @@
+---
+/**
+ * The project wordmark, rebuilt from the 2024 design: Josefin Sans spaced
+ * capitals. "of" is set lighter, as in the original. Spaced capitals are the
+ * brand mark only; UI text elsewhere stays in sentence case.
+ */
+interface Props { size?: 'small' | 'large' }
+const { size = 'small' } = Astro.props;
+---
+<span class:list={['wordmark', size]} aria-label="The Sound of Entanglement">
+  <span aria-hidden="true">The Sound <span class="of">of</span> Entanglement</span>
+</span>
+
+<style>
+  .wordmark {
+    font-family: var(--font-display);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.24em;
+    white-space: nowrap;
+  }
+  .small { font-size: 0.8125rem; }
+  .large { font-size: clamp(0.9rem, 0.6rem + 1vw, 1.25rem); }
+  .of { font-weight: 300; color: var(--ash); }
+</style>

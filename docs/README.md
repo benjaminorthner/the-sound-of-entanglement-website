@@ -15,6 +15,7 @@ sources in September 2026. Where sources disagree, the file says so.
 | [data.md](data.md) | the real measurement logs, the web excerpts and their encoding, the simulator, the point cloud |
 | [visual-language.md](visual-language.md) | the project's existing visual grammar: rings vs lines, Alice/Bob colours, BruQner shader sections |
 | [assets.md](assets.md) | where photos, audio, video, figures and logos are, credits, and what must never be copied |
+| [content-guide.md](content-guide.md) | how to add or update shows, photos, pieces, people and publications on the site |
 | [open-questions.md](open-questions.md) | unresolved facts and permissions to ask the team about |
 | [research/](research/) | the raw research dossiers (long and detailed, with full source paths). Use them to dig deeper. |
 

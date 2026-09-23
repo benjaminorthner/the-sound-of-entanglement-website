@@ -1,0 +1,414 @@
+[
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/*_53972967048_o.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/haze-over-case.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/*_53971847342_o.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/cloud-over-crowd.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/*_53973168965_o.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/torn-cloud.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/*_53973053449_o.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/starburst-from-gallery.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/*_53973168985_o.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/case-foreground.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/*_53972967143_o.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/cloud-dark-nave.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/*_53971847492_o.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/top-down-crowd.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/*_53972730451_o.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/vault-top-down.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/*_53973168995_o.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/organist-console.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/*_53973169020_o.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/optics-closeup.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/*_53972967203_o.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/fisheye-cathedral.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/*-7-*_53972730271_o.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/light-shaft-case.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Doku/BruQner*Krenn/*Krenn (31).jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/inverted-cone.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Doku/BruQner*Krenn/*Krenn (15).jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/purple-cone.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Doku/BruQner*Krenn/*Krenn (28).jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/laser-fan.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Doku/BruQner*Krenn/*Krenn (25).jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/twin-cones.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Doku/BruQner*Krenn/*Krenn (27).jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/beam-fan.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Dom Visual Test July/LinzVisuals-7.jpg",
+  "dest": "src/assets/photos/2024-bruqner-making-of/visual-test-v-cone.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Dom Visual Test July/LinzVisuals-18.jpg",
+  "dest": "src/assets/photos/2024-bruqner-making-of/visual-test-altar.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Dom Visual Test July/LinzVisuals-13.jpg",
+  "dest": "src/assets/photos/2024-bruqner-making-of/visual-test-chancel.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Dom Visual Test July/LinzVisuals-15.jpg",
+  "dest": "src/assets/photos/2024-bruqner-making-of/visual-test-nave.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Doku/BruQner Stills/BruQner_Stills_1.14.1.jpg",
+  "dest": "src/assets/photos/2024-bruqner-making-of/pump-laser-crystal.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Doku/BruQner Stills/BruQner_Stills_1.24.1.jpg",
+  "dest": "src/assets/photos/2024-bruqner-making-of/haze-test.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Doku/BruQner Stills/BruQner_Stills_1.27.1.jpg",
+  "dest": "src/assets/photos/2024-bruqner-making-of/cloud-above-pews.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Doku/BruQner Stills/BruQner_Stills_1.9.1.jpg",
+  "dest": "src/assets/photos/2024-bruqner-making-of/optics-bokeh.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Doku/BruQner Stills/BruQner_Stills_1.33.1.jpg",
+  "dest": "src/assets/photos/2024-bruqner-making-of/organ-console-above.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Innsbruck Lab 10.05.2023/IMG_3820 copy.jpg",
+  "dest": "src/assets/photos/2024-bruqner-making-of/innsbruck-lab-2023.jpg"
+ },
+ {
+  "src": "DRIVE/2025 05 - Osaka/Photos and Graphics/Photos/TSOE_osaka_photos-6.jpg",
+  "dest": "src/assets/photos/2024-early-sessions/haze-sheet.jpg"
+ },
+ {
+  "src": "DRIVE/2025 05 - Osaka/Photos and Graphics/Photos/TSOE_osaka_photos-5.jpg",
+  "dest": "src/assets/photos/2024-early-sessions/blue-cloud.jpg"
+ },
+ {
+  "src": "DRIVE/2025 05 - Osaka/Photos and Graphics/Photos/TSOE_osaka_photos-4.jpg",
+  "dest": "src/assets/photos/2024-early-sessions/blue-cone-rehearsal.jpg"
+ },
+ {
+  "src": "DRIVE/2025 05 - Osaka/Photos and Graphics/Photos/TSOE_osaka_photos-2.jpg",
+  "dest": "src/assets/photos/2024-early-sessions/optics-bench-piano.jpg"
+ },
+ {
+  "src": "DRIVE/2025 05 - Osaka/Photos and Graphics/Photos/TSOE_osaka_photos-1.jpg",
+  "dest": "src/assets/photos/2024-early-sessions/pianist-and-bench.jpg"
+ },
+ {
+  "src": "DRIVE/2025 01 - Vienna Science Ball/Photos/Ball Website (Low Quality)/08_FRPIC_250125_BdW_234.jpg",
+  "dest": "src/assets/photos/2025-vienna-ball/case-black-tie.jpg"
+ },
+ {
+  "src": "DRIVE/2025 01 - Vienna Science Ball/Photos/Ball Website (Low Quality)/08_FRPIC_250125_BdW_021.jpg",
+  "dest": "src/assets/photos/2025-vienna-ball/case-and-guitar.jpg"
+ },
+ {
+  "src": "DRIVE/2025 01 - Vienna Science Ball/Photos/Ball Website (Low Quality)/08_FRPIC_250125_BdW_229.jpg",
+  "dest": "src/assets/photos/2025-vienna-ball/case-edge-lit.jpg"
+ },
+ {
+  "src": "DRIVE/2025 01 - Vienna Science Ball/Photos/Ball Website (Low Quality)/08_FRPIC_250125_BdW_030.jpg",
+  "dest": "src/assets/photos/2025-vienna-ball/stage-lines.jpg"
+ },
+ {
+  "src": "DRIVE/2025 01 - Vienna Science Ball/Photos/Ball Website (Low Quality)/08_FRPIC_250125_BdW_262.jpg",
+  "dest": "src/assets/photos/2025-vienna-ball/guests-at-case.jpg"
+ },
+ {
+  "src": "DRIVE/2025 01 - Vienna Science Ball/Photos/Ball Website (Low Quality)/08_FRPIC_250125_BdW_032.jpg",
+  "dest": "src/assets/photos/2025-vienna-ball/band-beside-case.jpg"
+ },
+ {
+  "src": "DRIVE/2025 01 - Vienna Science Ball/Photos/Benjamin Photos/PXL_20250125_210939237.jpg",
+  "dest": "src/assets/photos/2025-vienna-ball/screen-landscape.jpg"
+ },
+ {
+  "src": "DRIVE/2025 01 - Vienna Science Ball/Photos/Benjamin Photos/PXL_20250125_210502378.jpg",
+  "dest": "src/assets/photos/2025-vienna-ball/band-under-screen.jpg"
+ },
+ {
+  "src": "DRIVE/2025 04 - Washington DC/Photos & Videos/Ona Ambrozaite/20250414_JHU_Science_2353.jpg",
+  "dest": "src/assets/photos/2025-washington/landscape-above-stage.jpg"
+ },
+ {
+  "src": "DRIVE/2025 04 - Washington DC/Photos & Videos/Ona Ambrozaite/20250414_JHU_Science_2455.jpg",
+  "dest": "src/assets/photos/2025-washington/wide-hall.jpg"
+ },
+ {
+  "src": "DRIVE/2025 04 - Washington DC/Photos & Videos/Ona Ambrozaite/20250414_JHU_Science_2345.jpg",
+  "dest": "src/assets/photos/2025-washington/from-the-back.jpg"
+ },
+ {
+  "src": "DRIVE/2025 04 - Washington DC/Photos & Videos/Ona Ambrozaite/20250414_JHU_Science_2363.jpg",
+  "dest": "src/assets/photos/2025-washington/diagonal-lines.jpg"
+ },
+ {
+  "src": "DRIVE/2025 04 - Washington DC/Photos & Videos/Ona Ambrozaite/20250414_JHU_Science_2358.jpg",
+  "dest": "src/assets/photos/2025-washington/clemens-behind-case.jpg"
+ },
+ {
+  "src": "DRIVE/2025 04 - Washington DC/Photos & Videos/Ona Ambrozaite/20250414_JHU_Science_2387.jpg",
+  "dest": "src/assets/photos/2025-washington/manu-bass.jpg"
+ },
+ {
+  "src": "DRIVE/2025 04 - Washington DC/Photos & Videos/Ona Ambrozaite/20250414_JHU_Science_2389.jpg",
+  "dest": "src/assets/photos/2025-washington/benjamin-operating.jpg"
+ },
+ {
+  "src": "DRIVE/2025 04 - Washington DC/Photos & Videos/Ona Ambrozaite/20250414_JHU_Science_2378.jpg",
+  "dest": "src/assets/photos/2025-washington/band-and-experiment.jpg"
+ },
+ {
+  "src": "DRIVE/2025 04 - Washington DC/Photos & Videos/Ona Ambrozaite/20250414_JHU_Science_2339.jpg",
+  "dest": "src/assets/photos/2025-washington/lecture.jpg"
+ },
+ {
+  "src": "DRIVE/2025 04 - Washington DC/Photos & Videos/JK*s Pictures and Videos/IMG_2308.HEIC",
+  "dest": "src/assets/photos/2025-washington/hall-panorama.jpg"
+ },
+ {
+  "src": "DRIVE/2025 04 - Washington DC/Photos & Videos/JK*s Pictures and Videos/IMG_2339.HEIC",
+  "dest": "src/assets/photos/2025-washington/team-rooftop.jpg"
+ },
+ {
+  "src": "DRIVE/2025 06 - Millstatt/Photos/Benjamin Photos/PXL_20250603_145548651.jpg",
+  "dest": "src/assets/photos/2025-millstatt/keys-and-altar.jpg"
+ },
+ {
+  "src": "DRIVE/2025 06 - Millstatt/Photos/Benjamin Photos/PXL_20250603_141856734.jpg",
+  "dest": "src/assets/photos/2025-millstatt/altar-screen.jpg"
+ },
+ {
+  "src": "DRIVE/2025 06 - Millstatt/Photos/Benjamin Photos/PXL_20250603_171507090.jpg",
+  "dest": "src/assets/photos/2025-millstatt/nave-to-screen.jpg"
+ },
+ {
+  "src": "DRIVE/2025 06 - Millstatt/Photos/Benjamin Photos/PXL_20250603_150123055.jpg",
+  "dest": "src/assets/photos/2025-millstatt/rooms-ui.jpg"
+ },
+ {
+  "src": "DRIVE/2025 08 - Alpbach/Bilder*/250826_200111_efa25*.jpg",
+  "dest": "src/assets/photos/2025-alpbach/lines-on-ceiling.jpg"
+ },
+ {
+  "src": "DRIVE/2025 08 - Alpbach/Bilder*/250826_200513_efa25*.jpg",
+  "dest": "src/assets/photos/2025-alpbach/spiky-landscape.jpg"
+ },
+ {
+  "src": "DRIVE/2025 08 - Alpbach/Bilder*/250826_195509_efa25*.jpg",
+  "dest": "src/assets/photos/2025-alpbach/wide-stage.jpg"
+ },
+ {
+  "src": "DRIVE/2025 08 - Alpbach/Bilder*/250826_195710_efa25*.jpg",
+  "dest": "src/assets/photos/2025-alpbach/drums-purple.jpg"
+ },
+ {
+  "src": "DRIVE/2025 08 - Alpbach/Bilder*/250826_195935_efa25*.jpg",
+  "dest": "src/assets/photos/2025-alpbach/keys-purple.jpg"
+ },
+ {
+  "src": "DRIVE/2025 08 - Alpbach/Bilder*/250826_201246_efa25*.jpg",
+  "dest": "src/assets/photos/2025-alpbach/experiment-closeup.jpg"
+ },
+ {
+  "src": "DRIVE/2025 08 - Alpbach/Bilder*/250826_201313_efa25*.jpg",
+  "dest": "src/assets/photos/2025-alpbach/audience-peering.jpg"
+ },
+ {
+  "src": "DRIVE/2025 08 - Alpbach/Bilder*/250826_201036_efa25*.jpg",
+  "dest": "src/assets/photos/2025-alpbach/opening-the-case.jpg"
+ },
+ {
+  "src": "DRIVE/2025 08 - Alpbach/Bilder*/250826_200928_efa25*.jpg",
+  "dest": "src/assets/photos/2025-alpbach/team-on-stage.jpg"
+ },
+ {
+  "src": "DRIVE/2025 10 - CIVA Wien/Photos/esel.at/ESEL6709.webp",
+  "dest": "src/assets/photos/2025-civa/keys-under-pointcloud.jpg"
+ },
+ {
+  "src": "DRIVE/2025 10 - CIVA Wien/Photos/esel.at/ESEL6704.webp",
+  "dest": "src/assets/photos/2025-civa/case-band-pointcloud.jpg"
+ },
+ {
+  "src": "DRIVE/2025 10 - CIVA Wien/Photos/esel.at/ESEL6693.webp",
+  "dest": "src/assets/photos/2025-civa/pointcloud-over-band.jpg"
+ },
+ {
+  "src": "DRIVE/2025 10 - CIVA Wien/Photos/esel.at/ESEL6585.webp",
+  "dest": "src/assets/photos/2025-civa/case-light-stripe.jpg"
+ },
+ {
+  "src": "DRIVE/2025 10 - CIVA Wien/Photos/esel.at/ESEL6571.webp",
+  "dest": "src/assets/photos/2025-civa/white-curve.jpg"
+ },
+ {
+  "src": "DRIVE/2025 10 - CIVA Wien/Photos/esel.at/ESEL6797.webp",
+  "dest": "src/assets/photos/2025-civa/pixel-sort.jpg"
+ },
+ {
+  "src": "DRIVE/2025 10 - CIVA Wien/Photos/esel.at/ESEL6677.webp",
+  "dest": "src/assets/photos/2025-civa/performer-light-stroke.jpg"
+ },
+ {
+  "src": "DRIVE/2025 10 - CIVA Wien/Photos/esel.at/ESEL6372.webp",
+  "dest": "src/assets/photos/2025-civa/case-wood-panels.jpg"
+ },
+ {
+  "src": "DRIVE/2025 10 - CIVA Wien/Photos/esel.at/ESEL6414.webp",
+  "dest": "src/assets/photos/2025-civa/backlight-burst.jpg"
+ },
+ {
+  "src": "DRIVE/2025 10 - CIVA Wien/Photos/esel.at/ESEL6989.webp",
+  "dest": "src/assets/photos/2025-civa/case-top-down.jpg"
+ },
+ {
+  "src": "DRIVE/2025 10 - CIVA Wien/Photos/esel.at/ESEL6849.webp",
+  "dest": "src/assets/photos/2025-civa/bows.jpg"
+ },
+ {
+  "src": "DRIVE/2025 11 - Zirkus des Wissens (JKU)/JK Pictures & Videos/IMG_6514.HEIC",
+  "dest": "src/assets/photos/2025-jku/audience-pointcloud.jpg"
+ },
+ {
+  "src": "DRIVE/2025 11 - Zirkus des Wissens (JKU)/JK Pictures & Videos/IMG_6519.HEIC",
+  "dest": "src/assets/photos/2025-jku/rain-visual.jpg"
+ },
+ {
+  "src": "DRIVE/2025 11 - Zirkus des Wissens (JKU)/JK Pictures & Videos/IMG_6502.HEIC",
+  "dest": "src/assets/photos/2025-jku/dotted-sphere.jpg"
+ },
+ {
+  "src": "DRIVE/2025 11 - Zirkus des Wissens (JKU)/JK Pictures & Videos/IMG_6485.HEIC",
+  "dest": "src/assets/photos/2025-jku/hall-soundcheck.jpg"
+ },
+ {
+  "src": "DRIVE/2025 11 - Zirkus des Wissens (JKU)/JK Pictures & Videos/IMG_6486.HEIC",
+  "dest": "src/assets/photos/2025-jku/team-at-case.jpg"
+ },
+ {
+  "src": "DRIVE/2025 11 - Zirkus des Wissens (JKU)/JK Pictures & Videos/IMG_6522.HEIC",
+  "dest": "src/assets/photos/2025-jku/audience-at-experiment.jpg"
+ },
+ {
+  "src": "HDRIVE/Presentations/EFS Application Presentation/DSCF9327.jpg",
+  "dest": "src/assets/photos/setup/case-top-view.jpg"
+ },
+ {
+  "src": "PAPER/Figures/SetupLabelledBeamPaths.png",
+  "dest": "src/assets/photos/setup/labelled-beam-paths.jpg",
+  "max": 1600
+ },
+ {
+  "src": "THESIS/sections/setup/figures/whole_setup_photo_beams.png",
+  "dest": "src/assets/photos/setup/setup-with-beams.jpg"
+ },
+ {
+  "src": "PAPER/Figures/Lightcones.jpg",
+  "dest": "src/assets/photos/figures/light-cones-painting.jpg",
+  "max": 1600
+ },
+ {
+  "src": "PAPER/Figures/8Rooms_Graphics.png",
+  "dest": "src/assets/photos/figures/8rooms-r1-r8.jpg",
+  "max": 1600
+ },
+ {
+  "src": "PAPER/Figures/sheet_music.png",
+  "dest": "src/assets/photos/figures/bruqner-motifs.jpg",
+  "max": 1600
+ },
+ {
+  "src": "PAPER/Figures/Qrndwalk28.jpg",
+  "dest": "src/assets/photos/figures/quantum-random-walk.jpg",
+  "max": 1200
+ },
+ {
+  "src": "PAPER/Clemens figures/8 ROOMS - clicking motives mit beschriftung.png",
+  "dest": "src/assets/photos/figures/8rooms-click-motives.jpg",
+  "max": 1600
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Press Pics for Are Electronica/Alex Ploier @ Elisabeth Peheim.jpg",
+  "dest": "src/assets/photos/people/alexander-ploier.jpg",
+  "max": 1400
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Press Pics for Are Electronica/Benjamin Orthner.jpg",
+  "dest": "src/assets/photos/people/benjamin-orthner.jpg",
+  "max": 1400
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Press Pics for Are Electronica/Enar de Dios Rodriguez @ Philipp Haslinger.tif",
+  "dest": "src/assets/photos/people/enar-de-dios-rodriguez.jpg",
+  "max": 1400
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Press Pics for Are Electronica/Martin Ringbauer @ Martin Ringbauer.jpg",
+  "dest": "src/assets/photos/people/martin-ringbauer.jpg",
+  "max": 1400
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Press Pics for Are Electronica/Philipp Haslinger @ Enar de Dios Rodriguez.jpg",
+  "dest": "src/assets/photos/people/philipp-haslinger.jpg",
+  "max": 1400
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Press Pics for Are Electronica/Richard K*ng @ Richard K*ng.jpeg",
+  "dest": "src/assets/photos/people/richard-kueng.jpg",
+  "max": 1400
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Press Pics for Are Electronica/Johannes Kofler @ Johannes Kofler.jpg",
+  "dest": "src/assets/photos/people/johannes-kofler.jpg",
+  "max": 1400
+ },
+ {
+  "src": "DRIVE/2025 10 - CIVA Wien/Pressematerial/Group Pictures/Clemens Wenger -3248 - Alex Gotter-2.jpg",
+  "dest": "src/assets/photos/people/clemens-wenger.jpg",
+  "max": 1400
+ },
+ {
+  "src": "DRIVE/2025 10 - CIVA Wien/Pressematerial/Group Pictures/Manu Mayr by ingo pertramer.jpg",
+  "dest": "src/assets/photos/people/manu-mayr.jpg",
+  "max": 1400
+ },
+ {
+  "src": "DRIVE/2025 10 - CIVA Wien/Pressematerial/Group Pictures/Kopie von JudithSchwarz*.jpeg",
+  "dest": "src/assets/photos/people/judith-schwarz.jpg",
+  "max": 1400
+ }
+]

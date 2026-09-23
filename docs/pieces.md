@@ -130,12 +130,13 @@ also called |indeterminate⟩⟨apparatus|.
 
 ## Other and experimental
 
-- Two unreleased experimental pieces were played at Vienna rehearsal events in
-  2024. The DPG slides (Mar 2025) mention "Piece 2 – FM Drums, inverse control"
-  and **"John's Bells"** (a 1:35 audio file is on Benjamin's drive). Confirm
-  with Clemens before publishing anything.
+- Two experimental pieces were played at Vienna rehearsal events in 2024 and
+  appear on the DPG slides (Mar 2025): **"John's Bells"** (a 1:35 and a 5:24
+  audio file are on Benjamin's drive, 120 BPM; named after John Bell) and
+  **"FM Drums, inverse control"**. Both are cleared for publishing as
+  experimental pieces. No further description exists yet.
 - **Album** *Sounds of Entanglement* by **The Uncertain Question**: "First Music
   Album capturing a live performance of music that is conducted by pairs of
   entangled photons, using a quantum photonic experiment". Vinyl and digital.
-  Recording planned for 1 May 2026, release planned for Oct/Nov 2026. No track
-  list known; status unconfirmed.
+  **Recorded (2026), not yet released.** A vinyl edition is planned. Track list,
+  label and release date are not known yet.

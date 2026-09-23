@@ -31,7 +31,7 @@ only. **Exhibition** = video or display.
 | **26 Aug 2025**, 19:00 | Congress Centrum Alpbach, Herz-Kremenak-Saal, Tyrol, AT | European Forum Alpbach 2025 | 8 Rooms | Performance + lecture | Wenger, Mayr, Schwarz (first trio). Lecture by Haslinger, Orthner, Kofler, Ringbauer. |
 | **3 Oct 2025**, 20:30 | Belvedere 21, Blickle Kino, Vienna, AT | CIVA Festival 2025 | Indeterminate Apparatus (**premiere**) | Performance-lecture + Q&A | Wenger, Mayr, Schwarz. Visuals de Dios Rodríguez. Lecture by Haslinger, Orthner. S = 2.41. |
 | 28 Oct 2025 | Orto Botanico, Palermo, IT | ISQCMC '25 (Quantum Computing and Musical Creativity) | 8 Rooms (simulated excerpt) | Music demonstration / talk | No live experiment |
-| 25 Oct 2025 | Deutsches Museum, Munich, DE | "Viva Quantum" (invitation-only conference) | – | Talk "Der Klang der Quanten-Verschränkung" | Unverified whether there was a performance; treat as a talk |
+| 25 Oct 2025 | Deutsches Museum, Munich, DE | "Viva Quantum" (invitation-only conference) | – | Talk "Der Klang der Quanten-Verschränkung" | Talk only (confirmed) |
 | **19 Nov 2025**, 19:30 | JKU Linz, AT | Zirkus des Wissens (UN Quantum Year focus week) | Indeterminate Apparatus | Performance-lecture, German | Wenger, Mayr, Schwarz. Lecture by Küng, Kofler. S = 2.51. Audio recording exists. |
 | May 2026 | ? | Pint of Science 2026 | – | Talk (Ploier) | City and venue unknown |
 

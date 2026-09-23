@@ -2,41 +2,51 @@
 
 Facts the research could not settle. Ask the team, and move answers into the
 relevant doc when resolved. Check items off rather than deleting them, so it's
-clear what was confirmed.
+clear what was confirmed. Answers from Benjamin (23 Sept 2026) are in
+*italics*.
 
 ## Site and hosting
-- [ ] Who controls **soundofentanglement.com** (currently a single HTML page on
-      Apache webspace, contact clemenswenger@mac.com)? Will this site replace it,
-      and can the DNS be pointed at the new host?
-- [ ] Languages: English only, or English + German?
-- [ ] Who will update shows and content after launch: agents via this repo,
-      or someone else who needs a CMS?
+- [x] Who controls **soundofentanglement.com**? *Clemens owns it. It can be
+      repointed to the new host later.*
+- [x] Languages? *Ideally English + German. English only is fine for now;
+      German is added later.* Build with i18n in mind: keep copy in content
+      files, not hard-coded in components.
+- [x] Who updates content after launch? *Agents, via this repo.* So no CMS:
+      content lives in Markdown/YAML collections that are easy to edit.
 
 ## Facts
 - [ ] Origin: was the Traunkirchen meeting in 2022 (evidence: Nov 2022
-      application) or summer 2023 (OÖ Landespreis text)?
-- [ ] Innsbruck, 16 Oct 2026: which piece, line-up, venue and time? Public?
-- [ ] Wien Modern, Nov 2026: confirmed?
-- [ ] Album *Sounds of Entanglement* (The Uncertain Question): recorded? Track
-      list, label and release date?
-- [ ] Leonardo Music Journal: current status? EPJ-ST 8 Rooms paper: title and status?
-- [ ] OÖ Landespreis für Initiative Kulturarbeit 2025 and JKU Kepler Award:
-      outcome? Falling Walls Global Call 2026 (Clemens, Art & Science
-      finalist): outcome?
-- [ ] Deutsches Museum Munich, 25 Oct 2025: talk only, or a performance too?
+      application) or summer 2023 (OÖ Landespreis text)? *Unanswered*: say
+      "conceived in 2022" or avoid the date.
+- [ ] Innsbruck, 16 Oct 2026: which piece, line-up, venue and time? *TBD.*
+      Show it as "details to follow".
+- [ ] Wien Modern, Nov 2026: confirmed? *TBD. Don't publish.*
+- [x] Album *Sounds of Entanglement* (The Uncertain Question): *recorded, not
+      yet released; there will also be a vinyl.* Track list, label and release
+      date are still unknown.
+- [ ] Leonardo Music Journal status; EPJ-ST 8 Rooms paper title and status. *TBD.*
+- [ ] OÖ Landespreis 2025, JKU Kepler Award, Falling Walls Global Call 2026
+      (Clemens, Art & Science finalist): outcomes. *TBD. Don't claim awards.*
+- [x] Deutsches Museum Munich, 25 Oct 2025: *talk only.*
 - [ ] Pint of Science, May 2026: city, venue, date?
 - [ ] ISWC for BruQner (3307761800) correct? ISWC for 8 Rooms?
-- [ ] "John's Bells" and "FM Drums, inverse control": publishable as pieces?
-- [ ] Benjamin's current status and title (the paper bio says "master's student").
-- [ ] Is "Indeterminate Apparatus" the final title?
+- [x] "John's Bells" and "FM Drums, inverse control": *yes, publishable as
+      pieces* (experimental pieces).
+- [x] Benjamin's title: *"master's student in experimental quantum physics at
+      TU Wien" is still accurate.*
+- [x] "Indeterminate Apparatus": *final title of that piece.*
 
 ## Rights and credits
-- [ ] Ars Electronica Flickr photos: licence for use on the site?
-- [ ] Land OÖ / Andreas Krenn photos: permission?
-- [ ] weitblickfilm stills: permission (probably fine; JKU commission)?
+*Use everything below for now.* Credits stay mandatory, and the list remains
+open for final clearance before launch.
+- [ ] Ars Electronica Flickr photos: licence (*use for now*)
+- [ ] Land OÖ / Andreas Krenn photos (*use for now*)
+- [x] weitblickfilm stills (*fine*)
 - [ ] Hi-res originals and credit for the Vienna Ball photos; hi-res CIVA
-      photos from eSeL.at.
-- [ ] Visual-test photos (July 2024) and "Osaka" photos: photographer?
-- [ ] Bios and portraits for the musicians (Mayr, Schwarz) and the organists
-      (Kreuzhuber, Raab), and approval of the team bios.
-- [ ] Good-quality audio of BruQner (desk recording or the documentary soundtrack).
+      photos from eSeL.at (*use what we have for now*)
+- [ ] Visual-test photos (July 2024) and "Osaka" photos: photographer unknown
+      (*use for now*; credit "The Sound of Entanglement")
+- [ ] Musician and organist bios and portraits; approval of team bios (*use
+      the drafts for now*)
+- [x] BruQner audio: *use the available recordings where it makes sense*
+      (the phone recordings are low quality; excerpt carefully).

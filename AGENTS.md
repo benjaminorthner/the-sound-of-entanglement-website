@@ -31,11 +31,17 @@ Design mockups (static HTML) are in `design/mockups/`. Serve them with
 ## Repository layout
 
 ```
-docs/              knowledge base (start here)
-docs/research/     raw research dossiers with source paths
-design/            design directions, mockups, decisions
-src/               the Astro site
-src/lib/bell.ts    Bell-test simulator
+docs/                 knowledge base (start here); docs/content-guide.md = how to update content
+docs/research/        raw research dossiers with source paths
+design/               design directions (DIRECTIONS.md), round-1 static mockups
+scripts/              import_assets.py + assets_manifest.json (photos from the drives)
+src/content/          ALL site content: shows/, pieces/, people/ (Markdown), publications.yaml
+src/content.config.ts content schemas
+src/assets/photos/    imported photos (optimised by Astro at build)
+src/data/             real measurement excerpts (JSON)
+src/lib/              bell.ts (simulator), replay.ts (real data), format.ts
+src/components/       shared components (Photo with credit, YouTube, AudioPlayer, BellScale, …)
+public/media/         audio, video loops, point cloud of the setup
 ```
 
 ## Rules
@@ -48,7 +54,8 @@ src/lib/bell.ts    Bell-test simulator
 - **Credits are mandatory** for every photo, video and audio file. See `docs/assets.md`.
 - **Never copy private material** (invoices, budgets, CVs, call sheets, emails)
   from the source drives.
-- Copy assets into the repo selectively: resized, with descriptive names.
+- Copy assets into the repo selectively via `scripts/import_assets.py`: resized, with descriptive names.
+- To add a show, piece, person or publication, follow `docs/content-guide.md`.
 - Copy is written in sentence case, plain and precise, in the team's voice. No hype.
 - Accessibility: keyboard navigation, visible focus, `prefers-reduced-motion`
   (static frames instead of animation), readable contrast, and pages that work

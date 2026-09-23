@@ -1,0 +1,109 @@
+/**
+ * Content collections. All site content lives in src/content/ as Markdown
+ * or YAML so that it can be edited without touching components.
+ * Facts must match docs/ (the verified knowledge base).
+ */
+import { defineCollection, reference } from 'astro:content';
+import { glob, file } from 'astro/loaders';
+import { z } from 'astro/zod';
+
+const link = z.object({ label: z.string(), url: z.url() });
+
+/** A photo with its mandatory credit. */
+const photo = (image: () => z.ZodType) =>
+  z.object({
+    src: image(),
+    alt: z.string(),
+    credit: z.string(),
+    caption: z.string().optional(),
+  });
+
+const shows = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/shows' }),
+  schema: ({ image }) =>
+    z.object({
+      /** Event name, e.g. "Ars Electronica Festival 2024, opening". */
+      title: z.string(),
+      date: z.coerce.date(),
+      endDate: z.coerce.date().optional(),
+      /** Local start time, e.g. "22:00". */
+      time: z.string().optional(),
+      venue: z.string(),
+      city: z.string(),
+      country: z.string(),
+      piece: reference('pieces').optional(),
+      kind: z.enum(['performance', 'talk', 'exhibition']),
+      premiere: z.boolean().default(false),
+      /** Short description of the format, e.g. "Lecture-performance in English". */
+      format: z.string().optional(),
+      lineup: z.array(z.string()).default([]),
+      lecture: z.array(z.string()).default([]),
+      /** Bell value measured during the show (from the performance logs). */
+      bell: z.number().optional(),
+      audience: z.string().optional(),
+      summary: z.string(),
+      cover: photo(image).optional(),
+      gallery: z.array(photo(image)).default([]),
+      youtube: z.string().optional(),
+      links: z.array(link).default([]),
+      /** Hide from public lists (e.g. unconfirmed). */
+      draft: z.boolean().default(false),
+    }),
+});
+
+const pieces = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/pieces' }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      year: z.number(),
+      /** Instrumentation line, e.g. "for two cathedral organs, entangled photons and light". */
+      forces: z.string(),
+      composers: z.array(z.string()),
+      status: z.enum(['repertoire', 'experimental']),
+      order: z.number(),
+      /** One or two sentences for lists. */
+      summary: z.string(),
+      /** How the measurement drives the music, one sentence. */
+      mapping: z.string(),
+      visualsBy: z.array(z.string()).default([]),
+      cover: photo(image).optional(),
+      images: z.array(photo(image)).default([]),
+      audio: z
+        .array(z.object({ src: z.string(), title: z.string(), note: z.string().optional() }))
+        .default([]),
+      youtube: z.string().optional(),
+      /** Which live visual the piece page uses. */
+      visual: z.enum(['rings', 'terrain', 'metronome', 'none']).default('none'),
+    }),
+});
+
+const people = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/people' }),
+  schema: ({ image }) =>
+    z.object({
+      name: z.string(),
+      role: z.string(),
+      group: z.enum(['team', 'musicians', 'organists']),
+      affiliation: z.string().optional(),
+      order: z.number(),
+      portrait: photo(image).optional(),
+      links: z.array(link).default([]),
+    }),
+});
+
+const publications = defineCollection({
+  loader: file('./src/content/publications.yaml'),
+  schema: z.object({
+    kind: z.enum(['paper', 'talk', 'video', 'press', 'radio']),
+    title: z.string(),
+    /** Authors, speaker, outlet or channel. */
+    by: z.string(),
+    date: z.coerce.date(),
+    url: z.url().optional(),
+    note: z.string().optional(),
+    language: z.enum(['en', 'de']).default('en'),
+  }),
+});
+
+export const collections = { shows, pieces, people, publications };

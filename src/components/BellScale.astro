@@ -1,0 +1,69 @@
+---
+/**
+ * A hairline scale from 0 to 3 with the classical limit (2) and the quantum
+ * limit (2√2) marked, and a measured value. Static; for live values set
+ * `data-bell-value` on the element and update `--x` from script.
+ */
+interface Props {
+  value?: number;
+  /** Short label under the value, e.g. "measured on 4 Sept 2024" */
+  label?: string;
+  compact?: boolean;
+}
+const { value, label, compact = false } = Astro.props;
+const MAX = 3;
+const pos = (v: number) => `${(Math.min(v, MAX) / MAX) * 100}%`;
+---
+<div class:list={['bell', { compact }]} style={value !== undefined ? `--x: ${pos(value)}` : undefined} data-bell>
+  <div class="track" aria-hidden="true">
+    <span class="mark classical" style={`left: ${pos(2)}`}><span class="ui">{!compact && 'classical limit '}2</span></span>
+    <span class="mark quantum" style={`left: ${pos(2 * Math.SQRT2)}`}><span class="ui">{!compact && 'quantum limit '}2√2</span></span>
+    {value !== undefined && <span class="dot"></span>}
+  </div>
+  {value !== undefined && (
+    <p class="value num">
+      <span class="visually-hidden">Bell value </span>S = {value.toFixed(2)}
+      {label && <span class="ui dim"> {label}</span>}
+    </p>
+  )}
+</div>
+
+<style>
+  .bell { --x: 0%; }
+  .track {
+    position: relative;
+    height: 1px;
+    background: var(--graphite);
+    margin-top: 2.2rem;
+  }
+  .compact .track { margin-top: 1.4rem; }
+  .mark {
+    position: absolute;
+    top: -6px;
+    width: 1px;
+    height: 13px;
+    background: var(--ash);
+  }
+  .mark span {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    color: var(--ash);
+    font-size: 0.75rem;
+  }
+  .quantum span { transform: translateX(-70%); }
+  .dot {
+    position: absolute;
+    left: var(--x);
+    top: -4px;
+    width: 9px;
+    height: 9px;
+    margin-left: -4.5px;
+    border-radius: 50%;
+    background: var(--paper);
+    box-shadow: 0 0 12px rgb(235 231 223 / 0.6);
+  }
+  .value { margin: 0.9rem 0 0; font-size: 1rem; }
+</style>

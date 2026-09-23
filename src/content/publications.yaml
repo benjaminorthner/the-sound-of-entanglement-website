@@ -1,0 +1,145 @@
+# Papers, talks, videos and press. Newest first within each kind.
+- id: arxiv-2025
+  kind: paper
+  title: The Sound of Entanglement
+  by: E. de Dios Rodríguez, P. Haslinger, J. Kofler, R. Kueng, B. Orthner, A. Ploier, M. Ringbauer, C. Wenger
+  date: '2025-09-10'
+  url: https://arxiv.org/abs/2509.08892
+  note: arXiv:2509.08892 [quant-ph]
+- id: dpg-2025
+  kind: talk
+  title: The Sound of Entanglement
+  by: Benjamin Orthner et al., DPG Spring Meeting, Regensburg
+  date: '2025-03-19'
+  url: https://www.dpg-verhandlungen.de/year/2025/conference/regensburg/part/dy/session/20
+- id: isqcmc-2025
+  kind: talk
+  title: Investigating the Sound of Entanglement
+  by: ISQCMC 2025, Palermo
+  date: '2025-10-28'
+  url: https://2025.isqcmc.org/program.html
+- id: doc-2025
+  kind: video
+  title: BruQner – The Sound of Entanglement (documentary)
+  by: weitblickfilm, directed by Deniz Lindenberg
+  date: '2025-06-04'
+  url: https://www.youtube.com/watch?v=_mIf_OFN1YI
+  note: 18 min
+- id: trailer-2025
+  kind: video
+  title: BruQner – The Sound of Entanglement (trailer)
+  by: Alexander Ploier
+  date: '2025-01-14'
+  url: https://www.youtube.com/watch?v=i-wF82vEts0
+  note: 2 min
+- id: ball-video-2025
+  kind: video
+  title: 8 Rooms, live at the Vienna Ball of Sciences 2025
+  by: Clemens Wenger; film by Lisa Truttmann
+  date: '2025-07-24'
+  url: https://www.youtube.com/watch?v=Smz7cGPBODw
+  note: 12 min
+- id: promo-2024
+  kind: video
+  title: BruQner – The Sound of Entanglement (promotional video)
+  by: Alexander Ploier
+  date: '2024-08-27'
+  url: https://www.youtube.com/watch?v=m5-0rCh3GbY
+  note: 2 min
+- id: bruckneruni-2025
+  kind: press
+  title: Clemens Wenger ist neuer Professor für Komposition
+  by: Anton Bruckner Private University
+  date: '2025-10-30'
+  url: https://www.bruckneruni.ac.at/de/ueber-uns/aktuelles/news/news-detail/clemens-wenger-ist-neuer-professor-fuer-komposition
+  language: de
+- id: qz-2025
+  kind: press
+  title: 'The Sound Of Entanglement: Live Performance Driven By Real-Time Quantum Correlation Measurements'
+  by: Quantum Zeitgeist
+  date: '2025-09-14'
+  url: https://quantumzeitgeist.com/quantum-entanglement-performance-sound-live-driven-real-time-correlation-measurements/
+- id: austria-org-2025
+  kind: press
+  title: 'The Sound of Entanglement: Music Beyond Classical Physics'
+  by: Austria in USA
+  date: '2025-06-17'
+  url: https://www.austria.org/new-austrian-quantum-content/the-sound-of-entanglement-music-beyond-classical-physics
+- id: tuwien-millstatt-2025
+  kind: press
+  title: TechForum Millstatt 2025 – tech to connect
+  by: TU Wien
+  date: '2025-06-11'
+  url: https://www.tuwien.at/tu-wien/aktuelles/news/news/techforum-millstatt-2025-tech-to-connect
+  language: de
+- id: austria-org-jhu-2025
+  kind: press
+  title: The Sound of Entanglement at the Johns Hopkins Science Diplomacy Summit 2025
+  by: Austria in USA
+  date: '2025-04-22'
+  url: https://www.austria.org/news/the-sound-of-entanglement-at-the-johns-hopkins-science-diplomacy-summit-2025
+- id: jku-usa-2025
+  kind: press
+  title: '"The Sound of Entanglement" Goes USA'
+  by: JKU / quantA
+  date: '2025-04-18'
+  url: https://www.jku.at/en/quanta/detail/news/the-sound-of-entanglement-goes-usa/
+- id: standard-blog-2025
+  kind: press
+  title: 'The Sound of Entanglement: Musik im Zeitalter der Quantenrevolution'
+  by: Der Standard, blog by Richard Küng
+  date: '2025-04-02'
+  url: https://www.derstandard.at/story/3000000262993/the-sound-of-entanglement-musik-im-zeitalter-der-quantenrevolution
+  language: de
+- id: tuwien-osaka-2025
+  kind: press
+  title: TU Wien at the EXPO 2025 in Osaka
+  by: TU Wien
+  date: '2025-03-21'
+  url: https://www.tuwien.at/en/tu-wien/news/news/tu-wien-auf-der-expo-2025-in-osaka
+- id: ball-blog-2025
+  kind: press
+  title: What does chance sound like?
+  by: Vienna Ball of Sciences
+  date: '2025-01-15'
+  url: https://www.wissenschaftsball.at/en/chance-25/
+- id: uibk-2024
+  kind: press
+  title: Anton Bruckner trifft auf Quantenphysik
+  by: University of Innsbruck
+  date: '2024-09-09'
+  url: https://www.uibk.ac.at/de/newsroom/2024/anton-bruckner-trifft-auf-quantenphysik/
+  language: de
+- id: standard-2024
+  kind: press
+  title: Erstes quantenverschränktes Konzert in Linz zu hören
+  by: Der Standard
+  date: '2024-09-04'
+  url: https://www.derstandard.at/story/3000000235155/erstes-quantenverschraenktes-konzert-in-linz-zu-hoeren
+  language: de
+- id: apa-2024
+  kind: press
+  title: '"BruQner" – Erstes Quantenverschränkungs-Konzert steigt im Linzer Dom'
+  by: APA
+  date: '2024-09-03'
+  url: https://science.apa.at/power-search/18101482239950765398
+  language: de
+- id: tuwien-2024
+  kind: press
+  title: Wenn Photonen dirigieren
+  by: TU Wien
+  date: '2024-08-27'
+  url: https://www.tuwien.at/tu-wien/aktuelles/news/news/wenn-photonen-dirigieren
+  language: de
+- id: ars-2024
+  kind: press
+  title: BruQner—The Sound of Entanglement
+  by: Ars Electronica
+  date: '2024-09-04'
+  url: https://ars.electronica.art/hope/en/bruqner-the-sound-of-entanglement/
+- id: vcq-2024
+  kind: press
+  title: 'The Sound of Entanglement: Anton Bruckner meets Quantum physics'
+  by: Vienna Center for Quantum Science and Technology
+  date: '2024-09-01'
+  url: https://vcq-quantum.at/2024/09/01/the-sound-of-entanglement-anton-bruckner-meets-quantum-physics/

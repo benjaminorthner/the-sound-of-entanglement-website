@@ -72,8 +72,8 @@ entanglement in a live performance."*
   again at JKU. arXiv paper (Sept 2025). Clemens Wenger becomes Professor of
   Composition at Bruckner University Linz (Oct 2025).
 - **2026**: Pint of Science talk (May). Album *Sounds of Entanglement* by the
-  band **The Uncertain Question** is in production: recording planned for
-  1 May 2026, release planned for Oct/Nov 2026 (status unconfirmed). Next show:
+  band **The Uncertain Question** is recorded and awaiting release (vinyl and
+  digital). Next show:
   **16 Oct 2026, University of Innsbruck**. Wien Modern (Nov 2026) is
   tentative.
 
@@ -90,8 +90,8 @@ entanglement in a live performance."*
 
 - **soundofentanglement.com**: a single hand-written HTML page (white, Space
   Mono + Bebas Neue) on Apache webspace, last modified 22 Jun 2026, with contact
-  clemenswenger@mac.com. It will be replaced by this site; who controls the
-  domain is still an open question.
+  clemenswenger@mac.com. It will be replaced by this site. Clemens owns the
+  domain, and it can be repointed to the new host.
 - **sites.google.com/view/thesoundofentanglement**: the old placeholder with
   the same content.
 - YouTube: [@BruQnerTheSoundofEntanglement](https://www.youtube.com/@BruQnerTheSoundofEntanglement)
