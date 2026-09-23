@@ -1,0 +1,222 @@
+---
+/**
+ * The musical Bell argument, from the June 2024 test-performance lecture.
+ * A classical conductor hands each musician an instruction card before the
+ * music starts: what to play if asked about volume, what to play if asked
+ * about timbre. The visitor writes the cards; the four agreements are scored
+ * as in the CHSH sum, which always comes out +2 or −2, whatever the cards say.
+ *
+ * +1 = loud or wooden, −1 = soft or metallic.
+ * A1/B1 = the answer to "volume", A2/B2 = the answer to "timbre".
+ */
+const questions = [
+  { q: 'volume', plus: 'loud', minus: 'soft' },
+  { q: 'timbre', plus: 'wooden', minus: 'metallic' },
+];
+// the example from the 2024 slides: Alice loud & wooden, Bob loud & metallic
+const initial = { alice: [1, 1], bob: [1, -1] };
+const pairs = [
+  { a: 0, b: 0, sign: 1 },
+  { a: 0, b: 1, sign: 1 },
+  { a: 1, b: 0, sign: 1 },
+  { a: 1, b: 1, sign: -1 },
+];
+---
+<div class="conductor" data-conductor>
+  <div class="cards">
+    {(['alice', 'bob'] as const).map((who) => (
+      <fieldset class:list={['card', who]}>
+        <legend>
+          <span class="who">{who === 'alice' ? 'Alice' : 'Bob'}</span>
+          <span class="dim"> {who === 'alice' ? 'first' : 'second'} musician</span>
+        </legend>
+        {questions.map((q, i) => (
+          <div class="row">
+            <span class="ask">If asked for {q.q}, play</span>
+            <div class="choice" role="radiogroup" aria-label={`${who === 'alice' ? 'Alice' : 'Bob'}, if asked for ${q.q}`}>
+              {[1, -1].map((v) => (
+                <label>
+                  <input
+                    type="radio"
+                    name={`${who}-${i}`}
+                    value={v}
+                    checked={initial[who][i] === v}
+                    data-who={who}
+                    data-q={i}
+                  />
+                  <span>{v === 1 ? q.plus : q.minus}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        ))}
+      </fieldset>
+    ))}
+  </div>
+
+  <div class="score" aria-live="polite">
+    <table>
+      <caption class="visually-hidden">How the four combinations of questions score with these cards</caption>
+      <thead>
+        <tr>
+          <th scope="col">Alice is asked</th>
+          <th scope="col">Bob is asked</th>
+          <th scope="col">They play</th>
+          <th scope="col" class="n">Counts</th>
+        </tr>
+      </thead>
+      <tbody>
+        {pairs.map((p, k) => (
+          <tr data-pair={k}>
+            <td class="alice">{questions[p.a].q}</td>
+            <td class="bob">{questions[p.b].q}</td>
+            <td data-play></td>
+            <td class="n num" data-term></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    <p class="sum num">
+      <span data-sum-expr></span> = <strong data-sum></strong>
+    </p>
+    <div class="actions">
+      <button type="button" class="btn" data-shuffle>Let the conductor choose at random</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-conductor]').forEach((root) => {
+    const Q = [
+      { plus: 'loud', minus: 'soft' },
+      { plus: 'wooden', minus: 'metallic' },
+    ];
+    const PAIRS = [
+      { a: 0, b: 0, sign: 1 },
+      { a: 0, b: 1, sign: 1 },
+      { a: 1, b: 0, sign: 1 },
+      { a: 1, b: 1, sign: -1 },
+    ];
+    const val = (who: string, q: number) =>
+      Number(root.querySelector<HTMLInputElement>(`input[data-who="${who}"][data-q="${q}"]:checked`)!.value);
+    const word = (q: number, v: number) => (v > 0 ? Q[q].plus : Q[q].minus);
+    const sgn = (v: number) => (v > 0 ? '+1' : '−1');
+
+    function update() {
+      let sum = 0;
+      const parts: string[] = [];
+      PAIRS.forEach((p, k) => {
+        const A = val('alice', p.a), B = val('bob', p.b);
+        const agree = A * B;
+        sum += p.sign * agree;
+        const row = root.querySelector<HTMLElement>(`[data-pair="${k}"]`)!;
+        row.querySelector('[data-play]')!.textContent =
+          `${word(p.a, A)} and ${word(p.b, B)}: ${agree > 0 ? 'alike' : 'unlike'}`;
+        row.querySelector('[data-term]')!.textContent = `${p.sign < 0 ? '−' : ''}(${sgn(agree)})`;
+        row.classList.toggle('minus', p.sign < 0);
+        parts.push(`${k === 0 ? '' : p.sign < 0 ? ' − ' : ' + '}(${sgn(agree)})`);
+      });
+      root.querySelector('[data-sum-expr]')!.textContent = parts.join('');
+      root.querySelector('[data-sum]')!.textContent = sum > 0 ? '+2' : '−2';
+    }
+
+    root.addEventListener('change', update);
+    root.querySelector('[data-shuffle]')!.addEventListener('click', () => {
+      root.querySelectorAll<HTMLElement>('.choice').forEach((g) => {
+        const inputs = g.querySelectorAll<HTMLInputElement>('input');
+        inputs[Math.random() < 0.5 ? 0 : 1].checked = true;
+      });
+      update();
+    });
+    update();
+  });
+</script>
+
+<style>
+  .conductor {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 2rem var(--gutter);
+    padding-block: 2rem;
+    border-top: 1px solid var(--graphite);
+    border-bottom: 1px solid var(--graphite);
+    margin-block: 2rem;
+  }
+  .cards { display: flex; flex-direction: column; gap: 1rem; }
+  .card {
+    margin: 0;
+    padding: 1rem 1.25rem 1.1rem;
+    border: 1px solid var(--graphite);
+    border-left-width: 2px;
+    background: var(--soot);
+  }
+  .card.alice { border-left-color: var(--alice); }
+  .card.bob { border-left-color: var(--bob); }
+  legend {
+    padding: 0 0.4rem;
+    margin-left: -0.4rem;
+    font-family: var(--font-display);
+    font-size: 0.9375rem;
+  }
+  .alice .who { color: var(--alice); }
+  .bob .who { color: var(--bob); }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4rem 1rem;
+    padding-top: 0.7rem;
+  }
+  .ask { font-size: 1rem; color: var(--ash); }
+  .choice { display: flex; gap: 0.3rem; }
+  .choice label { cursor: pointer; }
+  .choice input { position: absolute; opacity: 0; pointer-events: none; }
+  .choice span {
+    display: inline-block;
+    min-width: 5.5rem;
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: 0.9375rem;
+    padding: 0.3rem 0.8rem;
+    border: 1px solid var(--graphite);
+    border-radius: 999px;
+    color: var(--ash);
+  }
+  .choice input:checked + span { color: var(--black); background: var(--paper); border-color: var(--paper); }
+  .choice input:focus-visible + span { outline: 2px solid var(--paper); outline-offset: 2px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.9375rem; }
+  th, td { text-align: left; padding: 0.55rem 0.6rem 0.55rem 0; border-bottom: 1px solid var(--graphite); font-weight: 400; }
+  thead th { font-family: var(--font-display); font-size: 0.8125rem; color: var(--ash); }
+  td.alice { color: var(--alice); }
+  td.bob { color: var(--bob); }
+  .n { text-align: right; padding-right: 0; white-space: nowrap; }
+  tr.minus td { color: var(--paper); }
+  tr.minus td.alice { color: var(--alice); }
+  tr.minus td.bob { color: var(--bob); }
+  .sum {
+    margin: 1.25rem 0 0;
+    font-family: var(--font-display);
+    font-size: 1.0625rem;
+    color: var(--ash);
+    text-align: right;
+    max-width: none;
+  }
+  .sum strong { font-weight: 300; font-size: var(--step-3); color: var(--paper); margin-left: 0.25rem; }
+  .actions { display: flex; justify-content: flex-end; margin-top: 1rem; }
+  .btn {
+    font-family: var(--font-display);
+    font-size: 0.9375rem;
+    background: none;
+    color: var(--paper);
+    border: 1px solid var(--graphite);
+    border-radius: 999px;
+    padding: 0.5rem 1.1rem;
+    cursor: pointer;
+  }
+  .btn:hover { border-color: var(--ash); }
+  @media (max-width: 900px) {
+    .conductor { grid-template-columns: 1fr; }
+  }
+</style>

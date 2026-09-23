@@ -1,0 +1,269 @@
+---
+/**
+ * The measurement chain, step by step: a redraw of the setup sequence from
+ * the DPG 2025 talk (slides 15–24) in site colours (Alice red, Bob blue).
+ * Each part of the drawing carries data-from="n": it appears at step n and
+ * is highlighted while step n is current. The ordered list is both the
+ * navigation and the text alternative.
+ */
+const steps = [
+  { title: 'Laser', text: 'A violet 405 nm laser, the only light in the experiment you can see, shines into the source.' },
+  { title: 'Crystal', text: 'In a thin crystal of beta barium borate, about one laser photon in a hundred billion splits into two infrared 810 nm photons. The pair is entangled in polarisation.' },
+  { title: 'Two paths', text: 'Mirrors send one photon of each pair to Alice and the other to Bob, about thirty centimetres apart on the same breadboard.' },
+  { title: 'Choosing a setting', text: 'On each side, a motor turns a half-wave plate to one of two angles, chosen at random for every measurement. This is the click you hear.' },
+  { title: 'Beam splitter', text: 'A polarising beam splitter lets the photon through or reflects it. Through counts as +1, reflected as −1.' },
+  { title: 'Detectors', text: 'Optical fibres carry the photon to one of four single-photon detectors, two for Alice and two for Bob.' },
+  { title: 'Coincidence', text: 'A time tagger stamps every detection to a few trillionths of a second. Two detections less than a nanosecond apart belong to the same pair, and that pair becomes the next musical decision: Alice\'s setting, Bob\'s setting, Alice\'s result, Bob\'s result.' },
+];
+---
+<div class="setup-steps" data-steps>
+  <div class="figure">
+    <svg viewBox="0 0 920 440" role="img" aria-labelledby="ss-title">
+      <title id="ss-title">The measurement chain of the experiment, drawn step by step. The steps are described in the list next to the drawing.</title>
+      <defs>
+        <filter id="ss-glow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="3.5" result="b" />
+          <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
+      </defs>
+
+      <!-- 1 laser -->
+      <g class="part" data-from="1">
+        <rect x="30" y="192" width="96" height="56" rx="3" class="box" />
+        <text x="78" y="226" class="t" text-anchor="middle">405 nm</text>
+        <line x1="126" y1="220" x2="206" y2="220" class="pump" filter="url(#ss-glow)" />
+        <text x="78" y="276" class="t dim" text-anchor="middle">laser</text>
+      </g>
+
+      <!-- 2 crystal -->
+      <g class="part" data-from="2">
+        <rect x="206" y="194" width="10" height="52" class="crystal" />
+        <text x="211" y="276" class="t dim" text-anchor="middle">crystal</text>
+        <circle cx="228" cy="208" r="4" class="photon" filter="url(#ss-glow)" />
+        <circle cx="228" cy="232" r="4" class="photon" filter="url(#ss-glow)" />
+      </g>
+
+      <!-- 3 two paths -->
+      <g class="part" data-from="3">
+        <path d="M216 214 L300 110 L400 110" class="beam alice-b" />
+        <path d="M216 226 L300 330 L400 330" class="beam bob-b" />
+        <circle cx="300" cy="110" r="5" class="mirror" />
+        <circle cx="300" cy="330" r="5" class="mirror" />
+        <text x="300" y="86" class="t alice-t" text-anchor="middle">Alice</text>
+        <text x="300" y="366" class="t bob-t" text-anchor="middle">Bob</text>
+      </g>
+
+      <!-- 4 half-wave plates -->
+      <g class="part" data-from="4">
+        <line x1="400" y1="110" x2="530" y2="110" class="beam alice-b" />
+        <line x1="400" y1="330" x2="530" y2="330" class="beam bob-b" />
+        <g transform="translate(440 110)"><g class="hwp"><rect x="-5" y="-26" width="10" height="52" class="plate" /></g></g>
+        <g transform="translate(440 330)"><g class="hwp hwp-b"><rect x="-5" y="-26" width="10" height="52" class="plate" /></g></g>
+        <text x="440" y="66" class="t dim" text-anchor="middle">half-wave plate</text>
+        <text x="440" y="384" class="t dim" text-anchor="middle">half-wave plate</text>
+      </g>
+
+      <!-- 5 beam splitters -->
+      <g class="part" data-from="5">
+        <rect x="530" y="86" width="48" height="48" class="cube" />
+        <line x1="530" y1="134" x2="578" y2="86" class="cube-diag" />
+        <rect x="530" y="306" width="48" height="48" class="cube" />
+        <line x1="530" y1="306" x2="578" y2="354" class="cube-diag" />
+        <line x1="578" y1="110" x2="690" y2="110" class="beam alice-b" />
+        <line x1="554" y1="86" x2="554" y2="30" class="beam alice-b" />
+        <line x1="578" y1="330" x2="690" y2="330" class="beam bob-b" />
+        <line x1="554" y1="354" x2="554" y2="410" class="beam bob-b" />
+        <text x="634" y="100" class="t dim" text-anchor="middle">+1</text>
+        <text x="572" y="44" class="t dim">−1</text>
+        <text x="634" y="320" class="t dim" text-anchor="middle">+1</text>
+        <text x="572" y="404" class="t dim">−1</text>
+      </g>
+
+      <!-- 6 detectors -->
+      <g class="part" data-from="6">
+        <path d="M690 96 a14 14 0 0 1 0 28 z" class="det alice-d" />
+        <path d="M540 30 a14 14 0 0 1 28 0 z" class="det alice-d" />
+        <path d="M690 316 a14 14 0 0 1 0 28 z" class="det bob-d" />
+        <path d="M540 410 a14 14 0 0 0 28 0 z" class="det bob-d" />
+        <text x="720" y="150" class="t dim">detectors</text>
+      </g>
+
+      <!-- 7 time tagger -->
+      <g class="part" data-from="7">
+        <path d="M704 110 C 760 110, 760 190, 790 196" class="fibre" />
+        <path d="M568 22 C 700 10, 760 170, 790 206" class="fibre" />
+        <path d="M704 330 C 760 330, 760 250, 790 244" class="fibre" />
+        <path d="M568 418 C 700 430, 760 270, 790 234" class="fibre" />
+        <rect x="790" y="182" width="104" height="76" rx="3" class="box" />
+        <text x="842" y="214" class="t" text-anchor="middle">time</text>
+        <text x="842" y="234" class="t" text-anchor="middle">tagger</text>
+        <text x="842" y="290" class="t dim tail" text-anchor="middle">[a, b, A, B]</text>
+        <text x="842" y="312" class="t dim tail" text-anchor="middle">to the music</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class="text">
+    <ol class="steps" data-step-list>
+      {steps.map((s, i) => (
+        <li>
+          <button type="button" data-step={i + 1} aria-current={i === 0 ? 'step' : undefined}>
+            <span class="num step-n">{i + 1}</span>
+            <span class="step-title">{s.title}</span>
+          </button>
+          <p class="step-text">{s.text}</p>
+        </li>
+      ))}
+    </ol>
+    <div class="nav">
+      <button type="button" class="btn" data-prev>Previous</button>
+      <button type="button" class="btn primary" data-next>Next step</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-steps]').forEach((root) => {
+    const parts = Array.from(root.querySelectorAll<SVGGElement>('.part'));
+    const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-step]'));
+    const prev = root.querySelector<HTMLButtonElement>('[data-prev]')!;
+    const next = root.querySelector<HTMLButtonElement>('[data-next]')!;
+    const N = buttons.length;
+    let step = 1;
+
+    function show(n: number) {
+      step = Math.max(1, Math.min(N, n));
+      root.dataset.current = String(step);
+      parts.forEach((p) => {
+        const from = Number(p.dataset.from);
+        p.classList.toggle('on', from <= step);
+        p.classList.toggle('now', from === step);
+      });
+      buttons.forEach((b) => {
+        const i = Number(b.dataset.step);
+        b.closest('li')!.classList.toggle('current', i === step);
+        b.closest('li')!.classList.toggle('done', i < step);
+        if (i === step) b.setAttribute('aria-current', 'step');
+        else b.removeAttribute('aria-current');
+      });
+      prev.disabled = step === 1;
+      next.textContent = step === N ? 'Start again' : 'Next step';
+    }
+
+    buttons.forEach((b) => b.addEventListener('click', () => show(Number(b.dataset.step))));
+    prev.addEventListener('click', () => show(step - 1));
+    next.addEventListener('click', () => show(step === N ? 1 : step + 1));
+    root.classList.add('js');
+    show(1);
+  });
+</script>
+
+<style>
+  .setup-steps {
+    display: grid;
+    grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+    gap: 2rem var(--gutter);
+    align-items: start;
+    margin-top: 2.5rem;
+  }
+  .figure { position: sticky; top: calc(var(--header-h) + 1.5rem); }
+  svg { width: 100%; height: auto; overflow: visible; }
+
+  /* Without JavaScript everything is shown; with it, parts appear step by step. */
+  .js .part { opacity: 0; transition: opacity 0.5s ease; }
+  .js .part.on { opacity: 0.45; }
+  .js .part.now { opacity: 1; }
+  .js[data-current='7'] .part.on { opacity: 0.85; }
+  .js[data-current='7'] .part.now { opacity: 1; }
+
+  .box { fill: var(--black); stroke: var(--ash); }
+  .pump { stroke: var(--pump); stroke-width: 3; }
+  .crystal { fill: none; stroke: var(--paper); }
+  .photon { fill: var(--photon); }
+  .beam { fill: none; stroke-width: 2.5; }
+  .alice-b { stroke: var(--alice); }
+  .bob-b { stroke: var(--bob); }
+  .mirror { fill: var(--black); stroke: var(--ash); }
+  .plate { fill: rgb(235 231 223 / 0.12); stroke: var(--paper); }
+  .cube { fill: rgb(235 231 223 / 0.06); stroke: var(--paper); }
+  .cube-diag { stroke: var(--paper); stroke-opacity: 0.6; }
+  .det { stroke-width: 1.5; fill: var(--black); }
+  .alice-d { stroke: var(--alice); }
+  .bob-d { stroke: var(--bob); }
+  .fibre { fill: none; stroke: var(--smoke); stroke-width: 1.25; stroke-dasharray: 3 4; }
+  .t { fill: var(--paper); font-family: var(--font-display); font-size: 17px; }
+  .t.dim { fill: var(--ash); }
+  .alice-t { fill: var(--alice); }
+  .bob-t { fill: var(--bob); }
+
+  /* motion: the plates swing between two settings; detectors pulse */
+  .hwp { transform-box: fill-box; transform-origin: center; }
+  .part.now .hwp { animation: swing 2.2s ease-in-out infinite; }
+  .part.now .hwp-b { animation-delay: -1.1s; }
+  @keyframes swing {
+    0%, 35% { transform: rotate(0deg); }
+    50%, 85% { transform: rotate(22.5deg); }
+    100% { transform: rotate(0deg); }
+  }
+  .part.now .det { animation: pulse 1.6s ease-out infinite; }
+  .part.now .det:nth-of-type(2) { animation-delay: 0.4s; }
+  .part.now .det:nth-of-type(3) { animation-delay: 0.8s; }
+  .part.now .det:nth-of-type(4) { animation-delay: 1.2s; }
+  .alice-d { --flash: var(--alice); }
+  .bob-d { --flash: var(--bob); }
+  @keyframes pulse {
+    0% { fill: var(--flash); }
+    60%, 100% { fill: var(--black); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .js .part { transition: none; }
+    .part.now .hwp, .part.now .det { animation: none; }
+  }
+
+  .steps { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--graphite); }
+  .steps li { border-bottom: 1px solid var(--graphite); }
+  .steps button {
+    display: flex;
+    align-items: baseline;
+    gap: 0.9rem;
+    width: 100%;
+    background: none;
+    border: 0;
+    padding: 0.75rem 0;
+    color: var(--ash);
+    font-family: var(--font-display);
+    font-size: 1rem;
+    text-align: left;
+    cursor: pointer;
+  }
+  .steps button:hover { color: var(--paper); }
+  .step-n { width: 1.2rem; color: var(--smoke); }
+  .steps .current button { color: var(--paper); }
+  .steps .current .step-n { color: var(--pump); }
+  .step-text { margin: 0 0 1rem 2.1rem; font-size: 1.0625rem; }
+  .js .step-text { display: none; }
+  .js .current .step-text { display: block; }
+
+  .nav { display: flex; gap: 0.5rem; margin-top: 1.25rem; }
+  .btn {
+    font-family: var(--font-display);
+    font-size: 0.9375rem;
+    background: none;
+    color: var(--paper);
+    border: 1px solid var(--graphite);
+    border-radius: 999px;
+    padding: 0.5rem 1.1rem;
+    cursor: pointer;
+  }
+  .btn:hover { border-color: var(--ash); }
+  .btn:disabled { opacity: 0.4; cursor: default; }
+  .btn.primary { background: var(--paper); color: var(--black); border-color: var(--paper); }
+
+  @media (max-width: 900px) {
+    .setup-steps { grid-template-columns: 1fr; }
+    .figure { position: static; }
+    .t { font-size: 27px; }
+    .beam { stroke-width: 3.5; }
+    .tail { font-size: 21px; }
+  }
+</style>
