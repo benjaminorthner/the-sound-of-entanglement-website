@@ -50,9 +50,6 @@ gallery:
 - src: ../../assets/photos/2024-bruqner-linz/twin-cones.jpg
   alt: Two cones of light fan out towards the altar.
   credit: © Land OÖ / Andreas Krenn
-- src: ../../assets/photos/2024-bruqner-linz/organist-console.jpg
-  alt: An organist at the lit console.
-  credit: Florian Voggeneder / Ars Electronica
 - src: ../../assets/photos/2024-bruqner-linz/laser-fan.jpg
   alt: A fan of violet and yellow beams over the altar crucifix.
   credit: © Land OÖ / Andreas Krenn
@@ -71,9 +68,68 @@ gallery:
 - src: ../../assets/photos/2024-bruqner-linz/beam-fan.jpg
   alt: A fan of beams converging on one point, the operator in silhouette.
   credit: © Land OÖ / Andreas Krenn
+- src: ../../assets/photos/2024-bruqner-linz/case-cross-haze.jpg
+  alt: The experiment in haze below the altar cross, the operator behind it, the audience all around.
+  credit: Florian Voggeneder / Ars Electronica
+- src: ../../assets/photos/2024-bruqner-linz/optics-macro-2.jpg
+  alt: 'Inside the case: the optics under the LED strip.'
+  credit: Florian Voggeneder / Ars Electronica
+- src: ../../assets/photos/2024-bruqner-linz/wide-nave.jpg
+  alt: The nave filling up before the start, the main organ at the back.
+  credit: Florian Voggeneder / Ars Electronica
+  caption: The cathedral
+- src: ../../assets/photos/2024-bruqner-linz/lecture-before-3000.jpg
+  alt: 'Before the performance: the lecture in front of more than 3 000 people sitting on the cathedral floor, the main organ at the far end.'
+  credit: Florian Voggeneder / Ars Electronica
+  caption: The cathedral
+- src: ../../assets/photos/2024-bruqner-linz/overhead-crowd-1.jpg
+  alt: 'From the vault: the crowd filling the nave around the lit experiment.'
+  credit: Tom Mesic / Ars Electronica
+  caption: The cathedral
+- src: ../../assets/photos/2024-bruqner-linz/overhead-crowd-3.jpg
+  alt: 'From the gallery: the whole cathedral floor full of people.'
+  credit: Tom Mesic / Ars Electronica
+  caption: The cathedral
+- src: ../../assets/photos/2024-bruqner-linz/overhead-nave.jpg
+  alt: Looking down the nave from high above.
+  credit: Tom Mesic / Ars Electronica
+  caption: The cathedral
 - src: ../../assets/photos/2024-bruqner-linz/fisheye-cathedral.jpg
   alt: The full cathedral from above, crowded before the performance.
   credit: Tom Mesic / Ars Electronica
+  caption: The cathedral
+- src: ../../assets/photos/2024-bruqner-linz/candles.jpg
+  alt: Candles lit at the side of the nave during the evening.
+  credit: Florian Voggeneder / Ars Electronica
+  caption: The cathedral
+- src: ../../assets/photos/2024-bruqner-linz/mariendom-exterior.jpg
+  alt: The Mariendom lit violet on the night of the Ars Electronica opening.
+  credit: Tom Mesic / Ars Electronica
+  caption: The cathedral
+- src: ../../assets/photos/2024-bruqner-linz/organist-console.jpg
+  alt: An organist at the lit console.
+  credit: Florian Voggeneder / Ars Electronica
+  caption: At the organs
+- src: ../../assets/photos/2024-bruqner-linz/organ-rudigier-console.jpg
+  alt: At the console of the Rudigier organ, the notes arriving on a tablet.
+  credit: Tom Mesic / Ars Electronica
+  caption: At the organs
+- src: ../../assets/photos/2024-bruqner-linz/organist-kreuzhuber.jpg
+  alt: An organist lit by the console lamp, headphones on, reading the next bar.
+  credit: Florian Voggeneder / Ars Electronica
+  caption: At the organs
+- src: ../../assets/photos/2024-bruqner-linz/organist-registers.jpg
+  alt: The organ's stops and the organist's hands.
+  credit: Tom Mesic / Ars Electronica
+  caption: At the organs
+- src: ../../assets/photos/2024-bruqner-linz/visitors-at-case.jpg
+  alt: Visitors bending over the glass case to look at the optics.
+  credit: Florian Voggeneder / Ars Electronica
+  caption: After the performance
+- src: ../../assets/photos/2024-bruqner-linz/case-and-crowd.jpg
+  alt: After the performance, people crowd around the experiment.
+  credit: Florian Voggeneder / Ars Electronica
+  caption: After the performance
 youtube: _mIf_OFN1YI
 links:
 - label: Ars Electronica programme

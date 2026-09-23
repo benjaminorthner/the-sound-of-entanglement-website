@@ -1,0 +1,209 @@
+---
+/**
+ * The arXiv preprint as a physical object: the first page as a white sheet
+ * on the black site, the next pages stacked behind it, flippable with
+ * buttons, arrow keys or a click on the edge of the stack. Clicking the
+ * front sheet opens the PDF at that page.
+ *
+ * Pages are rendered from the arXiv PDF (pdftoppm, 1600 px wide) into
+ * src/assets/paper/. Only the first PREVIEW pages are included; the rest
+ * are one click away on arXiv. To refresh after a new arXiv version, see
+ * docs/content-guide.md (re-render and replace page-N.jpg).
+ */
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  pdfUrl: string;
+  totalPages: number;
+}
+const { pdfUrl, totalPages } = Astro.props;
+
+const files = import.meta.glob<{ default: ImageMetadata }>('../../assets/paper/page-*.jpg', { eager: true });
+const pages = await Promise.all(
+  Object.entries(files)
+    .map(([path, mod]) => ({ n: Number(path.match(/page-(\d+)\.jpg$/)![1]), src: mod.default }))
+    .sort((a, b) => a.n - b.n)
+    .map(async ({ n, src }) => {
+      const img = await getImage({ src, widths: [600, 900, 1200, 1600], format: 'webp', quality: 78 });
+      return { n, img };
+    }),
+);
+const shown = pages.length;
+---
+<div
+  class="paper-object"
+  data-paper
+  data-pdf={pdfUrl}
+  role="region"
+  aria-roledescription="page preview"
+  aria-label={`Preview of the paper, first ${shown} of ${totalPages} pages`}
+>
+  <div class="stack" tabindex="0" aria-describedby="paper-help">
+    {pages.map(({ n, img }, i) => (
+      <a
+        class="sheet"
+        href={`${pdfUrl}#page=${n}`}
+        data-sheet={i}
+        aria-label={`Page ${n}. Opens the PDF at this page.`}
+        aria-hidden={i === 0 ? undefined : 'true'}
+        tabindex={i === 0 ? undefined : -1}
+        style={`--i: ${i}`}
+      >
+        <img
+          src={img.src}
+          srcset={img.srcSet.attribute}
+          sizes="(min-width: 900px) 40vw, 88vw"
+          width={img.attributes.width}
+          height={img.attributes.height}
+          alt=""
+          loading={i < 3 ? 'eager' : 'lazy'}
+          decoding="async"
+          draggable="false"
+        />
+      </a>
+    ))}
+  </div>
+
+  <div class="controls ui">
+    <button type="button" data-prev aria-label="Previous page" disabled>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 L8 12 L15 19" /></svg>
+    </button>
+    <p class="count num" aria-live="polite"><span data-current>1</span> <span class="dim">of {totalPages}</span></p>
+    <button type="button" data-next aria-label="Next page">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5 L16 12 L9 19" /></svg>
+    </button>
+  </div>
+  <p id="paper-help" class="help ui dim">
+    Arrow keys turn the pages. The preview shows the first {shown} pages; the rest are in the{' '}
+    <a href={pdfUrl}>PDF</a>.
+  </p>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-paper]').forEach((root) => {
+    const stack = root.querySelector<HTMLElement>('.stack')!;
+    const sheets = [...root.querySelectorAll<HTMLAnchorElement>('[data-sheet]')];
+    const prev = root.querySelector<HTMLButtonElement>('[data-prev]')!;
+    const next = root.querySelector<HTMLButtonElement>('[data-next]')!;
+    const current = root.querySelector<HTMLElement>('[data-current]')!;
+    let at = 0;
+
+    const show = (k: number) => {
+      at = Math.max(0, Math.min(sheets.length - 1, k));
+      root.style.setProperty('--at', String(at));
+      sheets.forEach((s, i) => {
+        const front = i === at;
+        s.classList.toggle('turned', i < at);
+        s.classList.toggle('front', front);
+        if (front) {
+          s.removeAttribute('aria-hidden');
+          s.removeAttribute('tabindex');
+        } else {
+          s.setAttribute('aria-hidden', 'true');
+          s.tabIndex = -1;
+        }
+        // load the pages around the current one before they are needed
+        if (Math.abs(i - at) <= 2) s.querySelector('img')!.loading = 'eager';
+      });
+      current.textContent = String(at + 1);
+      prev.disabled = at === 0;
+      next.disabled = at === sheets.length - 1;
+    };
+
+    prev.addEventListener('click', () => show(at - 1));
+    next.addEventListener('click', () => show(at + 1));
+    stack.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown') { show(at + 1); e.preventDefault(); }
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') { show(at - 1); e.preventDefault(); }
+      if (e.key === 'Home') { show(0); e.preventDefault(); }
+      if (e.key === 'End') { show(sheets.length - 1); e.preventDefault(); }
+    });
+    // a click on a page lying behind the front sheet turns to it
+    sheets.forEach((s, i) =>
+      s.addEventListener('click', (e) => {
+        if (i !== at) { e.preventDefault(); show(i); }
+      }),
+    );
+    // horizontal swipe on touch screens
+    let x0: number | null = null;
+    stack.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'mouse') x0 = e.clientX; });
+    stack.addEventListener('pointerup', (e) => {
+      if (x0 === null) return;
+      const dx = e.clientX - x0;
+      x0 = null;
+      if (Math.abs(dx) > 40) show(at + (dx < 0 ? 1 : -1));
+    });
+    show(0);
+  });
+</script>
+
+<style>
+  .paper-object { --at: 0; }
+  .stack {
+    position: relative;
+    aspect-ratio: 1600 / 2263;
+    /* room for the pages fanned out behind the front sheet */
+    margin: 0 2.6rem 3.4rem 0;
+    touch-action: pan-y;
+    outline: none;
+  }
+  .stack:focus-visible .sheet.front { outline: 2px solid var(--paper); outline-offset: 6px; }
+  .sheet {
+    --d: calc(var(--i) - var(--at)); /* depth behind the front sheet */
+    position: absolute;
+    inset: 0;
+    display: block;
+    background: #fff;
+    z-index: calc(100 - var(--i));
+    transform-origin: 30% 100%;
+    transform:
+      translate(calc(min(var(--d), 3) * 0.8rem), calc(min(var(--d), 3) * 0.65rem))
+      rotate(calc(min(var(--d), 3) * 0.9deg));
+    filter: brightness(calc(0.94 - min(var(--d), 3) * 0.2));
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.05),
+      0 24px 60px -12px rgb(0 0 0 / 0.9),
+      0 0 0 1px rgb(0 0 0 / 0.25);
+    transition: transform 0.5s cubic-bezier(0.3, 0.7, 0.2, 1), filter 0.5s, opacity 0.4s;
+    cursor: pointer;
+  }
+  .sheet img { width: 100%; height: 100%; object-fit: cover; user-select: none; }
+  .sheet.front { cursor: zoom-in; filter: brightness(0.94); }
+  .sheet.turned {
+    transform: translate(-18%, -2%) rotate(-7deg);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .sheet.front:hover { filter: brightness(0.98); }
+  .sheet.front:focus-visible { outline: 2px solid var(--paper); outline-offset: 6px; }
+
+  .controls {
+    position: relative;
+    z-index: 101;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.5rem;
+  }
+  .controls button {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--graphite);
+    background: none;
+    color: var(--paper);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+  }
+  .controls button:hover:not(:disabled) { border-color: var(--ash); }
+  .controls button:disabled { opacity: 0.3; cursor: default; }
+  .controls svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+  .count { margin: 0; font-size: 1rem; min-width: 4.5rem; text-align: center; }
+  .help { font-size: 0.8125rem; margin-top: 0.75rem; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sheet { transition: none; }
+  }
+</style>

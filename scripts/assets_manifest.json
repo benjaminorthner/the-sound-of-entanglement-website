@@ -410,5 +410,170 @@
   "src": "DRIVE/2025 10 - CIVA Wien/Pressematerial/Group Pictures/Kopie von JudithSchwarz*.jpeg",
   "dest": "src/assets/photos/people/judith-schwarz.jpg",
   "max": 1400
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/*_53971847407_o.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/lecture-before-3000.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/*_53973053339_o.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/case-cross-haze.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/*_53971847427_o.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/organ-rudigier-console.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/*_53971847537_o.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/nave-portrait.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/*_53972730241_o.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/organist-registers.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/*_53972730466_o.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/overhead-crowd-1.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/*_53972730506_o.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/overhead-crowd-2.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/*_53972730521_o.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/overhead-nave.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/*_53972924878_o.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/visitors-at-case.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/*_53972967028_o.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/candles.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/*_53972967083_o.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/wide-nave.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/*_53972967208_o.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/overhead-crowd-3.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/*_53972967243_o.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/overhead-crowd-4.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/*_53973053384_o.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/organist-kreuzhuber.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/*_53973053469_o.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/organist-from-behind.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/*_53973126360_o.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/case-and-crowd.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/*_53973169010_o.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/organist-portrait-lit.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/*_53973169045_o.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/optics-macro-2.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/*_53973049295_o.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/mariendom-exterior.jpg"
+ },
+ {
+  "src": "DRIVE/2024 09 - BruQner/Photos Ars Electronica/bruqnerthe-sound-of-entanglement--clem*_53877695106*.jpg",
+  "dest": "src/assets/photos/2024-bruqner-linz/cathedral-organ-film-still.jpg"
+ },
+ {
+  "src": "DRIVE/2025 10 - CIVA Wien/Photos/esel.at/ESEL6604.webp",
+  "dest": "src/assets/photos/2025-civa/wide-stage-curve.jpg"
+ },
+ {
+  "src": "DRIVE/2025 10 - CIVA Wien/Photos/esel.at/ESEL6609.webp",
+  "dest": "src/assets/photos/2025-civa/wide-stage-lines.jpg"
+ },
+ {
+  "src": "DRIVE/2025 10 - CIVA Wien/Photos/esel.at/ESEL6731.webp",
+  "dest": "src/assets/photos/2025-civa/pointcloud-portrait.jpg"
+ },
+ {
+  "src": "DRIVE/2025 10 - CIVA Wien/Photos/esel.at/ESEL6678.webp",
+  "dest": "src/assets/photos/2025-civa/keys-portrait.jpg"
+ },
+ {
+  "src": "DRIVE/2025 10 - CIVA Wien/Photos/esel.at/ESEL6757.webp",
+  "dest": "src/assets/photos/2025-civa/bass-portrait.jpg"
+ },
+ {
+  "src": "DRIVE/2025 10 - CIVA Wien/Photos/esel.at/ESEL6209.webp",
+  "dest": "src/assets/photos/2025-civa/lecture-hall.jpg"
+ },
+ {
+  "src": "DRIVE/2025 10 - CIVA Wien/Photos/esel.at/ESEL6352.webp",
+  "dest": "src/assets/photos/2025-civa/lecture-stage.jpg"
+ },
+ {
+  "src": "DRIVE/2025 10 - CIVA Wien/Photos/esel.at/ESEL6379.webp",
+  "dest": "src/assets/photos/2025-civa/case-in-hall.jpg"
+ },
+ {
+  "src": "DRIVE/2025 10 - CIVA Wien/Photos/esel.at/ESEL6464.webp",
+  "dest": "src/assets/photos/2025-civa/slide-s-to-bpm.jpg"
+ },
+ {
+  "src": "DRIVE/2025 10 - CIVA Wien/Photos/esel.at/ESEL6470.webp",
+  "dest": "src/assets/photos/2025-civa/clemens-explaining-tempo.jpg"
+ },
+ {
+  "src": "DRIVE/2025 10 - CIVA Wien/Photos/esel.at/ESEL6534.webp",
+  "dest": "src/assets/photos/2025-civa/voqoder-slide.jpg"
+ },
+ {
+  "src": "DRIVE/2025 10 - CIVA Wien/Photos/esel.at/ESEL6923.webp",
+  "dest": "src/assets/photos/2025-civa/q-and-a.jpg"
+ },
+ {
+  "src": "DRIVE/2025 10 - CIVA Wien/Photos/esel.at/ESEL6948.webp",
+  "dest": "src/assets/photos/2025-civa/audience-at-case.jpg"
+ },
+ {
+  "src": "DRIVE/2025 10 - CIVA Wien/Photos/esel.at/ESEL6983.webp",
+  "dest": "src/assets/photos/2025-civa/phones-at-case.jpg"
+ },
+ {
+  "src": "DRIVE/2025 10 - CIVA Wien/Photos/esel.at/ESEL6986.webp",
+  "dest": "src/assets/photos/2025-civa/after-show-case.jpg"
+ },
+ {
+  "src": "DRIVE/2025 08 - Alpbach/Bilder*/250826_201606_efa25*.jpg",
+  "dest": "src/assets/photos/people/benjamin-orthner-alpbach.jpg",
+  "max": 1400
+ },
+ {
+  "src": "HDRIVE/Presentations/DPG Tagung/Photos/dpg_presentation_photo_1.jpeg",
+  "dest": "src/assets/photos/2025-dpg/talk-1.jpg"
+ },
+ {
+  "src": "HDRIVE/Presentations/DPG Tagung/Photos/dpg_presentation_photo_2.jpeg",
+  "dest": "src/assets/photos/2025-dpg/talk-2.jpg"
+ },
+ {
+  "src": "HDRIVE/Presentations/DPG Tagung/Photos/dpg_presentation_photo_3.jpeg",
+  "dest": "src/assets/photos/2025-dpg/talk-3.jpg"
+ },
+ {
+  "src": "HDRIVE/Presentations/DPG Tagung/Photos/dpg_presentation_photo_4.jpeg",
+  "dest": "src/assets/photos/2025-dpg/talk-4.jpg"
+ },
+ {
+  "src": "HDRIVE/Presentations/DPG Tagung/Photos/dpg_presentation_photo_5.jpeg",
+  "dest": "src/assets/photos/2025-dpg/talk-5.jpg"
  }
 ]

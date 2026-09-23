@@ -7,7 +7,7 @@
 import { Image } from 'astro:assets';
 import BellScale from '../BellScale.astro';
 import { formatRange } from '../../lib/format';
-import { pieceOf, place, type Show } from './data';
+import { pieceOf, venueLine, type Show } from './data';
 
 interface Props { show: Show }
 const { show } = Astro.props;
@@ -19,7 +19,7 @@ const href = `/shows/${show.id}/`;
   <p class="date ui num">{formatRange(d.date, d.endDate)}</p>
   <div class="text">
     <h4><a href={href}>{d.title}</a></h4>
-    <p class="where">{d.venue}, {place(show)}</p>
+    <p class="where">{venueLine(show)}</p>
     <p class="piece">
       {piece ? (
         <>

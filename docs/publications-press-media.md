@@ -50,6 +50,8 @@ LaTeX source of the paper: `D:\Programming\The-Sound-of-Entanglement\main.tex`.
 | Documentary short | ~2 min | https://www.youtube.com/shorts/8sxtatNxGQQ |
 | "8 Rooms" – Live at Vienna Science Ball 2025 | 11:43 | https://www.youtube.com/watch?v=Smz7cGPBODw |
 | JKU @ Ars Electronica clip | 1:33 | https://www.youtube.com/watch?v=Usrlo6RUwZA |
+| The Sound of Entanglement, Washington Science Diplomacy Summit 2025 (BenRickProductions) | – | https://www.youtube.com/watch?v=h9L6HFnSFwo |
+| Second test performance, 13 June 2024 (BenRickProductions, low quality) | – | https://www.youtube.com/watch?v=tTz13cvry2Y |
 
 Weitblickfilm portfolio page: https://www.weitblickfilm.com/portfolio/bruqner-the-sound-of-entanglement/
 

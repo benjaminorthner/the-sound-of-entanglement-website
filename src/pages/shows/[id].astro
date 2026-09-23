@@ -5,7 +5,8 @@ import Photo from '../../components/Photo.astro';
 import BellScale from '../../components/BellScale.astro';
 import YouTube from '../../components/YouTube.astro';
 import Gallery from '../../components/shows/Gallery.astro';
-import { publicShows, pieceOf, place, isUpcoming, type Show } from '../../components/shows/data';
+import TalkArticle from '../../components/shows/TalkArticle.astro';
+import { publicShows, pieceOf, place, venueLine, isUpcoming, videoInfo, type Show } from '../../components/shows/data';
 import { formatRange, formatDateShort } from '../../lib/format';
 
 export async function getStaticPaths() {
@@ -25,6 +26,8 @@ const upcoming = isUpcoming(show);
 const hasCover = !!d.cover;
 const kindLabel = d.kind === 'talk' ? 'Talk' : d.kind === 'exhibition' ? 'Exhibition' : upcoming ? 'Upcoming performance' : 'Performance';
 const videoPoster = d.gallery[1]?.src ?? d.cover?.src;
+const video = videoInfo[show.id] ?? { title: piece ? `${piece.data.title}, film` : 'Film' };
+const isTalk = d.kind !== 'performance';
 ---
 <Base title={d.title} description={d.summary} underHeader={hasCover}>
   {hasCover && (
@@ -42,16 +45,23 @@ const videoPoster = d.gallery[1]?.src ?? d.cover?.src;
       </p>
       <h1>{d.title}</h1>
       <p class="when num">{formatRange(d.date, d.endDate)}{d.time && !d.endDate && <span class="dim">, {d.time}</span>}</p>
-      <p class="where">{d.venue}, {place(show)}</p>
+      <p class="where">{venueLine(show)}</p>
     </header>
 
+    {isTalk ? (
+      <div class="talk-wrap">
+        <TalkArticle show={show}><Content /></TalkArticle>
+      </div>
+    ) : (
+      <>
     <div class="body">
       <p class="summary">{d.summary}</p>
       <div class="prose"><Content /></div>
 
       {d.youtube && videoPoster && (
         <div class="video">
-          <YouTube id={d.youtube} title={piece ? `${piece.data.title}, film` : 'Film'} poster={videoPoster} />
+          <YouTube id={d.youtube} title={video.title} duration={video.duration} poster={videoPoster} />
+          {video.note && <p class="video-note dim">{video.note}</p>}
         </div>
       )}
     </div>
@@ -92,11 +102,13 @@ const videoPoster = d.gallery[1]?.src ?? d.cover?.src;
         </div>
       )}
     </aside>
+      </>
+    )}
   </article>
 
   {d.gallery.length > 0 && (
     <div class="wrap gallery-wrap">
-      <h2 class="gallery-title">Photographs</h2>
+      <h2 class="gallery-title">{isTalk ? "From the talk" : "Photographs"}</h2>
       <Gallery items={d.gallery} label={`Photographs from ${d.title}`} />
     </div>
   )}
@@ -149,6 +161,8 @@ const videoPoster = d.gallery[1]?.src ?? d.cover?.src;
   .summary { font-size: var(--step-1); line-height: 1.45; margin-bottom: 1.5em; }
   .prose :global(p) { color: var(--paper); }
   .video { margin-top: 3rem; }
+  .video-note { font-size: 0.9375rem; line-height: 1.45; margin-top: 0.25rem; }
+  .talk-wrap { grid-column: 1 / -1; }
 
   .facts { grid-column: 9 / span 4; }
   dl { margin: 0; }

@@ -8,6 +8,7 @@ import Performances from '../../components/pieces/Performances.astro';
 import Rings from '../../components/visuals/rings/Rings.astro';
 import Terrain from '../../components/visuals/terrain/Terrain.astro';
 import Metronome from '../../components/visuals/metronome/Metronome.astro';
+import BruqnerStory from '../../components/pieces/bruqner/BruqnerStory.astro';
 import { formatDate } from '../../lib/format';
 
 export async function getStaticPaths() {
@@ -31,6 +32,8 @@ const shows = (await getCollection('shows', (s) => !s.data.draft && s.data.piece
   .sort((a, b) => +b.data.date - +a.data.date);
 const premiere = shows.filter((s) => s.data.premiere).sort((a, b) => +a.data.date - +b.data.date)[0];
 const hasVisual = d.visual !== 'none';
+// BruQner gets a photographic account of the premiere instead of the generic image layout.
+const isStory = piece.id === 'bruqner';
 const [firstImage, ...moreImages] = d.images;
 const composers = d.composers.join(', ').replace(/, ([^,]*)$/, ' and $1');
 // Figures drawn on white are shown inverted so they sit on the dark page.
@@ -74,13 +77,15 @@ const isLight = (src: { src: string }) => LIGHT_FIGURES.some((f) => src.src.incl
       )}
     </div>
 
-    {d.cover && (
+    {isStory && <BruqnerStory />}
+
+    {d.cover && !isStory && (
       <div class="cover">
         <Photo {...d.cover} bleed sizes="100vw" />
       </div>
     )}
 
-    {moreImages.length > 0 && (
+    {moreImages.length > 0 && !isStory && (
       <div class="wrap grid more">
         {moreImages.map((img, i) => (
           <div class:list={['more-item', `m${i % 2}`]}>
@@ -114,7 +119,7 @@ const isLight = (src: { src: string }) => LIGHT_FIGURES.some((f) => src.src.incl
 
     {shows.length > 0 && (
       <section class="wrap perf" aria-labelledby="performances">
-        <h2 id="performances" class="section-title">Performances</h2>
+        <h2 id="performances" class="section-title">{shows.some((s) => s.data.kind === 'talk') ? 'Performances and talks' : 'Performances'}</h2>
         <p class="dim perf-note">With the Bell value measured during each performance. Above 2, no classical source could have produced the correlations.</p>
         <Performances shows={shows} />
       </section>

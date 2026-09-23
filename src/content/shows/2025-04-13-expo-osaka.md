@@ -6,7 +6,7 @@ venue: Austrian Pavilion, Innovation Lab Austria
 city: Osaka
 country: Japan
 kind: exhibition
-format: A film in the exhibition "Composing the Future"
+format: A film in the exhibition “Composing the Future”
 summary: A film about the project was shown in the Austrian Pavilion at the world exhibition in Osaka, presented jointly by TU Wien, JKU Linz and the University of Innsbruck.
 ---
 

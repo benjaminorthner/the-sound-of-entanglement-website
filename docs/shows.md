@@ -19,13 +19,14 @@ only. **Exhibition** = video or display.
 
 | Date | Venue, city | Event | Piece | Type | Line-up / notes |
 |---|---|---|---|---|---|
+| 21 May & **13 Jun 2024** | Vienna (venue to confirm) | Test performances before the premiere | early versions | Test lecture-performances | Video of the second: YouTube `tTz13cvry2Y` (low quality). Photos in the "Osaka" folder are from these two dates. |
 | **4 Sept 2024**, 22:00 | Mariendom (New Cathedral), Linz, AT | Opening of Ars Electronica Festival 2024 · antonbruckner2024 (OÖ KulturEXPO), Bruckner's 200th birthday | BruQner (**world premiere**) | Performance, English lecture | Organists Gerhard Raab (Alice) and Wolfgang Kreuzhuber (Bob). Lecture by Wenger, Haslinger, Kofler. 3 000+ people, free. S ≈ 2.45. |
 | **6 Sept 2024**, 16:00 | Mariendom, Linz | same | BruQner | Performance, German lecture, family-friendly | Lecture incl. Wenger, Ringbauer |
 | 26 Sept 2024 | Linz | SFB BeyondC Autumn Workshop | – | Talk (Kofler) | |
 | **25 Jan 2025**, 21:30–02:15 | Wiener Rathaus (City Hall), Vienna | 10th Vienna Ball of Sciences | 8 Rooms (**premiere**) | Performance, six 15-min sets, no lecture | Wenger + Mayr. S = 2.62 over the night. Video: YouTube `Smz7cGPBODw`. |
 | Mar 2025 | Regensburg, DE | DPG Spring Meeting (talk TT 28.1) | – | Talk (Orthner) | |
 | 13 Apr – 13 Oct 2025 | EXPO 2025 Osaka, JP | Austrian Pavilion, "Composing the Future" / Innovation Lab Austria | – | Exhibition (video) | Presented jointly by TU Wien, JKU and Uni Innsbruck. **Not a live concert.** |
-| **14 Apr 2025**, 4:45 pm | Johns Hopkins University Bloomberg Center, Washington DC, US | Science Diplomacy Summit 2025, with the Austrian Cultural Forum Washington | 8 Rooms | Performance + lecture (first international) | Wenger + Mayr. Lecture by Wenger, Ploier, Kofler. |
+| **14 Apr 2025**, 4:45 pm | Johns Hopkins University Bloomberg Center, Washington DC, US | Science Diplomacy Summit 2025, with the Austrian Cultural Forum Washington | 8 Rooms | Performance + lecture (first international) | Wenger + Mayr. Lecture by Wenger, Ploier, Kofler. Video: YouTube `h9L6HFnSFwo`. |
 | **3 Jun 2025**, 20:00 | Stiftskirche Millstatt, Carinthia, AT | TechForum Millstatt ("Der Zufall als Dirigent") | 8 Rooms | Performance, German | Wenger + Mayr. Haslinger, Orthner. |
 | 11 Jul 2025 | Berlin, DE | "Quantum Computers and Art" workshop | – | Talk (Ploier) | |
 | **26 Aug 2025**, 19:00 | Congress Centrum Alpbach, Herz-Kremenak-Saal, Tyrol, AT | European Forum Alpbach 2025 | 8 Rooms | Performance + lecture | Wenger, Mayr, Schwarz (first trio). Lecture by Haslinger, Orthner, Kofler, Ringbauer. |

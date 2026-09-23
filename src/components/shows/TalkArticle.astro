@@ -1,0 +1,213 @@
+---
+/**
+ * Body of a talk or exhibition page. There's no experiment and usually no
+ * photographs, so the page is built from what a talk does have: the abstract
+ * (set like the abstract of a paper), the speakers, the event, the piece that
+ * was presented, and ways into the project.
+ */
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import type { Show } from './data';
+import { speakers, pieceOf, place } from './data';
+
+interface Props { show: Show }
+const { show } = Astro.props;
+const d = show.data;
+const piece = await pieceOf(show);
+const people = await speakers(d.lecture);
+// Without a specific piece, list the pieces that had premiered by the date of the talk.
+const firstShown = new Map<string, number>();
+for (const s of await getCollection('shows', (s) => s.data.kind === 'performance' && !!s.data.piece)) {
+  const id = s.data.piece!.id;
+  firstShown.set(id, Math.min(firstShown.get(id) ?? Infinity, +s.data.date));
+}
+const repertoire = piece
+  ? []
+  : (await getCollection('pieces', (p) => p.data.status === 'repertoire' && (firstShown.get(p.id) ?? Infinity) <= +d.date))
+      .sort((a, b) => a.data.order - b.data.order);
+---
+<div class="talk">
+  <div class="doc">
+    <p class="summary">{d.summary}</p>
+    <div class="prose"><slot /></div>
+  </div>
+
+  <aside class="side" aria-label="About this talk">
+    {people.length > 0 && (
+      <section class="block">
+        <h2 class="label ui">{people.length > 1 ? 'Speakers' : 'Speaker'}</h2>
+        <ul class="speakers">
+          {people.map(({ raw, person, extra }) => (
+            <li>
+              {person?.data.portrait ? (
+                <Image
+                  class="portrait"
+                  src={person.data.portrait.src}
+                  alt=""
+                  width={128}
+                  height={128}
+                  format="webp"
+                />
+              ) : (
+                <span class="portrait empty" aria-hidden="true"></span>
+              )}
+              <span class="who">
+                {person ? <a href={`/people/#${person.id}`}>{person.data.name}</a> : raw}
+                {extra && <span class="dim"> {extra}</span>}
+                {person && <span class="role dim">{person.data.role}{person.data.affiliation && `, ${person.data.affiliation}`}</span>}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    <section class="block">
+      <h2 class="label ui">Where</h2>
+      <p class="where">{d.venue}<br />{place(show)}</p>
+      {d.format && <p class="format dim">{d.format}</p>}
+      {d.links.length > 0 && (
+        <ul class="links">{d.links.map((l) => <li><a href={l.url}>{l.label}</a></li>)}</ul>
+      )}
+    </section>
+
+    {piece ? (
+      <section class="block">
+        <h2 class="label ui">Piece presented</h2>
+        <a class="piece" href={`/pieces/${piece.id}/`}>
+          {piece.data.cover && (
+            <Image src={piece.data.cover.src} alt="" widths={[400, 800]} sizes="(min-width: 860px) 25vw, 100vw" format="webp" quality={78} />
+          )}
+          <span class="piece-title"><em>{piece.data.title}</em>, {piece.data.year}</span>
+          <span class="piece-forces dim">{piece.data.forces}</span>
+        </a>
+      </section>
+    ) : (
+      <section class="block">
+        <h2 class="label ui">{d.kind === 'exhibition' ? 'The pieces so far' : 'Presented'}</h2>
+        <ul class="pieces">
+          {repertoire.map((p) => (
+            <li><a href={`/pieces/${p.id}/`}><em>{p.data.title}</em></a> <span class="dim">{p.data.year}</span></li>
+          ))}
+        </ul>
+      </section>
+    )}
+  </aside>
+</div>
+
+<nav class="further" aria-label="Read further">
+  <a href="https://arxiv.org/abs/2509.08892">
+    <span class="f-title">The paper</span>
+    <span class="dim">The Sound of Entanglement, arXiv:2509.08892</span>
+  </a>
+  <a href="/physics/">
+    <span class="f-title">How the experiment works</span>
+    <span class="dim">Entangled photons, the Bell test, the clicks</span>
+  </a>
+  <a href="/publications/">
+    <span class="f-title">Papers and press</span>
+    <span class="dim">Talks, films and articles</span>
+  </a>
+</nav>
+
+<style>
+  .talk {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    row-gap: 3rem;
+  }
+  .doc { grid-column: 1 / span 7; }
+  .side { grid-column: 9 / span 4; }
+  .summary { font-size: var(--step-1); line-height: 1.45; margin-bottom: 2rem; }
+
+  /* The abstract, set like the abstract of a paper: a centred heading, inset
+     margins, justified text in a slightly smaller size. */
+  .prose :global(blockquote) {
+    margin: 2.5rem 0;
+    padding: 2rem clamp(0rem, 5%, 3rem) 2.25rem;
+    border-top: 1px solid var(--graphite);
+    border-bottom: 1px solid var(--graphite);
+    background: linear-gradient(var(--soot), transparent 70%);
+  }
+  .prose :global(blockquote)::before {
+    content: 'Abstract';
+    display: block;
+    text-align: center;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: 0.04em;
+    margin-bottom: 1.25rem;
+  }
+  .prose :global(blockquote p) {
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    text-align: justify;
+    hyphens: auto;
+    max-width: none;
+    margin: 0;
+  }
+  .prose :global(blockquote p + p) { text-indent: 1.5em; }
+  .prose :global(p) { color: var(--paper); }
+
+  .block { padding: 1rem 0 1.5rem; border-top: 1px solid var(--graphite); }
+  .label { color: var(--ash); font-weight: 400; font-size: 0.8125rem; margin: 0 0 0.9rem; }
+  .speakers { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; }
+  .speakers li { display: grid; grid-template-columns: 64px 1fr; gap: 1rem; align-items: center; }
+  .speakers :global(.portrait) {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 50%;
+    filter: grayscale(1) contrast(1.05);
+  }
+  .portrait.empty { display: block; width: 64px; height: 64px; border-radius: 50%; border: 1px solid var(--graphite); }
+  .who { display: flex; flex-direction: column; font-size: 1.0625rem; line-height: 1.35; }
+  .who a { text-decoration-color: var(--graphite); }
+  .role { font-size: 0.9375rem; margin-top: 0.2rem; }
+  .where { font-size: 1.0625rem; line-height: 1.45; margin: 0; }
+  .format { font-size: 0.9375rem; line-height: 1.45; margin: 0.6rem 0 0; }
+  .links, .pieces { list-style: none; margin: 0.75rem 0 0; padding: 0; font-size: 1.0625rem; }
+  .pieces { margin: 0; line-height: 1.8; }
+  .piece { display: block; text-decoration: none; }
+  .piece :global(img) {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    margin-bottom: 0.75rem;
+    filter: brightness(0.9);
+    transition: filter 0.25s;
+  }
+  .piece:hover :global(img) { filter: brightness(1.05); }
+  .piece-title { display: block; font-size: var(--step-1); font-family: var(--font-text); }
+  .piece:hover .piece-title { text-decoration: underline; text-decoration-color: var(--graphite); }
+  .piece-forces { display: block; font-size: 0.9375rem; line-height: 1.45; margin-top: 0.25rem; }
+
+  .further {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--gutter);
+    margin-top: clamp(3rem, 7vw, 5rem);
+  }
+  .further a {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--graphite);
+    text-decoration: none;
+    font-size: 0.9375rem;
+    line-height: 1.4;
+  }
+  .further a:hover { border-top-color: var(--paper); }
+  .f-title { font-family: var(--font-display); font-weight: 300; font-size: var(--step-1); }
+
+  @media (max-width: 860px) {
+    .doc, .side { grid-column: 1 / -1; }
+    .further { grid-template-columns: 1fr; }
+    .prose :global(blockquote) { padding-inline: 0; }
+    .prose :global(blockquote p) { text-align: left; }
+  }
+</style>

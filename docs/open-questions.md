@@ -29,6 +29,8 @@ clear what was confirmed. Answers from Benjamin (23 Sept 2026) are in
       (Clemens, Art & Science finalist): outcomes. *TBD. Don't claim awards.*
 - [x] Deutsches Museum Munich, 25 Oct 2025: *talk only.*
 - [ ] Pint of Science, May 2026: city, venue, date?
+- [ ] Test performances 21 May and 13 June 2024: where in Vienna?
+- [x] Palermo (ISQCMC 2025): *no photos exist on either drive.*
 - [ ] ISWC for BruQner (3307761800) correct? ISWC for 8 Rooms?
 - [x] "John's Bells" and "FM Drums, inverse control": *yes, publishable as
       pieces* (experimental pieces).

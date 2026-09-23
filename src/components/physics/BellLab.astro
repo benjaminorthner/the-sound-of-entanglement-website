@@ -7,12 +7,12 @@
  *
  * `measured` lists values actually measured at shows, drawn on the same scale.
  */
+import BellScale from '../BellScale.astro';
+
 interface Props {
   measured: { label: string; value: number }[];
 }
 const { measured } = Astro.props;
-const MAX = 3;
-const pos = (v: number) => `${(Math.min(v, MAX) / MAX) * 100}%`;
 const cells = [
   { k: 0, a: 1, b: 1, sign: '+' },
   { k: 1, a: 1, b: 2, sign: '+' },
@@ -98,16 +98,11 @@ const cells = [
       <p class="s-formula">S = |E<sub>11</sub> + E<sub>12</sub> + E<sub>21</sub> − E<sub>22</sub>|</p>
       <p class="s-value num"><span data-s>–</span><span class="sigma dim" data-sigma></span></p>
       <p class="s-note dim" data-snote>From 0 pairs.</p>
-      <div class="scale" style="--x: 0%">
-        <div class="track">
-          <span class="band" aria-hidden="true"></span>
-          <span class="mark" style={`left: ${pos(2)}`}><span class="ui">classical limit 2</span></span>
-          <span class="mark" style={`left: ${pos(2 * Math.SQRT2)}`}><span class="ui q">2√2</span></span>
-          {measured.map((m) => <span class="show-tick" style={`left: ${pos(m.value)}`} title={`${m.label}: ${m.value.toFixed(2)}`}></span>)}
-          <span class="dot" data-dot></span>
-        </div>
+      <div class="scale">
+        <BellScale live range="full" marks={measured} />
         <p class="scale-legend ui dim">
-          Grey ticks: values measured at our shows. Dot and shaded band: this simulation and its uncertainty.
+          Ticks below the scale: values measured at our shows. Ring and shaded band: this simulation and
+          its uncertainty. Early on, the value can jump past 2√2; the ring then waits at the end.
         </p>
       </div>
       <canvas class="history" data-history aria-label="Bell value as more pairs are measured" role="img"></canvas>
@@ -133,7 +128,9 @@ const cells = [
   const sEl = q<HTMLElement>('[data-s]');
   const sigmaEl = q<HTMLElement>('[data-sigma]');
   const sNote = q<HTMLElement>('[data-snote]');
-  const scale = q<HTMLElement>('.scale');
+  const scale = q<HTMLElement>('[data-bell-scale]');
+  const QMAX = 2 * Math.SQRT2;
+  const pct = (v: number) => `${(Math.max(0, Math.min(v, QMAX)) / QMAX) * 100}%`;
   const canvas = q<HTMLCanvasElement>('[data-history]');
   const aliceDial = q<SVGLineElement>('[data-alice-dial]');
   const bobDial = q<SVGLineElement>('[data-bob-dial]');
@@ -226,6 +223,7 @@ const cells = [
       scale.style.setProperty('--x', '0%');
       scale.style.setProperty('--lo', '0%');
       scale.style.setProperty('--hi', '0%');
+      scale.classList.remove('quantum');
     } else {
       const S = test.S, sg = sigma();
       sEl.textContent = S.toFixed(2);
@@ -237,8 +235,8 @@ const cells = [
       else if (S > 2) verdict = ' Above 2, but not yet by more than the uncertainty.';
       else verdict = ' At or below the classical limit.';
       sNote.textContent = pairs + verdict;
-      const pct = (v: number) => `${(Math.max(0, Math.min(v, 3)) / 3) * 100}%`;
       scale.style.setProperty('--x', pct(S));
+      scale.classList.toggle('quantum', S > 2);
       const lo = isFinite(sg) ? S - sg : S, hi = isFinite(sg) ? S + sg : S;
       scale.style.setProperty('--lo', pct(lo));
       scale.style.setProperty('--hi', pct(hi));
@@ -450,32 +448,7 @@ const cells = [
   }
   .sigma { font-size: 0.45em; }
   .s-note { font-size: 0.9375rem; margin: 0; min-height: 3em; }
-  .scale { --x: 0%; --lo: 0%; --hi: 0%; margin-top: 1.25rem; }
-  .track { position: relative; height: 1px; background: var(--graphite); margin-top: 2rem; }
-  .mark { position: absolute; top: -6px; width: 1px; height: 13px; background: var(--ash); }
-  .mark span { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); white-space: nowrap; color: var(--ash); font-size: 0.75rem; }
-  .mark .q { transform: translateX(-40%); }
-  .band {
-    position: absolute;
-    top: -2px;
-    height: 5px;
-    left: var(--lo);
-    width: calc(var(--hi) - var(--lo));
-    background: rgb(235 231 223 / 0.15);
-  }
-  .show-tick { position: absolute; top: -3px; width: 1px; height: 7px; background: var(--smoke); }
-  .dot {
-    position: absolute;
-    left: var(--x);
-    top: -4px;
-    width: 9px;
-    height: 9px;
-    margin-left: -4.5px;
-    border-radius: 50%;
-    background: var(--paper);
-    box-shadow: 0 0 10px rgb(235 231 223 / 0.5);
-    transition: left 0.2s ease;
-  }
+  .scale { margin-top: 1.5rem; }
   .scale-legend { margin: 0.75rem 0 0; font-size: 0.75rem; }
   .history { width: 100%; height: 140px; margin-top: 1.25rem; }
   .disclaimer { margin: 1.5rem 0 0; font-size: 0.8125rem; max-width: none; }
@@ -490,7 +463,7 @@ const cells = [
     .controls { flex-direction: column; align-items: stretch; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .setting-line, .dot { transition: none; }
+    .setting-line { transition: none; }
     .det.on { animation: none; fill-opacity: 0.7; }
   }
 </style>

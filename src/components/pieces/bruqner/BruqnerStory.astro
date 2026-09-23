@@ -1,0 +1,280 @@
+---
+/**
+ * The premiere night of BruQner as a photographic narrative, in the order
+ * the evening happened: the cathedral fills, the lecture, the two organs,
+ * the score, the experiment at the crossing, the light, afterwards.
+ * Photos and captions: ./story.ts.
+ */
+import Photo from '../../Photo.astro';
+import BellScale from '../../BellScale.astro';
+import { photos as p, sections } from './story';
+
+const SHOW = '/shows/2024-09-04-bruqner-linz/';
+const full = '100vw';
+const wide = '(min-width: 1000px) 58vw, 100vw';
+const narrow = '(min-width: 1000px) 34vw, 100vw';
+---
+<div class="story">
+  <!-- The night -->
+  <section class="wrap grid chapter night" aria-labelledby="ch-night">
+    <div class="text">
+      <h2 id="ch-night">4 September 2024, 22:00</h2>
+      <p>
+        On Anton Bruckner’s 200th birthday, <em>BruQner</em> opened the Ars Electronica Festival in the
+        Mariendom in Linz, as part of the Upper Austrian KulturEXPO antonbruckner2024. Admission was free.
+      </p>
+    </div>
+    <div class="img-wide"><Photo {...p.exterior} sizes={wide} /></div>
+    <div class="img-small"><Photo {...p.candles} sizes={narrow} /></div>
+  </section>
+
+  <!-- The cathedral fills -->
+  <div class="bleed"><Photo {...p.overheadCrowd} bleed sizes={full} /></div>
+  <section class="wrap grid chapter crowd" aria-labelledby="ch-crowd">
+    <p class="big-number num" aria-hidden="true">3 000+</p>
+    <div class="text">
+      <h2 id="ch-crowd" class="visually-hidden">More than 3 000 people</h2>
+      <p class="lead">
+        More than 3 000 people came, as many as the cathedral’s fire-safety rules allowed. Most of them
+        sat on the stone floor of the nave, all around the experiment.
+      </p>
+    </div>
+  </section>
+  <div class="wrap grid pair">
+    <div class="a"><Photo {...p.overheadNave} sizes={narrow} /></div>
+    <div class="b"><Photo {...p.wideNave} sizes={wide} /></div>
+  </div>
+
+  <!-- The lecture -->
+  <section class="chapter lecture" aria-labelledby="ch-lecture">
+    <Photo {...p.lecture} bleed sizes={full} />
+    <div class="wrap grid">
+      <div class="text">
+        <h2 id="ch-lecture">First, a lecture</h2>
+        <p>
+          Before the music, about twenty-five minutes of physics: Clemens Wenger, Philipp Haslinger and
+          Johannes Kofler explained what entanglement is, why Bell’s inequality separates it from anything
+          classical, and how the experiment in the middle of the cathedral would conduct the two organs.
+          The afternoon performance on 6 September had the lecture in German.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Two organs -->
+  <section class="wrap chapter organs" aria-labelledby="ch-organs">
+    <div class="grid organs-head">
+      <p class="big-number num" aria-hidden="true">30 m</p>
+      <div class="text">
+        <h2 id="ch-organs">Two organs, thirty metres apart</h2>
+        <p>
+          The Mariendom has two organs that are tuned to each other and can be played together, which is why
+          the piece could only happen here. One photon of every pair went to each organ. The organists read
+          their next bar from a screen, one bar ahead, sent over cables laid through the cathedral: WiFi
+          was too unreliable for music.
+        </p>
+      </div>
+    </div>
+    <div class="grid stations">
+      <div class="station alice">
+        <p class="station-name ui">Alice</p>
+        <Photo {...p.rudigierConsole} sizes={wide} />
+        <div class="inset"><Photo {...p.registers} sizes={narrow} /></div>
+      </div>
+      <div class="station bob">
+        <p class="station-name ui">Bob</p>
+        <Photo {...p.kreuzhuber} sizes={wide} />
+        <div class="inset"><Photo {...p.kreuzhuberLit} sizes={narrow} /></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- The score -->
+  <section class="wrap grid chapter score" aria-labelledby="ch-score">
+    <div class="motifs"><Photo {...p.motifs} sizes={narrow} class="inverted" /></div>
+    <div class="text">
+      <h2 id="ch-score">What the photons chose</h2>
+      <p>
+        Clemens Wenger turned Bruckner’s <em>Perger Präludium</em> (1884) into more than 250 precomposed
+        bars: some identical to Bruckner’s, many varied, inverted, transposed or rhythmically intensified.
+        For every photon pair, the experiment picked one of four motifs for each organ, named after the
+        setting that was measured and its outcome: A1+, A1−, A2+ and A2− for Alice, B1+ to B2− for Bob.
+        The motifs are arranged so that the stronger-than-classical correlations mostly produce polyrhythms.
+      </p>
+      <h3>The form</h3>
+      <ol class="form">
+        {sections.map((s) => (
+          <li><span class="n num">{s.n}</span><span>{s.text}</span></li>
+        ))}
+      </ol>
+      <p class="dim small">The piece opened with Bruckner’s original, played in the dark, and lasted about eighteen minutes.</p>
+    </div>
+  </section>
+
+  <!-- The experiment -->
+  <section class="chapter experiment" aria-labelledby="ch-experiment">
+    <Photo {...p.caseCross} bleed sizes={full} />
+    <div class="wrap grid exp-body">
+      <div class="text">
+        <h2 id="ch-experiment">The conductor, at the crossing</h2>
+        <p>
+          The experiment stood in a glass case lit from inside, at the crossing of the cathedral beneath the
+          altar cross. A violet laser made pairs of entangled infrared photons; a few times a second one pair
+          was measured and its result sent to the organs and the projectors.
+        </p>
+        <p><a href="/physics/">How the experiment works</a></p>
+      </div>
+      <div class="bell-moment">
+        <p class="big-number num" aria-hidden="true">S ≈ 2.45</p>
+        <BellScale value={2.45} />
+        <p class="small">
+          The Bell value measured that night. No classical source can produce correlations above 2. In the
+          classical middle section of the piece it dropped below 2, on purpose.
+        </p>
+      </div>
+    </div>
+    <div class="wrap grid pair">
+      <div class="b"><Photo {...p.opticsMacro} sizes={wide} /></div>
+      <div class="a low"><Photo {...p.caseForeground} sizes={narrow} /></div>
+    </div>
+  </section>
+
+  <!-- Light -->
+  <section class="chapter light" aria-labelledby="ch-light">
+    <Photo {...p.invertedCone} bleed sizes={full} />
+    <div class="wrap grid">
+      <div class="text">
+        <h2 id="ch-light">Cones of light</h2>
+        <p>
+          In the crystal, entangled pairs leave along two cones of light. The visuals drew them: three laser
+          projectors faced the audience and shone into haze, so each projected ring became a cone of light
+          in the air above the people. Circles meant entanglement, straight lines meant classical
+          correlations, and every shape was triggered by a measured photon pair.
+        </p>
+      </div>
+    </div>
+    <div class="wrap grid trio">
+      <div class="t1"><Photo {...p.twinCones} sizes={wide} /></div>
+      <div class="t2"><Photo {...p.purpleCone} sizes={narrow} /></div>
+    </div>
+    <div class="bleed later"><Photo {...p.starburst} bleed sizes={full} /></div>
+  </section>
+
+  <!-- Afterwards -->
+  <section class="wrap grid chapter after" aria-labelledby="ch-after">
+    <div class="text">
+      <h2 id="ch-after">Afterwards</h2>
+      <p>After the last chord, the audience came down to the crossing to look inside the case.</p>
+      <p class="ui more"><a href={SHOW}>More photographs from the premiere</a></p>
+    </div>
+    <div class="img-wide"><Photo {...p.visitors} sizes={wide} /></div>
+    <div class="img-small"><Photo {...p.caseAndCrowd} sizes={narrow} /></div>
+  </section>
+</div>
+
+<style>
+  .story { margin-top: clamp(4rem, 9vw, 8rem); }
+  .chapter { margin-block: clamp(5rem, 11vw, 10rem); }
+  .bleed { margin-block: clamp(4rem, 8vw, 7rem) 0; }
+  h2 { font-size: var(--step-3); margin-bottom: 1.25rem; }
+  h3 { font-size: var(--step-1); font-weight: 400; margin: 2.5rem 0 1rem; }
+  .small { font-size: 1rem; }
+  .lead { font-size: var(--step-1); font-weight: 300; line-height: 1.45; }
+  .story :global(.inverted img) { filter: invert(0.92) hue-rotate(180deg); background: transparent; }
+  .text a { text-decoration-color: var(--smoke); }
+
+  /* A number that carries meaning, set as type rather than as a tile */
+  .big-number {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(4.5rem, 2rem + 11vw, 12rem);
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    margin: 0;
+    max-width: none;
+    white-space: nowrap;
+  }
+
+  /* The night: text left, exterior right, candles tucked under the text */
+  .night { align-items: start; row-gap: 2rem; }
+  .night .text { grid-column: 1 / span 4; }
+  .night .img-wide { grid-column: 6 / span 7; grid-row: 1 / span 2; }
+  .night .img-small { grid-column: 1 / span 4; align-self: end; }
+
+  /* Crowd: the number, then the sentence */
+  .crowd { margin-top: clamp(2.5rem, 5vw, 4rem); align-items: end; row-gap: 1.5rem; }
+  .crowd .big-number { grid-column: 1 / span 7; }
+  .crowd .text { grid-column: 8 / span 5; }
+
+  .pair { align-items: start; row-gap: 2rem; }
+  .pair .a { grid-column: 1 / span 4; margin-top: clamp(0rem, 10vw, 9rem); }
+  .pair .b { grid-column: 6 / span 7; }
+  .experiment .pair .b { grid-column: 1 / span 7; }
+  .experiment .pair .a { grid-column: 9 / span 4; }
+
+  .lecture .text, .light .text { grid-column: 2 / span 7; margin-top: 2.5rem; }
+
+  /* Organs */
+  .organs-head { align-items: end; row-gap: 1.5rem; }
+  .organs-head .big-number { grid-column: 1 / span 5; }
+  .organs-head .text { grid-column: 6 / span 7; }
+  .stations { margin-top: clamp(3rem, 6vw, 5rem); row-gap: 3rem; align-items: start; }
+  .station { position: relative; border-top: 1px solid var(--c); padding-top: 1rem; }
+  .station.alice { --c: var(--alice); grid-column: 1 / span 6; }
+  .station.bob { --c: var(--bob); grid-column: 7 / span 6; margin-top: clamp(0rem, 9vw, 8rem); }
+  .station-name { color: var(--c); margin: 0 0 1rem; font-size: 1rem; }
+  .inset { width: 58%; margin: 1.5rem 0 0 auto; }
+  .bob .inset { margin: 1.5rem auto 0 0; }
+
+  /* Score */
+  .score { align-items: start; row-gap: 2.5rem; }
+  .score .motifs { grid-column: 1 / span 4; position: sticky; top: calc(var(--header-h) + 2rem); }
+  .score .text { grid-column: 6 / span 7; }
+  .form { list-style: none; margin: 0 0 2rem; padding: 0; border-top: 1px solid var(--graphite); max-width: var(--measure); }
+  .form li {
+    display: grid;
+    grid-template-columns: 4.5rem 1fr;
+    gap: 1rem;
+    padding-block: 0.9rem;
+    border-bottom: 1px solid var(--graphite);
+    font-size: 1.0625rem;
+  }
+  .form .n { font-family: var(--font-display); color: var(--ash); padding-top: 0.1rem; }
+
+  /* Experiment */
+  .exp-body { margin-top: 2.5rem; row-gap: 3rem; align-items: start; margin-bottom: clamp(3rem, 7vw, 6rem); }
+  .exp-body .text { grid-column: 2 / span 6; }
+  .bell-moment { grid-column: 8 / span 5; }
+  .bell-moment .big-number { font-size: clamp(3.5rem, 1.5rem + 6vw, 7rem); }
+  .bell-moment :global(.track) { margin-top: 2.6rem; }
+  .bell-moment :global(.value) { display: none; }
+  .bell-moment .small { margin-top: 1.25rem; color: var(--ash); }
+
+  /* Light */
+  .trio { margin-top: clamp(3rem, 7vw, 6rem); align-items: end; row-gap: 2rem; }
+  .trio .t1 { grid-column: 1 / span 7; }
+  .trio .t2 { grid-column: 9 / span 4; }
+
+  /* Afterwards */
+  .after { align-items: start; row-gap: 2rem; }
+  .after .text { grid-column: 1 / span 4; }
+  .after .img-wide { grid-column: 6 / span 7; grid-row: 1 / span 2; }
+  .after .img-small { grid-column: 1 / span 4; }
+  .more { margin-top: 1.5rem; font-size: 1rem; }
+
+  @media (max-width: 900px) {
+    .night .text, .night .img-wide, .night .img-small,
+    .crowd .big-number, .crowd .text,
+    .pair .a, .pair .b, .experiment .pair .a, .experiment .pair .b,
+    .lecture .text, .light .text,
+    .organs-head .big-number, .organs-head .text,
+    .station.alice, .station.bob,
+    .score .motifs, .score .text,
+    .exp-body .text, .bell-moment,
+    .trio .t1, .trio .t2,
+    .after .text, .after .img-wide, .after .img-small { grid-column: 1 / -1; grid-row: auto; }
+    .pair .a, .station.bob { margin-top: 0; }
+    .score .motifs { position: static; max-width: 420px; }
+    .inset { width: 70%; }
+  }
+</style>

@@ -5,9 +5,9 @@ group: team
 affiliation: Atominstitut, TU Wien
 order: 2
 portrait:
-  src: ../../assets/photos/people/benjamin-orthner.jpg
-  alt: Portrait of Benjamin Orthner.
-  credit: Benjamin Orthner
+  src: ../../assets/photos/people/benjamin-orthner-alpbach.jpg
+  alt: Benjamin Orthner behind the experiment at the European Forum Alpbach, explaining the setup.
+  credit: © EFA / Luiza Puiu
 links:
 - label: Instagram
   url: https://www.instagram.com/benjaminorthner/

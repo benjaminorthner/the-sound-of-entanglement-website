@@ -2,6 +2,9 @@
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import YouTube from '../components/YouTube.astro';
+import PaperPreview from '../components/publications/PaperPreview.astro';
+import { Image } from 'astro:assets';
+import figure3 from '../assets/paper/figure-3-bell-setup.jpg';
 import { formatDate, formatDateShort, year } from '../lib/format';
 
 import docPoster from '../assets/photos/2024-bruqner-linz/haze-over-case.jpg';
@@ -9,6 +12,15 @@ import docPoster from '../assets/photos/2024-bruqner-linz/haze-over-case.jpg';
 const all = (await getCollection('publications')).sort((a, b) => +b.data.date - +a.data.date);
 const of = (kind: string) => all.filter((p) => p.data.kind === kind);
 const paper = of('paper')[0];
+const bibtex = `@misc{deDiosRodriguez2025sound,
+  title         = {The Sound of Entanglement},
+  author        = {de Dios Rodr{\'i}guez, Enar and Haslinger, Philipp and Kofler, Johannes and Kueng, Richard and Orthner, Benjamin and Ploier, Alexander and Ringbauer, Martin and Wenger, Clemens},
+  year          = {2025},
+  eprint        = {2509.08892},
+  archivePrefix = {arXiv},
+  primaryClass  = {quant-ph},
+  doi           = {10.48550/arXiv.2509.08892}
+}`;
 const talks = of('talk');
 const films = of('video').filter((v) => v.id !== 'doc-2025');
 const doc = all.find((p) => p.id === 'doc-2025');
@@ -25,24 +37,44 @@ const pressByYear = [...new Set(press.map((p) => year(p.data.date)))].map((y) =>
 
   {paper && (
     <section class="wrap paper" aria-labelledby="paper-h">
-      <p class="kind ui dim">Paper, {formatDate(paper.data.date)}</p>
-      <h2 id="paper-h"><a href={paper.data.url}>{paper.data.title}</a></h2>
-      <p class="authors">{paper.data.by}</p>
-      <p class="ref ui dim">{paper.data.note}. Preprint.</p>
-      <blockquote class="abstract">
-        <p>
-          We present <em>The Sound of Entanglement</em>, a live musical performance driven by
-          real-time measurements of entangled photons in a Bell test. By integrating the measured
-          quantum correlations as a central compositional element and synchronizing live visuals with
-          experimental data, the performance offers a unique and unrepeatable audiovisual experience
-          that relies on quantum correlations which cannot be produced by any classical device.
+      <div class="paper-sheet">
+        <PaperPreview pdfUrl="https://arxiv.org/pdf/2509.08892" totalPages={13} />
+      </div>
+      <div class="paper-text">
+        <p class="kind ui dim">Preprint, {formatDate(paper.data.date)}</p>
+        <h2 id="paper-h"><a href={paper.data.url}>{paper.data.title}</a></h2>
+        <p class="authors">{paper.data.by}</p>
+        <p class="ref ui dim">arXiv:2509.08892 [quant-ph], 13 pages, 12 figures. Not yet published in a journal.</p>
+        <blockquote class="abstract">
+          <p>
+            We present <em>The Sound of Entanglement</em>, a live musical performance driven by
+            real-time measurements of entangled photons in a Bell test. By integrating the measured
+            quantum correlations as a central compositional element and synchronizing live visuals with
+            experimental data, the performance offers a unique and unrepeatable audiovisual experience
+            that relies on quantum correlations which cannot be produced by any classical device.
+          </p>
+          <footer class="ui dim">From the abstract</footer>
+        </blockquote>
+        <p class="actions ui">
+          <a class="primary" href={paper.data.url}>Read on arXiv</a>
+          <a href="https://arxiv.org/pdf/2509.08892">PDF, 7.7 MB</a>
         </p>
-        <footer class="ui dim">From the abstract</footer>
-      </blockquote>
-      <p class="actions ui">
-        <a href={paper.data.url}>Read on arXiv</a>
-        <a href="https://arxiv.org/pdf/2509.08892">PDF</a>
-      </p>
+        <details class="bibtex">
+          <summary class="ui">BibTeX</summary>
+          <pre><code>{bibtex}</code></pre>
+        </details>
+
+        <figure class="clipping">
+          <Image
+            src={figure3}
+            alt="Photograph of the setup seen from above with the two beam paths drawn in: red to Alice's detectors, blue to Bob's, each passing a half-wave plate and a beam splitter, with outcomes labelled plus one and minus one."
+            widths={[500, 800, 1010]}
+            sizes="(min-width: 900px) 30vw, 88vw"
+            format="webp"
+          />
+          <figcaption class="ui dim">Figure 3 of the paper: the Bell setup, with Alice's beam path in red and Bob's in blue.</figcaption>
+        </figure>
+      </div>
     </section>
   )}
 
@@ -115,8 +147,11 @@ const pressByYear = [...new Set(press.map((p) => year(p.data.date)))].map((y) =>
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
     column-gap: var(--gutter);
+    row-gap: 3rem;
+    align-items: start;
   }
-  .paper > * { grid-column: 1 / span 9; }
+  .paper-sheet { grid-column: 1 / span 6; }
+  .paper-text { grid-column: 8 / -1; padding-top: 1rem; }
   .kind { font-size: 0.875rem; margin: 0 0 1rem; }
   .paper h2 { font-size: var(--step-4); }
   .paper h2 a { text-decoration: none; }
@@ -124,14 +159,42 @@ const pressByYear = [...new Set(press.map((p) => year(p.data.date)))].map((y) =>
   .authors { margin-top: 1.5rem; font-size: var(--step-1); line-height: 1.45; max-width: 44ch; }
   .ref { font-size: 0.875rem; }
   .abstract {
-    grid-column: 1 / span 8;
     margin: 2rem 0 0;
     padding-left: 1.5rem;
     border-left: 1px solid var(--graphite);
   }
   .abstract p { font-size: 1.0625rem; color: var(--ash); }
   .abstract footer { font-size: 0.8125rem; }
-  .actions { display: flex; gap: 1.5rem; margin-top: 1.5rem; font-size: 1rem; }
+  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1.5rem; margin-top: 2rem; font-size: 1rem; }
+  .actions .primary {
+    text-decoration: none;
+    border: 1px solid var(--paper);
+    border-radius: 999px;
+    padding: 0.55rem 1.2rem;
+  }
+  .actions .primary:hover { background: var(--paper); color: var(--black); }
+  .bibtex { margin-top: 1.25rem; }
+  .bibtex summary { cursor: pointer; color: var(--ash); font-size: 0.875rem; }
+  .bibtex pre {
+    margin: 0.75rem 0 0;
+    padding: 1rem;
+    background: var(--soot);
+    border: 1px solid var(--graphite);
+    overflow-x: auto;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: var(--ash);
+  }
+  .clipping { margin: 3.5rem 0 0; max-width: 26rem; }
+  .clipping :global(img) {
+    width: 100%;
+    height: auto;
+    background: #fff;
+    filter: brightness(0.92);
+    box-shadow: 0 18px 40px -14px rgb(0 0 0 / 0.9);
+    transform: rotate(-1.2deg);
+  }
+  .clipping figcaption { margin-top: 1rem; font-size: 0.8125rem; }
 
   .section-title { font-size: var(--step-2); color: var(--ash); margin-bottom: 2rem; }
   .block { padding-top: clamp(4rem, 9vw, 7rem); }
@@ -170,7 +233,8 @@ const pressByYear = [...new Set(press.map((p) => year(p.data.date)))].map((y) =>
   .year-group .list { grid-column: 3 / -1; }
 
   @media (max-width: 900px) {
-    .paper > *, .abstract { grid-column: 1 / -1; }
+    .paper-sheet, .paper-text { grid-column: 1 / -1; }
+    .paper-text { padding-top: 0; }
     .film-text, .film-video, .more-films { grid-column: 1 / -1; }
     .year, .year-group .list { grid-column: 1 / -1; }
     .year { margin-bottom: 1rem; }

@@ -1,73 +1,256 @@
 ---
 /**
- * A hairline scale from 0 to 3 with the classical limit (2) and the quantum
- * limit (2√2) marked, and a measured value. Static; for live values set
- * `data-bell-value` on the element and update `--x` from script.
+ * The Bell value S on a scale that makes its two regions legible:
+ *
+ *   classical  |  only entanglement gets here
+ *   ───────────┼▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓|
+ *              2                             2√2 (the maximum; the scale ends there)
+ *
+ * In the project's own visual grammar (BruQner visuals), straight lines mean
+ * classical and circles mean entangled: the classical range is a plain line,
+ * the quantum range a faintly photon-tinted band, and the measured value a ring.
+ *
+ * `compact` scales zoom to 1.5–2√2 so that differences between shows
+ * (e.g. 2.19 vs 2.62) are visible; the axis break is drawn and labelled, so
+ * the zoom is never hidden. Full scales start at 0.
+ *
+ * Props are backwards compatible (value, label, compact). Optional: `sigma`
+ * draws an uncertainty band; `range` overrides the zoom choice; `marks` draws
+ * small reference ticks (e.g. values measured at shows).
+ *
+ * Live use (`live`): the ring and band are rendered without text; a script
+ * sets `--x`, `--lo`, `--hi` as percentages, pct(v) = clamp(v, LO, 2√2 − LO)
+ * mapped onto 0–100 % (LO = 0 for range 'full', 1.5 for 'zoom'), and toggles
+ * the `quantum` class on [data-bell-scale] (see physics/BellLab.astro).
  */
 interface Props {
   value?: number;
-  /** Short label under the value, e.g. "measured on 4 Sept 2024" */
+  /** Short label after the value, e.g. "measured that night" */
   label?: string;
   compact?: boolean;
+  /** One standard deviation, drawn as a band around the value. */
+  sigma?: number;
+  /** 'zoom' = 1.5 to 2√2 with a marked axis break, 'full' = 0 to 2√2. Default: zoom when compact. */
+  range?: 'zoom' | 'full';
+  /** Reference ticks under the track. */
+  marks?: { value: number; label: string }[];
+  /** Render ring and band for a script to move; no static value text. */
+  live?: boolean;
 }
-const { value, label, compact = false } = Astro.props;
-const MAX = 3;
-const pos = (v: number) => `${(Math.min(v, MAX) / MAX) * 100}%`;
+const { value, label, compact = false, sigma, marks = [], live = false } = Astro.props;
+const range = Astro.props.range ?? (compact ? 'zoom' : 'full');
+
+const QMAX = 2 * Math.SQRT2; // Tsirelson bound, 2.828…
+const LO = range === 'zoom' ? 1.5 : 0;
+const clamp = (v: number) => Math.max(LO, Math.min(v, QMAX));
+const pct = (v: number) => ((clamp(v) - LO) / (QMAX - LO)) * 100;
+const p2 = pct(2);
+
+const quantum = value !== undefined && value > 2;
+const described =
+  value === undefined
+    ? ''
+    : `Bell value S = ${value.toFixed(2)}${label ? `, ${label}` : ''}. ` +
+      (quantum
+        ? 'Above the classical limit of 2, which only entangled photons can do. '
+        : 'At or below the classical limit of 2. ') +
+      'The quantum maximum is 2√2, about 2.83.';
 ---
-<div class:list={['bell', { compact }]} style={value !== undefined ? `--x: ${pos(value)}` : undefined} data-bell>
-  <div class="track" aria-hidden="true">
-    <span class="mark classical" style={`left: ${pos(2)}`}><span class="ui">{!compact && <span class="long">classical limit </span>}2</span></span>
-    <span class="mark quantum" style={`left: ${pos(2 * Math.SQRT2)}`}><span class="ui">{!compact && <span class="long">quantum limit </span>}2√2</span></span>
-    {value !== undefined && <span class="dot"></span>}
+<div
+  class:list={['bell-scale', { compact, zoom: range === 'zoom', quantum }]}
+  style={`--p2: ${p2}%;${value !== undefined ? ` --x: ${pct(value)}%;` : ''}${
+    sigma !== undefined && value !== undefined ? ` --lo: ${pct(value - sigma)}%; --hi: ${pct(value + sigma)}%;` : ''
+  }`}
+  data-bell-scale
+>
+  {value !== undefined && !live && <p class="visually-hidden">{described}</p>}
+  <div class="scale" aria-hidden="true">
+    <div class="numbers ui num">
+      {range === 'zoom' ? (
+        <span class="n start"><span class="break">⫽</span>{LO}</span>
+      ) : (
+        <span class="n start">0</span>
+      )}
+      <span class="n two">{compact ? '2' : <><span class="word">classical limit </span>2</>}</span>
+      <span class="n max">{compact ? '2√2' : <>2√2<span class="word"> maximum</span></>}</span>
+    </div>
+    <div class="track">
+      <span class="classical"></span>
+      <span class="quantum-band"></span>
+      <span class="tick at-two"></span>
+      <span class="tick at-max"></span>
+      {marks.map((m) => <span class="mark" style={`left: ${pct(m.value)}%`} title={`${m.label}: ${m.value.toFixed(2)}`}></span>)}
+      {((sigma !== undefined && value !== undefined) || live) && <span class="sigma"></span>}
+      {(value !== undefined || live) && <span class="ring"></span>}
+    </div>
+    <div class="regions ui">
+      <span class="r classical-r">classical</span>
+      <span class="r quantum-r"><span class="long-q">only entanglement gets here</span><span class="short-q">entangled</span></span>
+    </div>
   </div>
-  {value !== undefined && (
-    <p class="value num">
-      <span class="visually-hidden">Bell value </span>S = {value.toFixed(2)}
-      {label && <span class="ui dim"> {label}</span>}
+  {value !== undefined && !live && (
+    <p class="value num" aria-hidden="true">
+      <span class="s">S = {value.toFixed(2)}</span>
+      {label && <span class="label"> {label}</span>}
     </p>
   )}
 </div>
 
 <style>
-  .bell { --x: 0%; container-type: inline-size; }
-  /* Full labels collide below ~460px of scale width: drop the words, keep the numbers. */
-  @container (max-width: 460px) {
-    .long { display: none; }
+  .bell-scale {
+    --x: 0%;
+    --p2: 70.7%;
+    --lo: 0%;
+    --hi: 0%;
+    --line: var(--smoke);
+    --band: rgb(255 255 179 / 0.09);
+    --band-edge: rgb(255 255 179 / 0.32);
+    container-type: inline-size;
+    width: 100%;
   }
-  .track {
+  .scale { position: relative; }
+
+  /* Numbers above the track */
+  .numbers {
     position: relative;
-    height: 1px;
-    background: var(--graphite);
-    margin-top: 2.2rem;
+    height: 1.15rem;
+    font-size: 0.75rem;
+    color: var(--ash);
   }
-  .compact .track { margin-top: 1.4rem; }
-  .mark {
+  .n { position: absolute; bottom: 0; white-space: nowrap; line-height: 1; }
+  .start { left: 0; color: var(--smoke); }
+  .break { margin-right: 0.2em; letter-spacing: -0.1em; }
+  .two { left: var(--p2); transform: translateX(-50%); }
+  .max { right: 0; color: var(--ash); }
+
+  /* The track: a plain line for the classical range, a band for the quantum range */
+  /* Doubled class: the scale owns its internal spacing, even if a caller styles `.track`. */
+  .bell-scale.bell-scale .track {
+    position: relative;
+    height: 12px;
+    margin-top: 0.35rem;
+  }
+  .classical {
     position: absolute;
-    top: -6px;
+    left: 0;
+    width: var(--p2);
+    top: 50%;
+    height: 1px;
+    background: var(--line);
+  }
+  .zoom .classical {
+    /* a dashed start (::before) signals that the axis does not begin at zero */
+    background: linear-gradient(90deg, transparent 0, transparent 16px, var(--line) 16px);
+  }
+  .zoom .classical::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 14px;
+    top: 0;
+    height: 1px;
+    background: repeating-linear-gradient(90deg, var(--line) 0 3px, transparent 3px 6px);
+  }
+  .quantum-band {
+    position: absolute;
+    left: var(--p2);
+    right: 0;
+    top: 1px;
+    bottom: 1px;
+    background: var(--band);
+    border-top: 1px solid var(--band-edge);
+    border-bottom: 1px solid var(--band-edge);
+  }
+  .tick {
+    position: absolute;
+    top: -3px;
+    bottom: -3px;
     width: 1px;
-    height: 13px;
     background: var(--ash);
   }
-  .mark span {
+  .at-two { left: var(--p2); }
+  .at-max { right: 0; background: var(--band-edge); }
+  .mark {
     position: absolute;
-    bottom: 16px;
-    left: 50%;
-    transform: translateX(-50%);
-    white-space: nowrap;
-    color: var(--ash);
-    font-size: 0.75rem;
+    bottom: -6px;
+    width: 1px;
+    height: 4px;
+    background: var(--ash);
   }
-  .quantum span { transform: translateX(-70%); }
-  .dot {
+  .sigma {
+    position: absolute;
+    left: var(--lo);
+    width: calc(var(--hi) - var(--lo));
+    top: 50%;
+    height: 3px;
+    margin-top: -1.5px;
+    background: rgb(235 231 223 / 0.35);
+  }
+  /* The measured value: a ring, the project's sign for entanglement */
+  .ring {
     position: absolute;
     left: var(--x);
-    top: -4px;
-    width: 9px;
-    height: 9px;
-    margin-left: -4.5px;
+    top: 50%;
+    width: 13px;
+    height: 13px;
+    margin: -6.5px 0 0 -6.5px;
     border-radius: 50%;
-    background: var(--paper);
-    box-shadow: 0 0 12px rgb(235 231 223 / 0.6);
+    border: 1.5px solid var(--paper);
+    background: var(--black);
+    box-shadow: 0 0 0 3px rgb(0 0 0 / 0.9), 0 0 14px rgb(255 255 179 / 0.45);
+    transition: left 0.2s ease;
   }
-  .value { margin: 0.9rem 0 0; font-size: 1rem; }
+  .sigma { transition: left 0.2s ease, width 0.2s ease; }
+  @media (prefers-reduced-motion: reduce) {
+    .ring, .sigma { transition: none; }
+  }
+  .bell-scale:not(.quantum) .ring {
+    border-color: var(--ash);
+    box-shadow: 0 0 0 3px rgb(0 0 0 / 0.9);
+  }
+
+  /* Region names below the track */
+  .regions {
+    position: relative;
+    height: 1.1rem;
+    margin-top: 0.3rem;
+    font-size: 0.6875rem;
+    letter-spacing: 0.02em;
+  }
+  .r { position: absolute; top: 0; white-space: nowrap; line-height: 1.2; }
+  .classical-r { left: 0; width: var(--p2); text-align: center; color: var(--smoke); }
+  .zoom .classical-r { padding-left: 14px; }
+  .quantum-r { left: var(--p2); right: 0; text-align: center; color: rgb(255 255 179 / 0.7); }
+  .short-q { display: none; }
+  /* Full range: the quantum band is only 29% wide, so its label ends at 2√2 and
+     extends left over the (empty) end of the classical segment */
+  .bell-scale:not(.zoom) .quantum-r { left: auto; right: 0; text-align: right; }
+  .bell-scale:not(.zoom) .classical-r { width: 50%; }
+
+  .value {
+    margin: 0.55rem 0 0;
+    font-size: 1rem;
+    line-height: 1.35;
+  }
+  .s { font-family: var(--font-display); color: var(--paper); }
+  .label { font-family: var(--font-display); font-size: 0.875rem; color: var(--ash); }
+
+  /* Full (non-compact) scale: more room, bigger type */
+  .bell-scale:not(.compact) .numbers { font-size: 0.8125rem; height: 1.3rem; }
+  .bell-scale.bell-scale:not(.compact) .track { height: 16px; }
+  .bell-scale:not(.compact) .regions { font-size: 0.8125rem; height: 1.3rem; }
+  .bell-scale:not(.compact) .ring { width: 15px; height: 15px; margin: -7.5px 0 0 -7.5px; }
+  .bell-scale:not(.compact) .value { font-size: 1.125rem; }
+
+  /* Narrow: shorter words, then fewer words */
+  @container (max-width: 520px) {
+    .word { display: none; }
+  }
+  @container (max-width: 240px) {
+    .long-q { display: none; }
+    .short-q { display: inline; }
+  }
+  @container (max-width: 150px) {
+    .regions { display: none; }
+  }
 </style>
