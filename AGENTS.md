@@ -1,0 +1,61 @@
+# The Sound of Entanglement: website
+
+The website for *The Sound of Entanglement*, an art–science project in which a
+live Bell-test experiment with entangled photons conducts music and visuals in
+real time (pieces: *BruQner*, *8 Rooms*, *Indeterminate Apparatus*). It
+replaces the placeholder at soundofentanglement.com.
+
+**Before doing anything, read [`docs/README.md`](docs/README.md).** It indexes
+a verified knowledge base about the project, people, physics, pieces, shows,
+data and assets, so you don't need to re-explore the source drives.
+
+## Stack
+
+- [Astro](https://docs.astro.build) 7, fully static output, no backend.
+- TypeScript (strict). Plain CSS (no framework) with design tokens as custom properties.
+- WebGL / canvas for the data-driven visuals; three.js only where 3D is needed.
+- `src/lib/bell.ts`: client-side Bell-test simulator with verified statistics.
+
+## Commands
+
+```sh
+npm install
+npm run dev        # dev server (use `astro dev --background` for agents; then `astro dev stop|status|logs`)
+npm run build      # static build into dist/
+npm run preview
+```
+
+Design mockups (static HTML) are in `design/mockups/`. Serve them with
+`python -m http.server 8765` from that folder.
+
+## Repository layout
+
+```
+docs/              knowledge base (start here)
+docs/research/     raw research dossiers with source paths
+design/            design directions, mockups, decisions
+src/               the Astro site
+src/lib/bell.ts    Bell-test simulator
+```
+
+## Rules
+
+- **Accuracy over flourish.** This is a physics project run by physicists.
+  Never claim a loophole-free Bell test, faster-than-light signalling, or S
+  values that weren't measured. See `docs/physics.md`.
+- **Real vs simulated data must be labelled.** When a visual replays measured
+  events, say where and when they were measured. When it simulates, say so.
+- **Credits are mandatory** for every photo, video and audio file. See `docs/assets.md`.
+- **Never copy private material** (invoices, budgets, CVs, call sheets, emails)
+  from the source drives.
+- Copy assets into the repo selectively: resized, with descriptive names.
+- Copy is written in sentence case, plain and precise, in the team's voice. No hype.
+- Accessibility: keyboard navigation, visible focus, `prefers-reduced-motion`
+  (static frames instead of animation), readable contrast, and pages that work
+  without WebGL.
+
+## Git
+
+- Commit messages: imperative mood, concise.
+- **Never add "Co-Authored-By" lines or mention AI agents or assistants in commit
+  messages** (this is Benjamin's convention across his repos).
