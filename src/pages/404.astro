@@ -1,0 +1,12 @@
+---
+// Cloudflare Pages needs this file: without a top-level 404.html it serves the
+// home page, with status 200, for every unknown address.
+import Base from '../layouts/Base.astro';
+---
+<Base title="Page not found" description="This page does not exist.">
+  <section class="wrap section">
+    <h1>Page not found</h1>
+    <p>This page does not exist. <a href="/">Go to the home page</a>.</p>
+    <p lang="de">Diese Seite gibt es nicht. <a href="/de/">Zur Startseite</a>.</p>
+  </section>
+</Base>
