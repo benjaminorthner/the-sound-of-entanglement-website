@@ -73,8 +73,8 @@ entanglement in a live performance."*
   Composition at Bruckner University Linz (Oct 2025).
 - **2026**: Pint of Science talk (May). Album *Sounds of Entanglement* by the
   band **The Uncertain Question** is recorded and awaiting release (vinyl and
-  digital). Next show:
-  **16 Oct 2026, University of Innsbruck**. Wien Modern (Nov 2026) is
+  digital). First show in Innsbruck on
+  **16 Oct 2026** (MIP Alumni Homecoming Day). Wien Modern (Nov 2026) is
   tentative.
 
 ## Names and spelling

@@ -18,8 +18,10 @@ clear what was confirmed. Answers from Benjamin (23 Sept 2026) are in
 - [ ] Origin: was the Traunkirchen meeting in 2022 (evidence: Nov 2022
       application) or summer 2023 (OÖ Landespreis text)? *Unanswered*: say
       "conceived in 2022" or avoid the date.
-- [ ] Innsbruck, 16 Oct 2026: which piece, line-up, venue and time? *TBD.*
-      Show it as "details to follow".
+- [x] Innsbruck, 16 Oct 2026: *MIP Alumni Homecoming Day, Großer Hörsaal;
+      Wenger, Mayr, Schwarz, Orthner; Ringbauer on the physics* (UIBK event page
+      and faculty LinkedIn post, Oct 2026). Still open: which piece, the start
+      time and the Bell value.
 - [ ] Wien Modern, Nov 2026: confirmed? *TBD. Don't publish.*
 - [x] Album *Sounds of Entanglement* (The Uncertain Question): *recorded, not
       yet released; there will also be a vinyl.* Track list, label and release
@@ -53,6 +55,8 @@ open for final clearance before launch.
       photos from eSeL.at (*use what we have for now*)
 - [x] "Osaka" folder photos (the 2024 preview performances): *taken by Benjamin Orthner.*
 - [ ] Visual-test photos in the Mariendom (July 2024): photographer? (*use for now*)
+- [ ] Innsbruck 2026 photos (from the UIBK event report): photographer and
+      permission. Credited "Universität Innsbruck" for now.
 - [ ] Musician and organist bios and portraits; approval of team bios (*use
       the drafts for now*)
 - [x] BruQner audio: *use the available recordings where it makes sense*

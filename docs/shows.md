@@ -11,7 +11,6 @@ only. **Exhibition** = video or display.
 
 | Date | Where | What | Status |
 |---|---|---|---|
-| **16 Oct 2026** | University of Innsbruck, Austria | Dies Academicus / MIP Alumni Day | Booked. Details (piece, line-up, time, venue) to be announced. |
 | Nov 2026 | Wien Modern festival, Vienna | ? | Tentative ("looking good" in Dec 2025 notes). Do not publish yet. |
 | Oct/Nov 2026, Feb/Mar 2027 | ? | Album release concerts | Planned in the album spreadsheet, unconfirmed |
 
@@ -35,6 +34,7 @@ only. **Exhibition** = video or display.
 | 25 Oct 2025 | Deutsches Museum, Munich, DE | "Viva Quantum" (invitation-only conference) | – | Talk "Der Klang der Quanten-Verschränkung" | Talk only (confirmed) |
 | **19 Nov 2025**, 19:30 | JKU Linz, AT | Zirkus des Wissens (UN Quantum Year focus week) | Indeterminate Apparatus | Performance-lecture, German | Wenger, Mayr, Schwarz. Lecture by Küng, Kofler. S = 2.51. Audio recording exists. |
 | May 2026 | ? | Pint of Science 2026 | – | Talk (Ploier) | City and venue unknown |
+| **16 Oct 2026** | Großer Hörsaal, University of Innsbruck, AT | MIP Alumni Homecoming Day 2026 (Faculty of Mathematics, Computer Science and Physics) | not published | Performance + introduction | First show in Innsbruck. Wenger, Mayr, Schwarz, Orthner (experiment). Physics by Ringbauer. 90+ alumni, staff and lecturers. Behind-the-scenes video: YouTube `1YiNhEr7ni4`. Photos: Universität Innsbruck event report (photographer not named). Sources: UIBK event page, faculty LinkedIn post. |
 
 The team's own "past performances" list (Pint of Science deck, 2026) has 8
 entries: Linz, the Ball, Osaka, Washington, Millstatt, Alpbach, CIVA and
