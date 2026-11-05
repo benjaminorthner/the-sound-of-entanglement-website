@@ -30,15 +30,25 @@ Design mockups (static HTML) are in `design/mockups/`. Serve them with
 
 ## Deployment
 
-- Hosted on **Vercel** (project `benjaminorthners-projects/the-sound-of-entanglement`),
-  connected to this GitHub repo: **every push to `main` deploys to production**
-  at https://the-sound-of-entanglement.vercel.app, and every other branch gets
-  its own preview URL. So only push to `main` when the build passes
+- Hosted on **Cloudflare Pages** (project `the-sound-of-entanglement`, in Benjamin's
+  account), connected to this GitHub repo: **every push to `main` deploys to
+  production** at https://the-sound-of-entanglement.pages.dev, and every other
+  branch gets its own preview URL. So only push to `main` when the build passes
   (`npm run build`).
+- Moving from Vercel: until the domain points at Cloudflare, Vercel still deploys
+  `main` too (https://the-sound-of-entanglement.vercel.app, with `vercel.json`).
+  Remove that project and file after the switch.
+- Cloudflare-specific files: `functions/media/[[path]].ts` serves the partial
+  responses Safari needs for video and audio, limited to the paths in
+  `public/_routes.json`. Redirects are in `public/_redirects`, cache rules in
+  `public/_headers`. `src/pages/404.astro` must stay: without a 404 page, Pages
+  serves the home page for every unknown address.
+- Domain: soundofentanglement.com is owned by Clemens, with DNS and email at
+  World4You. `www` is a CNAME to the Pages project. The bare domain stays on
+  World4You, which redirects it to `www`. Don't change the nameservers.
 - Preview phase: the site has `noindex` (in `src/layouts/Base.astro`) and a
   `public/robots.txt` blocking crawlers until photo rights are cleared. Remove
   both at launch.
-- Launch: point soundofentanglement.com (owned by Clemens) at Vercel via DNS.
 
 ## Repository layout
 
