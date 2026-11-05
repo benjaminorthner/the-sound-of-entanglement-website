@@ -24,7 +24,7 @@ const {
   image,
   imageAlt,
 } = Astro.props;
-const site = Astro.site ?? new URL('https://the-sound-of-entanglement.vercel.app');
+const site = Astro.site ?? new URL('https://the-sound-of-entanglement.pages.dev');
 const og = image
   ? new URL((await getImage({ src: image, width: 1200, height: 630, fit: 'cover', format: 'jpg', quality: 80 })).src, site).href
   : new URL('/og/default.jpg', site).href;

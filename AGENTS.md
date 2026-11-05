@@ -35,9 +35,8 @@ Design mockups (static HTML) are in `design/mockups/`. Serve them with
   production** at https://the-sound-of-entanglement.pages.dev, and every other
   branch gets its own preview URL. So only push to `main` when the build passes
   (`npm run build`).
-- Moving from Vercel: until the domain points at Cloudflare, Vercel still deploys
-  `main` too (https://the-sound-of-entanglement.vercel.app, with `vercel.json`).
-  Remove that project and file after the switch.
+- `site` in `astro.config.mjs` (share previews, canonical links) is the `pages.dev`
+  address until DNS for the domain is switched, then the `www` address.
 - Cloudflare-specific files: `functions/media/[[path]].ts` serves the partial
   responses Safari needs for video and audio, limited to the paths in
   `public/_routes.json`. Redirects are in `public/_redirects`, cache rules in
@@ -80,7 +79,7 @@ public/media/         audio, video loops, point cloud of the setup
 - In page code, read an imported image's properties only through `meta()` from `src/lib/image.ts`
   (reading `img.src` or `img.width` directly makes Astro ship the full-size original), and
   size photos with `ladder()` / `QUALITY` so every component reuses the same files.
-  Every deployment is stored in full on Vercel, so build size adds up.
+  Cloudflare Pages allows 20,000 files per deployment and 25 MiB per file, so build size adds up.
 - To add a show, piece, person or publication, follow `docs/content-guide.md`.
 - Copy is written in sentence case, plain and precise, in the team's voice. No hype.
 - Accessibility: keyboard navigation, visible focus, `prefers-reduced-motion`

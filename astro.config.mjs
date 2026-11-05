@@ -4,7 +4,7 @@ import { defineConfig } from 'astro/config';
 // https://astro.build/config
 export default defineConfig({
   // Absolute URLs for share previews (og:image). Change when soundofentanglement.com points here.
-  site: 'https://the-sound-of-entanglement.vercel.app',
+  site: 'https://the-sound-of-entanglement.pages.dev',
   // English is the default at /, German lives under /de/. No automatic
   // redirects or browser-language detection: visitors switch by hand.
   i18n: {
